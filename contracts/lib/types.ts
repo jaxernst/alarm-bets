@@ -1,22 +1,22 @@
-import { BigNumberish } from "ethers";
+import type { BigNumberish } from "ethers";
 import {
-  PartnerAlarmClock,
+  type PartnerAlarmClock,
   PartnerAlarmClock__factory,
 } from "../typechain-types";
 
 export type DayOfWeek = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
-export const commitmentTypeVals: Record<CommitmentType, number> = {
+export const alarmTypeVals: Record<AlarmType, number> = {
   PartnerAlarmClock: 0,
 };
 
-export const commitmentValToType: Record<number, CommitmentType> = {
+export const alarmValToType: Record<number, AlarmType> = {
   0: "PartnerAlarmClock",
 };
 
-export type CommitmentType = "PartnerAlarmClock";
+export type AlarmType = "PartnerAlarmClock";
 
-export type CommitmentContractTypes = {
+export type AlarmContractTypes = {
   PartnerAlarmClock: PartnerAlarmClock;
 };
 
@@ -25,13 +25,6 @@ export const alarmFactories = {
 };
 
 export type InitializationTypes = {
-  BaseCommitment: { name: string; description: string };
-  TimelockingDeadlineTask: {
-    deadline: BigNumberish;
-    submissionWindow: BigNumberish;
-    timelockDuration: BigNumberish;
-    taskDescription: BigNumberish;
-  };
   PartnerAlarmClock: {
     alarmTime: BigNumberish;
     alarmdays: BigNumberish;
@@ -53,7 +46,7 @@ export const solidityInitializationTypes = {
   ],
 };
 
-export enum CommitmentStatus {
+export enum AlarmStatus {
   INACTIVE,
   ACTIVE,
   PAUSED,
