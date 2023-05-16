@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgb(203, 203, 203);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  --bg-color1: rgb(41, 41, 41);
+  --bg-color2: rgb(50, 50, 50);
+
+  --button-highlight1: rgb(27, 27, 27);
+}
+
+html {
+  background: url('assets/gradient-lines.svg') no-repeat center center fixed;
+}
+
