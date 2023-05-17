@@ -38,7 +38,7 @@ const config: HardhatUserConfig = {
   abiExporter: [
     {
       runOnCompile: true,
-      path: "../client/abi",
+      path: "../client/src/lib/abi",
       format: "json",
       flat: true,
       only: ["SocialAlarmClockHub.sol", "PartnerAlarmClock.sol"],

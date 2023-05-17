@@ -13,8 +13,10 @@ import {
   solidityNamedInitTypes,
   AlarmStatus,
 } from "@sac/contracts/lib/types";
+
 import HubAbi from "./abi/SocialAlarmClockHub";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
+
 import type { EvmAddress } from "../types";
 
 export type AlarmFunctions =
@@ -24,11 +26,15 @@ export type AlarmFunctions =
   | "betAmount"
   | "alarmDays"
   | "alarmActiveDays"
+  | "submissionWindow"
   | "getPenaltyAmount"
   | "getPlayerBalance"
   | "missedDeadlines"
   | "numConfirmations"
-  | "timezoneOffset";
+  | "timezoneOffset"
+  | "timeToNextDeadline"
+  | "player1"
+  | "player2";
 
 export const AlarmCreationEvent = getAbiItem({
   abi: HubAbi,
@@ -53,12 +59,14 @@ export const getAlarmById = async (
 
 export const queryAlarm = async (
   alarmAddress: EvmAddress,
-  func: AlarmFunctions
+  func: AlarmFunctions,
+  args?: any[]
 ) => {
   return await readContract({
     address: alarmAddress,
     abi: PartnerAlarmClock,
     functionName: func,
+    args: args as any,
   });
 };
 
@@ -167,6 +175,16 @@ export async function startAlarm(alarmAddress: EvmAddress) {
   return (await writeContract(request)).hash;
 }
 
+export async function submitConfirmation(alarmAddress: EvmAddress) {
+  const { request } = await prepareWriteContract({
+    address: alarmAddress,
+    abi: PartnerAlarmClock,
+    functionName: "submitConfirmation",
+  });
+
+  return (await writeContract(request)).hash;
+}
+
 export function encodeCreationParams<T extends AlarmType>(
   alarmType: T,
   initData: InitializationTypes[T]
@@ -196,10 +214,12 @@ export async function getUserAlarmsByType<T extends AlarmType>(
     type
   );
 
+  const joinEvents = await queryUserJoinedEvents(hubAddress, userAddress, type);
+
   if (!creationEvents) return;
 
   const out: Record<string, AlarmBaseInfo> = {};
-  for (const { args, blockNumber } of creationEvents) {
+  for (const { args, blockNumber } of [...creationEvents, ...joinEvents]) {
     if (!args.id || !args.alarmAddr || !args.user || !blockNumber)
       throw new Error("Bad event query");
 
@@ -229,6 +249,7 @@ export async function queryAlarmCreationEvents(
       _type: alarmType ? alarmTypeVals[alarmType] : 0,
       user: userAddress,
     },
+    fromBlock: 0n,
   });
 }
 
@@ -238,12 +259,16 @@ export async function queryUserJoinedEvents(
   alarmType?: AlarmType
 ) {
   const client = getPublicClient();
-  return await client.getLogs({
+  const logs = await client.getLogs({
     address: hubAddress,
     event: AlarmJoinedEvent,
     args: {
       user: userAddress,
       _type: alarmType ? alarmTypeVals[alarmType] : 0,
     },
+    fromBlock: 0n,
   });
+
+  console.log("User joined logs", logs);
+  return logs;
 }

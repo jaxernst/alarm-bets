@@ -45,9 +45,10 @@ contract SocialAlarmClockHub is AlarmFactory, ISocialAlarmClockHub {
     mapping(address => uint) public alarmIds; // Lookup alarms by address
 
     event UserJoined(
-        RegisteredAlarmType indexed _type,
         address indexed user,
-        address alarmAddr
+        RegisteredAlarmType indexed _type,
+        address alarmAddr,
+        uint id
     );
 
     event AlarmCreation(
@@ -77,7 +78,7 @@ contract SocialAlarmClockHub is AlarmFactory, ISocialAlarmClockHub {
      * Called by alarm to indicate a user has joined
      */
     function emitUserJoined(RegisteredAlarmType _type, address user) external {
-        require(alarmIds[msg.sender] != 0, "NOT_HUB_REGISTERED_COMMITMENT");
-        emit UserJoined(_type, user, msg.sender);
+        require(alarmIds[msg.sender] != 0, "NOT_HUB_REGISTERED_ALARM");
+        emit UserJoined(user, _type, msg.sender, alarmIds[msg.sender]);
     }
 }

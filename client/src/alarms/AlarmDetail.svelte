@@ -8,17 +8,22 @@
   import EthereumIcon from "../assets/ethereum-icon.svelte";
   import { MINUTE } from "../lib/time";
   import { onMount } from "svelte";
-  import type { AlarmInfo } from "../lib/alarmHelpers";
+  import {
+    queryAlarm,
+    type AlarmBaseInfo,
+    submitConfirmation,
+  } from "../lib/alarmHelpers";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { formatTime, shorthandAddress, timeString } from "../lib/util";
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
 
-  export let alarm: AlarmInfo<"PartnerAlarmClock">;
+  export let alarm: AlarmBaseInfo;
+  const alarmAddress = alarm.contractAddress;
 
   $: account = $getRequiredAccount();
 
-  // COntract constants - Will eventually be refactored to avoid duplicate queries
-  $: alarmTime = alarm.contract.alarmTime();
+  // Contract constants - Will eventually be refactored to avoid duplicate queries
+  $: alarmTime = queryAlarm(alarmAddress, "alarmTime");
   let penaltyVal: string;
   let submissionWindow: number;
   let initialDeposit: string;
@@ -32,43 +37,50 @@
   let player2Confirmations: number = 0;
   let timeToNextDeadline: number = 0;
 
-  alarm.contract
-    .missedAlarmPenalty()
-    .then((res) => (penaltyVal = formatEther(res)));
+  queryAlarm(alarmAddress, "missedAlarmPenalty").then(
+    (res) => (penaltyVal = formatEther(res))
+  );
 
-  alarm.contract
-    .submissionWindow()
-    .then((res) => (submissionWindow = res.toNumber()));
+  queryAlarm(alarmAddress, "submissionWindow").then(
+    (res) => (submissionWindow = Number(res))
+  );
 
-  alarm.contract.betAmount().then((res) => (initialDeposit = formatEther(res)));
-  alarm.contract.player1().then((res) => (player1 = res as EvmAddress));
-  alarm.contract.player2().then((res) => (player2 = res as EvmAddress));
+  queryAlarm(alarmAddress, "betAmount").then(
+    (res) => (initialDeposit = formatEther(res))
+  );
 
-  $: if (player1 && initialDeposit) {
-    alarm.contract.getPlayerBalance(player1).then((res) => {
+  queryAlarm(alarmAddress, "player1").then(
+    (res) => (player1 = res as EvmAddress)
+  );
+  queryAlarm(alarmAddress, "player2").then(
+    (res) => (player2 = res as EvmAddress)
+  );
+
+  $: if (player1 && alarm.status === AlarmStatus.ACTIVE) {
+    queryAlarm(alarmAddress, "getPlayerBalance", [player1]).then((res) => {
       player1Balance = formatEther(res);
     });
 
-    alarm.contract
-      .numConfirmations(player1)
-      .then((res) => (player1Confirmations = res.toNumber()));
+    queryAlarm(alarmAddress, "numConfirmations", [player1]).then(
+      (res) => (player1Confirmations = Number(res))
+    );
   }
 
-  $: if (player2 && initialDeposit) {
-    alarm.contract.getPlayerBalance(player2).then((res) => {
+  $: if (player2 && alarm.status === AlarmStatus.ACTIVE) {
+    queryAlarm(alarmAddress, "getPlayerBalance", [player2]).then((res) => {
       player2Balance = formatEther(res);
     });
 
-    alarm.contract
-      .numConfirmations(player2)
-      .then((res) => (player2Confirmations = res.toNumber()));
+    queryAlarm(alarmAddress, "numConfirmations", [player2]).then(
+      (res) => (player2Confirmations = Number(res))
+    );
   }
 
   const syncTimeToDeadline = async () => {
     if (alarm.status === AlarmStatus.ACTIVE) {
-      timeToNextDeadline = (
-        await alarm.contract.timeToNextDeadline($account.address)
-      ).toNumber();
+      timeToNextDeadline = Number(
+        await queryAlarm(alarmAddress, "timeToNextDeadline", [$account.address])
+      );
     }
   };
 
@@ -78,8 +90,8 @@
     if (timeToNextDeadline) timeToNextDeadline -= 1;
   }, 1000);
 
-  const submitConfirmation = () => {
-    transactions.addTransaction(alarm.contract.submitConfirmation());
+  const submitConfirmationTransaction = () => {
+    transactions.addTransaction(submitConfirmation(alarmAddress));
   };
 
   let expanded = false;
@@ -91,10 +103,10 @@
       <div>
         <div class=" rounded-lg p-1 text-xs">ID: {alarm.id}</div>
       </div>
-      <div class="justify-self-center" style="font-size: 1.8em">
+      <div class="justify-self-center" style="font-size: 1.6em">
         {#await alarmTime then time}
           <ClockDisplay
-            overrideTime={timeString(time.toNumber())}
+            overrideTime={timeString(Number(time))}
             overrideColor={"zinc-500"}
           />
         {/await}
@@ -126,6 +138,12 @@
         <span class="text-zinc-500">missed alarm penalty:</span>
         <span><span class="h-3 w-3 text-cyan-600">{penaltyVal}</span> eth</span>
       </div>
+      <div class="flex justify-between gap-2">
+        <span class="text-zinc-500">initial deposit:</span>
+        <span
+          ><span class="h-3 w-3 text-cyan-600">{initialDeposit}</span> eth</span
+        >
+      </div>
     </div>
     <div class="flex flex-grow justify-center gap-1 text-sm font-bold">
       <div
@@ -136,13 +154,13 @@
         >
         <div class="flex flex-grow items-center justify-evenly pb-1">
           <div class="flex items-center gap-1">
-            {player1Confirmations}
+            {player1Confirmations || "-"}
             <div class="h-3 w-3 fill-cyan-600">
               <SunIcon />
             </div>
           </div>
           <div class="flex items-center gap-1">
-            {player1Balance}
+            {player1Balance || "-"}
             <div class="h-3 w-3 fill-cyan-600">
               <EthereumIcon />
             </div>
@@ -157,13 +175,13 @@
         >
         <div class="flex flex-grow items-center justify-evenly pb-1">
           <div class="flex items-center gap-1">
-            {player2Confirmations}
+            {player2Confirmations || "-"}
             <div class="h-3 w-3 fill-cyan-600">
               <SunIcon />
             </div>
           </div>
           <div class="flex items-center gap-1">
-            {player2Balance}
+            {player2Balance || "-"}
             <div class="h-3 w-3 fill-cyan-600">
               <EthereumIcon />
             </div>
@@ -173,7 +191,7 @@
     </div>
   </div>
   <div
-    class="bottom-0 right-0 mt-1 flex w-full justify-center rounded-b-xl bg-zinc-800 p-2"
+    class="bottom-0 right-0 flex w-full justify-center rounded-b-xl bg-zinc-800 p-1"
   >
     {#if alarm.status === AlarmStatus.INACTIVE}
       <button
@@ -184,7 +202,7 @@
       <button
         class="shadow-l p-1 text-sm font-bold text-green-600 transition hover:scale-105 disabled:text-green-900"
         disabled={timeToNextDeadline > submissionWindow}
-        on:click={submitConfirmation}>Confirm Wakeup</button
+        on:click={submitConfirmationTransaction}>Confirm Wakeup</button
       >
     {/if}
   </div>

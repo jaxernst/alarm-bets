@@ -2,22 +2,22 @@ import { BigNumberish, Contract, ethers } from "ethers";
 import { deploy } from "../test/helpers/deploy";
 import { SocialAlarmClockHub } from "../typechain-types";
 import {
-  CommitmentType,
-  CommitmentContractTypes,
-  commitmentTypeVals,
+  AlarmType,
+  AlarmContractTypes,
+  alarmTypeVals,
   InitializationTypes,
   alarmFactories,
   solidityInitializationTypes,
 } from "./types";
 
-export async function createAlarm<T extends CommitmentType>(
+export async function createAlarm<T extends AlarmType>(
   hub: SocialAlarmClockHub,
   name: T,
   initData: InitializationTypes[T],
   value?: BigNumberish
-): Promise<CommitmentContractTypes[T]> {
+): Promise<AlarmContractTypes[T]> {
   if (
-    (await hub.alarmTypeRegistry(commitmentTypeVals[name])) ===
+    (await hub.alarmTypeRegistry(alarmTypeVals[name])) ===
     ethers.constants.AddressZero
   ) {
     await registerNewType(hub, name);
@@ -25,7 +25,7 @@ export async function createAlarm<T extends CommitmentType>(
 
   const byteData = encodeCreationParams(name, initData);
   const rc = await (
-    await hub.createAlarm(commitmentTypeVals[name], byteData, {
+    await hub.createAlarm(alarmTypeVals[name], byteData, {
       value: value ? value : 0,
     })
   ).wait();
@@ -42,7 +42,7 @@ export async function createAlarm<T extends CommitmentType>(
   return (alarmFactories[name] as any).connect(alarmAddr!, hub.signer);
 }
 
-export function encodeCreationParams<T extends CommitmentType>(
+export function encodeCreationParams<T extends AlarmType>(
   name: T,
   initData: InitializationTypes[T]
 ): string {
@@ -54,13 +54,10 @@ export function encodeCreationParams<T extends CommitmentType>(
 
 export async function registerNewType<
   Hub extends SocialAlarmClockHub,
-  Name extends CommitmentType
+  Name extends AlarmType
 >(hub: Hub, contractName: Name) {
   const commit = await deploy(contractName);
   await (
-    await hub.registerAlarmType(
-      commitmentTypeVals[contractName],
-      commit.address
-    )
+    await hub.registerAlarmType(alarmTypeVals[contractName], commit.address)
   ).wait();
 }

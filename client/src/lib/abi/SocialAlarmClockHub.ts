@@ -54,21 +54,27 @@ export default [
     inputs: [
       {
         indexed: true,
-        internalType: "enum RegisteredAlarmType",
-        name: "_type",
-        type: "uint8",
-      },
-      {
-        indexed: true,
         internalType: "address",
         name: "user",
         type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "enum RegisteredAlarmType",
+        name: "_type",
+        type: "uint8",
       },
       {
         indexed: false,
         internalType: "address",
         name: "alarmAddr",
         type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
       },
     ],
     name: "UserJoined",

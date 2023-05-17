@@ -116,7 +116,7 @@
   }
 
   .main-container-shadow {
-    box-shadow: 0px 0px 35px 5px rgba(140, 140, 140, 0.22);
+    box-shadow: 0px 0px 35px 5px rgba(90, 90, 90, 0.32);
   }
 
   .bg-trans {

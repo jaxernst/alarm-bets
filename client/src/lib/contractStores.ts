@@ -1,6 +1,10 @@
 import { account } from "./chainClient";
 import { derived, writable, type Readable, get } from "svelte/store";
-import { getUserAlarmsByType, type AlarmBaseInfo, type AlarmFunctions } from "./alarmHelpers";
+import {
+  getUserAlarmsByType,
+  type AlarmBaseInfo,
+  type AlarmFunctions,
+} from "./alarmHelpers";
 import { transactions } from "./transactions";
 import type { EvmAddress } from "../types";
 
@@ -13,7 +17,6 @@ export const userAlarms = derived(
   [account, hub, transactions],
   ([$user, $hub, _], set) => {
     if (!$user?.address) return set({});
-
     getUserAlarmsByType($hub, $user.address, "PartnerAlarmClock")
       .then((alarms) => {
         if (alarms && Object.keys(alarms).length > 0) return set(alarms);
@@ -23,7 +26,7 @@ export const userAlarms = derived(
   }
 ) as Readable<Record<number, AlarmBaseInfo>>;
 
-function MakeAlarmConstantsCache() {
+/*function MakeAlarmConstantsCache() {
   const cache = new Map()
 
   const getOrQuery = (key: AlarmFunctions, alarmAddress: EvmAddress) => {
@@ -36,4 +39,4 @@ function MakeAlarmConstantsCache() {
     }
   }
 
-}
+} */
