@@ -46,6 +46,17 @@ export const solidityInitializationTypes = {
   ],
 };
 
+export const solidityNamedInitTypes = {
+  PartnerAlarmClock: [
+    "uint256 alarmTime",
+    "uint8[] alarmdays",
+    "uint256 submissionWindow",
+    "uint256 missedAlarmPenalty",
+    "int256 timezoneOffset",
+    "address otherPlayer",
+  ] as const,
+};
+
 export enum AlarmStatus {
   INACTIVE,
   ACTIVE,

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { AlarmStatus } from "@sac/contracts/lib/types";
-  import { userAlarms } from "../lib/contractInterface";
+  import { userAlarms } from "../lib/contractStores";
   import AlarmOverview from "./AlarmOverview.svelte";
   import { displayedAlarmId } from "./displayedAlarm";
 

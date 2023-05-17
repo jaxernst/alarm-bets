@@ -1,8 +1,8 @@
 <script lang="ts">
   import { toast } from "@zerodevx/svelte-toast";
   import { account } from "../lib/chainClient";
-  import { commitmentHub } from "../lib/contractInterface";
-  import { getAlarmById } from "../lib/alarmHelpers";
+  import { hub } from "../lib/contractStores";
+  import { getAlarmById, getPlayer, startAlarm } from "../lib/alarmHelpers";
   import { transactions } from "../lib/transactions";
   import { shorthandAddress } from "../lib/util";
 
@@ -13,23 +13,20 @@
     if (!$account) return;
 
     // Check if other player has an alarm with connected account's address
-    const targetAlarm = await getAlarmById(alarmId, $commitmentHub);
+    const targetAlarm = await getAlarmById(alarmId, $hub);
     if (!targetAlarm) {
       return (error = "No alarm contract found for provided ID");
     }
 
     // Check if other player's alarm has the connected account's address as a partner
-    const player2 = await targetAlarm.player2();
+    const player2 = await getPlayer(targetAlarm, 2);
     if (player2 !== $account.address) {
       error = "This address is not apart of this alarm";
       return;
     }
 
-    const value = targetAlarm.betAmount();
-    const otherPlayer = await targetAlarm.player1();
-    const txResult = await transactions.addTransaction(
-      targetAlarm.start({ value })
-    );
+    const otherPlayer = await getPlayer(targetAlarm, 1);
+    const txResult = await transactions.addTransaction(startAlarm(targetAlarm));
 
     if (!txResult.error) {
       toast.push(

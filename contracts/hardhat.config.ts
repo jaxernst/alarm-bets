@@ -41,12 +41,7 @@ const config: HardhatUserConfig = {
       path: "../client/abi",
       format: "json",
       flat: true,
-      only: [
-        "CommitmentHub.sol",
-        "TimelockingDeadlineTask.sol",
-        "PartnerAlarmClock.sol",
-        "BaseCommitment.sol",
-      ],
+      only: ["SocialAlarmClockHub.sol", "PartnerAlarmClock.sol"],
     },
   ],
 };

@@ -1,15 +1,14 @@
-import type { Transaction, ContractReceipt, ContractTransaction } from "ethers";
+import { waitForTransaction, type Hash } from "@wagmi/core";
 import { writable } from "svelte/store";
-
-type EthersError = { message?: string };
+import type { TransactionReceipt } from "viem";
 
 type AddTxResult =
   | {
-      rc: ContractReceipt;
+      rc: TransactionReceipt;
       error?: never;
     }
   | {
-      error: EthersError;
+      error: any;
       rc?: never;
     };
 
@@ -17,16 +16,8 @@ type AddTxResult =
  * Manage and track transactions made through the frontend
  */
 function MakeTransactionStore() {
-  const contractTransactionReceipts = writable<ContractReceipt[]>([]);
-  const transactionResponses = writable<ContractTransaction[]>([]);
-
-  transactionResponses.subscribe((txs) => {
-    if (txs.length === 0) return;
-    const lastTx = txs[txs.length - 1];
-    lastTx.wait().then((receipt) => {
-      contractTransactionReceipts.update((txs) => [...txs, receipt]);
-    });
-  });
+  const contractTransactionReceipts = writable<TransactionReceipt[]>([]);
+  const transactionHashes = writable<Hash[]>([]);
 
   /**
    * The store's main subscription is for finalized transactions (receipts), but
@@ -34,19 +25,19 @@ function MakeTransactionStore() {
    */
   return {
     subscribe: contractTransactionReceipts.subscribe,
-    responses: { subscribe: transactionResponses.subscribe },
+    hashes: { subscribe: transactionHashes.subscribe },
     addTransaction: async (
-      transaction: Promise<ContractTransaction>
+      transaction: Promise<Hash>
     ): Promise<AddTxResult> => {
-      let rc: ContractReceipt;
+      let rc: TransactionReceipt;
       try {
         const submittedTx = await transaction;
-        transactionResponses.update((txs) => [...txs, submittedTx]);
-        rc = await submittedTx.wait();
+        transactionHashes.update((txs) => [...txs, submittedTx]);
+        rc = await waitForTransaction({ hash: submittedTx });
         contractTransactionReceipts.update((txs) => [...txs, rc]);
       } catch (err) {
         return {
-          error: err as EthersError,
+          error: err,
         };
       }
 

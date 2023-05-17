@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { isAddress, parseEther } from "ethers/lib/utils.js";
   import FormCard from "./FormCard.svelte";
   import { createAlarm, creationParams, isReady } from "./alarmCreation";
-
   import EthSymbol from "../lib/components/EthSymbol.svelte";
   import { transactions } from "../lib/transactions";
   import { toast } from "@zerodevx/svelte-toast";
@@ -10,6 +8,7 @@
   import { account, network } from "../lib/chainClient";
   import JoinAlarm from "./JoinAlarm.svelte";
   import ToggleLetter from "../lib/components/ToggleLetter.svelte";
+  import { isAddress, parseEther } from "viem";
 
   function handleAlarmDayToggle(daySelected: boolean, dayNumber: number) {
     console.log(daySelected, dayNumber);
@@ -36,11 +35,11 @@
     $creationParams.alarmTime = seconds;
   }
 
-  function handleBuyInInput(input: string) {
+  function handleBuyInInput(input: `${number}`) {
     $creationParams.buyIn = parseEther(input);
   }
 
-  function handleAlarmPenaltyInput(input: string) {
+  function handleAlarmPenaltyInput(input: `${number}`) {
     $creationParams.missedAlarmPenalty = parseEther(input);
   }
 

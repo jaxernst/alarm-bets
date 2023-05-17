@@ -1,6 +1,6 @@
 <script lang="ts">
   import "./app.css";
-  import { userAlarms } from "./lib/contractInterface";
+  import { userAlarms } from "./lib/contractStores";
   import ClockDisplay from "./lib/components/ClockDisplay.svelte";
   import { fade } from "svelte/transition";
 

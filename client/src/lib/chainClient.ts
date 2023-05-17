@@ -1,51 +1,45 @@
 import { derived, get, writable, type Readable } from "svelte/store";
+import { mainnet, polygon, hardhat } from "@wagmi/core/chains";
 import {
   configureChains,
-  createClient,
   fetchEnsName,
-  fetchSigner,
   type GetNetworkResult,
   type GetAccountResult,
   switchNetwork,
+  createConfig,
+  getWalletClient,
+  type WalletClient,
 } from "@wagmi/core";
-import { mainnet, polygon, hardhat } from "@wagmi/core/chains";
 import { Web3Modal } from "@web3modal/html";
 import {
   EthereumClient,
-  modalConnectors,
-  walletConnectProvider,
+  w3mConnectors,
+  w3mProvider,
 } from "@web3modal/ethereum";
-import type { ethers } from "ethers";
 import type { EvmAddress } from "../types";
-
-const supportedChains = [hardhat];
 
 export type Account = GetAccountResult & { address: EvmAddress };
 
-// Wagmi Core Client
-export const { provider } = configureChains(supportedChains, [
-  walletConnectProvider({ projectId: "698bddafdbc932fc6eb19c24ab471c3a" }),
+const supportedChains = [hardhat];
+const projectId = "698bddafdbc932fc6eb19c24ab471c3a";
+
+const { publicClient } = configureChains(supportedChains, [
+  w3mProvider({ projectId }),
 ]);
 
-const wagmiClient = createClient({
+const wagmiConfig = createConfig({
   autoConnect: true,
-  connectors: modalConnectors({
-    projectId: "698bddafdbc932fc6eb19c24ab471c3a",
-    version: "1", // or "2"
-    appName: "web3Modal",
-    chains: supportedChains,
-  }),
-  provider,
+  connectors: w3mConnectors({ projectId, version: 1, chains: supportedChains }),
+  publicClient,
 });
 
 export const ethClient = writable(
-  new EthereumClient(wagmiClient, supportedChains)
+  new EthereumClient(wagmiConfig, supportedChains)
 );
 
 export const web3Modal = derived(
   ethClient,
-  ($ethClient) =>
-    new Web3Modal({ projectId: "698bddafdbc932fc6eb19c24ab471c3a" }, $ethClient)
+  ($ethClient) => new Web3Modal({ projectId }, $ethClient)
 );
 
 export const account = writable<GetAccountResult | undefined>();
@@ -55,17 +49,18 @@ export const signer = derived(
   [account, network],
   ([$account, $network], set) => {
     if (!$network?.chain?.id || !$account) return;
+
     const noSignerError = (e?: any) =>
       console.error("Signer fetching failed", e);
 
-    fetchSigner({ chainId: $network.chain.id })
+    getWalletClient({ chainId: $network.chain.id })
       .then((signer) => {
         if (signer) return set(signer);
         noSignerError();
       })
-      .catch((e) => noSignerError());
+      .catch(noSignerError);
   }
-) as Readable<ethers.Signer | undefined>;
+) as Readable<WalletClient | undefined>;
 
 export const ensName = derived([account, network], ([$account], set) => {
   if (!$account?.address) return;
@@ -86,6 +81,9 @@ get(ethClient).watchNetwork((net) => {
   }
 });
 
+/*
+ * Accout store to for contexts and pages where an account is assumed to always be present
+ */
 export const getRequiredAccount = derived(account, ($account) => {
   return () => {
     if (!$account) throw new Error("No account connected");

@@ -2,13 +2,13 @@
   import AlarmActiveDays from "../lib/components/AlarmActiveDays.svelte";
   import { getRequiredAccount } from "../lib/chainClient";
   import type { EvmAddress } from "../types";
-  import type { AlarmInfo } from "../lib/alarmHelpers";
+  import type { AlarmBaseInfo } from "../lib/alarmHelpers";
   import { getOtherPlayer } from "../lib/alarmHelpers";
   import { transactions } from "../lib/transactions";
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
   import { timeString } from "../lib/util";
 
-  export let userAlarm: AlarmInfo<"PartnerAlarmClock">;
+  export let userAlarm: AlarmBaseInfo;
 
   $: account = $getRequiredAccount();
   $: daysActive = userAlarm.contract.alarmDays();

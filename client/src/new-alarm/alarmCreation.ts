@@ -1,9 +1,8 @@
-import type { BigNumberish, ContractTransaction } from "ethers";
-import { BigNumber as bn } from "ethers";
-import { parseEther } from "ethers/lib/utils.js";
 import { derived, get, writable, type Readable } from "svelte/store";
 import { account } from "../lib/chainClient";
-import { commitmentHub } from "../lib/contractInterface";
+import { createAlarm as _createAlarm } from "../lib/alarmHelpers";
+import { hub } from "../lib/contractStores";
+import { parseEther, type Hash, type TransactionReceipt } from "viem";
 
 export const SelectionWheel = (numItems: number) => {
   const i = writable(0); // Selected index
@@ -47,13 +46,13 @@ export const alarmDays = writable({
 });
 
 type CreationParams = {
-  buyIn: BigNumberish;
+  buyIn: bigint;
   submissionWindow: number;
   timezoneMode: TimezoneMode;
   alarmTime: number;
   alarmDays: number[];
   otherPlayer: string;
-  missedAlarmPenalty: BigNumberish;
+  missedAlarmPenalty: bigint;
 };
 
 export const buyIn = writable<number>(0.001);
@@ -68,13 +67,13 @@ export const otherPlayer = writable<string>(
 );
 
 export const creationParams = writable<CreationParams>({
-  buyIn: "",
+  buyIn: BigInt(0),
   submissionWindow: 60 * 30,
   timezoneMode: TimezoneMode.SAME_TIME_OF_DAY,
   alarmTime: 0, // 6:30 AM
   alarmDays: [],
   otherPlayer: "",
-  missedAlarmPenalty: "0",
+  missedAlarmPenalty: BigInt(0),
 });
 
 export const isReady = derived(
@@ -94,7 +93,6 @@ export const isReady = derived(
       submissionWindow > 0 &&
       otherPlayer !== $account?.address &&
       buyIn &&
-      bn.from(buyIn).gt(0) &&
       timezoneMode !== null &&
       alarmTime !== null &&
       Object.values(alarmDays).some((v) => v)
@@ -103,26 +101,24 @@ export const isReady = derived(
 );
 
 export const createAlarm = derived(
-  [creationParams, isReady, commitmentHub],
-  ([c, $isReady, $commitmentHub]) => {
+  [creationParams, isReady, hub],
+  ([c, $isReady, $hub]) => {
     return () => {
       if (!$isReady) return;
 
-      // Enode creation params to be sent to the commitment hub
-      const encodedParams = encodeCreationParams("PartnerAlarmClock", {
-        alarmTime: c.alarmTime,
-        alarmdays: c.alarmDays.sort(),
-        missedAlarmPenalty: c.missedAlarmPenalty,
-        submissionWindow: c.submissionWindow,
-        timezoneOffset: new Date().getTimezoneOffset() * -60,
-        otherPlayer: c.otherPlayer,
-      });
-
-      return $commitmentHub.createCommitment(
-        commitmentTypeVals["PartnerAlarmClock"],
-        encodedParams,
-        { value: c.buyIn }
+      return _createAlarm(
+        $hub,
+        "PartnerAlarmClock",
+        {
+          alarmTime: c.alarmTime,
+          alarmdays: c.alarmDays.sort(),
+          missedAlarmPenalty: c.missedAlarmPenalty,
+          submissionWindow: c.submissionWindow,
+          timezoneOffset: new Date().getTimezoneOffset() * -60,
+          otherPlayer: c.otherPlayer,
+        },
+        c.buyIn
       );
     };
   }
-) as Readable<() => Promise<ContractTransaction> | undefined>;
+) as Readable<() => Promise<Hash> | undefined>;
