@@ -37,7 +37,7 @@ const config: HardhatUserConfig = {
   networks: {},
   abiExporter: [
     {
-      runOnCompile: true,
+      runOnCompile: false,
       path: "../client/src/lib/abi",
       format: "json",
       flat: true,
