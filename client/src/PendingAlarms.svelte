@@ -8,7 +8,6 @@
   };
 
   export let items: PendingAlarm[];
-  console.log("items", items);
 </script>
 
 <div class="container">

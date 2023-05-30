@@ -1,59 +1,55 @@
 <script lang="ts">
   import AlarmActiveDays from "../lib/components/AlarmActiveDays.svelte";
   import { getRequiredAccount } from "../lib/chainClient";
-  import type { EvmAddress } from "../types";
-  import { queryAlarm, type AlarmBaseInfo } from "../lib/alarmHelpers";
-  import { getOtherPlayer } from "../lib/alarmHelpers";
-  import { transactions } from "../lib/transactions";
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
   import { timeString } from "../lib/util";
+  import type { UserAlarm } from "../lib/contractStores";
+  import { AlarmStatus } from "@sac/contracts/lib/types";
+  import { displayedAlarmId } from "./displayedAlarm";
 
-  export let userAlarm: AlarmBaseInfo;
+  export let userAlarm: UserAlarm;
 
+  $: id = $userAlarm.id;
   $: account = $getRequiredAccount();
-  $: daysActive = queryAlarm(userAlarm.contractAddress, "alarmDays");
-  $: alarmTime = queryAlarm(userAlarm.contractAddress, "alarmTime");
+  $: daysActive = $userAlarm.alarmDays as number[];
+  $: alarmTime = $userAlarm.alarmTime;
+  $: status = $userAlarm.status;
 
-  let otherPlayer: EvmAddress | null = null;
-  $: getOtherPlayer(userAlarm.contractAddress, $account.address ?? "").then(
-    (res) => (otherPlayer = res as EvmAddress)
-  );
+  const stylePending = (status: AlarmStatus) =>
+    status === AlarmStatus.INACTIVE
+      ? "border border-dashed border-zinc-600"
+      : "";
 
-  let timeToNextDeadline: number = 0;
-  const syncTimeToDeadline = async () => {
-    timeToNextDeadline = Number(
-      await queryAlarm(userAlarm.contractAddress, "timeToNextDeadline", [
-        $account.address ?? "",
-      ])
-    );
-  };
-
-  setInterval(syncTimeToDeadline, 15000);
-  setInterval(() => {
-    if (timeToNextDeadline) timeToNextDeadline -= 1;
-  }, 1000);
+  $: styleSelected = (alarmId: number) =>
+    $displayedAlarmId === alarmId ? "bg-zinc-800" : "";
 </script>
 
-<div class="flex items-center gap-2">
-  <div>
-    <div class="pt-1" style="font-size: 2em">
-      {#await alarmTime then time}
-        <ClockDisplay
-          overrideTime={timeString(Number(time))}
-          overrideColor={"orange"}
-        />
-      {/await}
+<button
+  class="rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
+    status
+  )} {styleSelected(id)}"
+  on:click={() => ($displayedAlarmId = id)}
+>
+  {#if status === AlarmStatus.INACTIVE}
+    <div class="text-sm font-bold">Alarm ID: {id}</div>
+    <div class="text-xs">Waiting on Player 2 to start alarm...</div>
+  {:else if status === AlarmStatus.ACTIVE}
+    <div class="flex items-center gap-2">
+      <div>
+        <div class="pt-1" style="font-size: 2em">
+          <ClockDisplay
+            overrideTime={timeString(Number(alarmTime))}
+            overrideColor={"orange"}
+          />
+        </div>
+        <div />
+      </div>
+      <div class="" style="font-size: .7em">
+        <AlarmActiveDays {daysActive} />
+      </div>
     </div>
-    <div />
-  </div>
-  <div class="" style="font-size: .7em">
-    {#await daysActive}
-      <AlarmActiveDays daysActive={[]} />
-    {:then days}
-      <AlarmActiveDays daysActive={days} />
-    {/await}
-  </div>
-</div>
+  {/if}
+</button>
 
 <style>
   .custom-grid {

@@ -1,3 +1,3 @@
 import { writable } from "svelte/store";
 
-export const displayedAlarmId = writable<string | null>(null);
+export const displayedAlarmId = writable<number | null>(null);

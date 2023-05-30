@@ -94,7 +94,7 @@
             <AlarmsSidebar />
             <div class="bg-transparent-grey rounded-2xl">
               {#if $displayedAlarmId && $userAlarms[Number($displayedAlarmId)]}
-                <AlarmDetail alarm={$userAlarms[Number($displayedAlarmId)]} />
+                <AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
               {/if}
             </div>
           </div>

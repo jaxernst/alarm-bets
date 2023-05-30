@@ -11,7 +11,6 @@
   import { isAddress, parseEther } from "viem";
 
   function handleAlarmDayToggle(daySelected: boolean, dayNumber: number) {
-    console.log(daySelected, dayNumber);
     // Toggle day on
     if (daySelected && !$creationParams.alarmDays.includes(dayNumber)) {
       // Add day to alarmDays if not in already

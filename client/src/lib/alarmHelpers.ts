@@ -1,4 +1,10 @@
-import { getAbiItem, encodeAbiParameters, parseAbiParameters } from "viem";
+import {
+  getAbiItem,
+  encodeAbiParameters,
+  parseAbiParameters,
+  type GetFunctionArgs,
+  type ReadContractParameters,
+} from "viem";
 import {
   getPublicClient,
   prepareWriteContract,
@@ -16,25 +22,8 @@ import {
 
 import HubAbi from "./abi/SocialAlarmClockHub";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
-
 import type { EvmAddress } from "../types";
-
-export type AlarmFunctions =
-  | "name"
-  | "alarmTime"
-  | "missedAlarmPenalty"
-  | "betAmount"
-  | "alarmDays"
-  | "alarmActiveDays"
-  | "submissionWindow"
-  | "getPenaltyAmount"
-  | "getPlayerBalance"
-  | "missedDeadlines"
-  | "numConfirmations"
-  | "timezoneOffset"
-  | "timeToNextDeadline"
-  | "player1"
-  | "player2";
+import { get } from "svelte/store";
 
 export const AlarmCreationEvent = getAbiItem({
   abi: HubAbi,
@@ -57,17 +46,24 @@ export const getAlarmById = async (
   return alarmAddr;
 };
 
-export const queryAlarm = async (
-  alarmAddress: EvmAddress,
-  func: AlarmFunctions,
-  args?: any[]
-) => {
-  return await readContract({
-    address: alarmAddress,
-    abi: PartnerAlarmClock,
-    functionName: func,
-    args: args as any,
-  });
+// TODO: batch these queries with a multicall
+export const getAlarmConstants = async (alarmAddress: EvmAddress) => {
+  const args = { address: alarmAddress, abi: PartnerAlarmClock };
+  return {
+    alarmTime: await readContract({ ...args, functionName: "alarmTime" }),
+    alarmDays: await readContract({ ...args, functionName: "alarmDays" }),
+    betAmount: await readContract({ ...args, functionName: "betAmount" }),
+    player1: await readContract({ ...args, functionName: "player1" }),
+    player2: await readContract({ ...args, functionName: "player2" }),
+    missedAlarmPenalty: await readContract({
+      ...args,
+      functionName: "missedAlarmPenalty",
+    }),
+    submissionWindow: await readContract({
+      ...args,
+      functionName: "submissionWindow",
+    }),
+  };
 };
 
 export const getBetStanding = async (
@@ -109,6 +105,18 @@ export const getPlayer = async (alarmAddress: EvmAddress, player: 1 | 2) => {
   });
 };
 
+export const getPlayerBalance = async (
+  alarmAddress: EvmAddress,
+  player: EvmAddress
+) => {
+  return await readContract({
+    address: alarmAddress,
+    abi: PartnerAlarmClock,
+    functionName: "getPlayerBalance",
+    args: [player],
+  });
+};
+
 export const getMissedDeadlines = async (
   alarmAddress: EvmAddress,
   userAddress: EvmAddress
@@ -118,6 +126,30 @@ export const getMissedDeadlines = async (
     abi: PartnerAlarmClock,
     functionName: "missedDeadlines",
     args: [userAddress],
+  });
+};
+
+export const getTimeToNextDeadline = async (
+  alarmAddress: EvmAddress,
+  player: EvmAddress
+) => {
+  return await readContract({
+    address: alarmAddress,
+    abi: PartnerAlarmClock,
+    functionName: "timeToNextDeadline",
+    args: [player],
+  });
+};
+
+export const getNumConfirmations = async (
+  alarmAddress: EvmAddress,
+  player: EvmAddress
+) => {
+  return await readContract({
+    address: alarmAddress,
+    abi: PartnerAlarmClock,
+    functionName: "numConfirmations",
+    args: [player],
   });
 };
 
@@ -207,7 +239,7 @@ export async function getUserAlarmsByType<T extends AlarmType>(
   hubAddress: EvmAddress,
   userAddress: EvmAddress,
   type: T
-): Promise<Record<string, AlarmBaseInfo> | undefined> {
+) {
   const creationEvents = await queryAlarmCreationEvents(
     hubAddress,
     userAddress,
@@ -218,7 +250,7 @@ export async function getUserAlarmsByType<T extends AlarmType>(
 
   if (!creationEvents) return;
 
-  const out: Record<string, AlarmBaseInfo> = {};
+  const out: Record<number, AlarmBaseInfo> = {};
   for (const { args, blockNumber } of [...creationEvents, ...joinEvents]) {
     if (!args.id || !args.alarmAddr || !args.user || !blockNumber)
       throw new Error("Bad event query");
@@ -259,7 +291,7 @@ export async function queryUserJoinedEvents(
   alarmType?: AlarmType
 ) {
   const client = getPublicClient();
-  const logs = await client.getLogs({
+  return await client.getLogs({
     address: hubAddress,
     event: AlarmJoinedEvent,
     args: {
@@ -268,7 +300,4 @@ export async function queryUserJoinedEvents(
     },
     fromBlock: 0n,
   });
-
-  console.log("User joined logs", logs);
-  return logs;
 }

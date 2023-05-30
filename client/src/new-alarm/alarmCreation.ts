@@ -82,13 +82,6 @@ export const isReady = derived(
     { submissionWindow, otherPlayer, buyIn, timezoneMode, alarmTime },
     $account,
   ]) => {
-    console.log({
-      submissionWindow,
-      otherPlayer,
-      buyIn,
-      timezoneMode,
-      alarmTime,
-    });
     return (
       submissionWindow > 0 &&
       otherPlayer !== $account?.address &&
