@@ -82,9 +82,9 @@
       </div>
 
       <!-- Main content -->
-      <div class="relative grid">
+      <div class="relative grid flex-grow">
         {#if $activeTab === "alarms"}
-          <div transition:blur class="col-start-1 row-start-1">
+          <div transition:blur class="col-start-1 row-start-1 flex flex-col">
             {#if numUserAlarms === 0}
               <div
                 class="flex-grow rounded-2xl p-2 align-middle tracking-tight text-zinc-400"
@@ -93,7 +93,9 @@
                 existing one.
               </div>
             {:else}
-              <div class="alarms-container-grid flex-grow gap-3 text-zinc-400">
+              <div
+                class="alarms-container-grid flex-grow gap-3 self-stretch text-zinc-400"
+              >
                 <AlarmsSidebar />
                 <div class="bg-transparent-grey rounded-2xl">
                   {#if $displayedAlarmId && $userAlarms[Number($displayedAlarmId)]}
