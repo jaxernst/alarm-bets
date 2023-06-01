@@ -4,6 +4,7 @@
   import { shorthandAddress } from "./lib/util";
 
   import AlarmClockSymbol from "./assets/alarm-clock-symbol.svelte";
+  import { userAlarms } from "./lib/contractStores";
 
   let displayName: string | undefined;
   $: if ($account?.address) {
@@ -19,7 +20,7 @@
 >
   <div class="flex items-center gap-1">
     <div class="h-[18px] w-[18px] stroke-cyan-500"><AlarmClockSymbol /></div>
-    <div>0</div>
+    <div>{Object.keys($userAlarms).length}</div>
   </div>
 
   <div class="flex h-full items-center gap-1">
