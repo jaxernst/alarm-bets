@@ -130,4 +130,10 @@ describe("Partner Alarm Clock test", () => {
     expect(result2P1).to.approximately(alarmTime - curTime2, 3);
     expect(result2P2).to.approximately(alarmTime - curTime2, 3);
   });
+
+  describe("Ending alarms", () => {
+    it(
+      "When any player withdraws (ends the alarm), both player's funds are returned to them"
+    );
+  });
 });

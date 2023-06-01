@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root {
   line-height: 1.5;
   font-weight: 400;
@@ -20,9 +19,12 @@
   --bg-color2: rgb(50, 50, 50);
 
   --button-highlight1: rgb(27, 27, 27);
+  font-family: jura, sans-serif;
 }
 
-html {
-  background: url('assets/gradient-lines.svg') no-repeat center center fixed;
+body {
+  background-image: url("assets/clean-deep-ribbons.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
-

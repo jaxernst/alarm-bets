@@ -37,7 +37,7 @@
 </script>
 
 <div
-  class="clock-text-container"
+  class={`clock-text-container`}
   style={overrideColor ? `color: ${overrideColor}` : ""}
 >
   <div class="clock-text">

@@ -9,10 +9,14 @@ import {
   getTimeToNextDeadline,
   getPlayerBalance,
   getNumConfirmations,
+  endAlarm,
 } from "./alarmHelpers";
 import { transactions } from "./transactions";
 import type { EvmAddress } from "../types";
 import { AlarmStatus } from "@sac/contracts/lib/types";
+import { toast } from "@zerodevx/svelte-toast";
+import { watchContractEvent } from "@wagmi/core";
+import PartnerAlarmClock from "./abi/PartnerAlarmClock";
 
 export const hub = writable<EvmAddress>(
   "0x5fbdb2315678afecb367f032d93f642f64180aa3"
@@ -62,12 +66,12 @@ export type UserAlarm = Awaited<ReturnType<typeof UserAlarmStore>>;
 export type AlarmState = {
   status: AlarmStatus;
   timeToNextDeadline: bigint;
-  player1MissedDeadlines: bigint;
-  player2MissedDeadlines: bigint;
-  player1Balance: bigint;
-  player2Balance: bigint;
-  player1Confirmations: bigint;
-  player2Confirmations: bigint;
+  player1MissedDeadlines: bigint | undefined;
+  player2MissedDeadlines: bigint | undefined;
+  player1Balance: bigint | undefined;
+  player2Balance: bigint | undefined;
+  player1Confirmations: bigint | undefined;
+  player2Confirmations: bigint | undefined;
 };
 
 /**
@@ -145,6 +149,16 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
     if (s.status !== AlarmStatus.ACTIVE) clearInterval(interval);
   });
 
+  // Add status change listener
+  watchContractEvent(
+    {
+      address: addr,
+      abi: PartnerAlarmClock,
+      eventName: "StatusChanged",
+    },
+    (log) => console.log(log)
+  );
+
   // Consolidate params into single store
   const { subscribe } = derived(
     [constants, alarmState],
@@ -164,6 +178,7 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
     initAlarmState: get(initAlarmState),
     submitConfirmation: async () => {},
     startAlarm: async () => {},
+    endAlarm: async () => endAlarm(addr),
     syncTimeToDeadline: async () => {
       const p1 = get(constants).player1;
       const timeToNextDeadline = await getTimeToNextDeadline(addr, p1);

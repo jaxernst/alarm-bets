@@ -1,4 +1,7 @@
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<script>
+  export let klass = "";
+</script>
+
 <svg
   version="1.1"
   id="Capa_1"
@@ -6,6 +9,7 @@
   xmlns:xlink="http://www.w3.org/1999/xlink"
   viewBox="0 0 478.703 478.703"
   xml:space="preserve"
+  class={klass}
 >
   <g>
     <g>

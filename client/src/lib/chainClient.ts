@@ -84,9 +84,9 @@ get(ethClient).watchNetwork((net) => {
 /*
  * Accout store to for contexts and pages where an account is assumed to always be present
  */
-export const getRequiredAccount = derived(account, ($account) => {
+export const getCurrentAccount = derived(account, ($account) => {
   return () => {
     if (!$account) throw new Error("No account connected");
     return account;
   };
-}) as Readable<() => Readable<Account>>;
+}) as Readable<() => Account>;

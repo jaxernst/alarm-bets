@@ -1,16 +1,25 @@
 <script lang="ts">
-  import { getRequiredAccount } from "../lib/chainClient";
-  import { transactions } from "../lib/transactions";
   import SettingsIcon from "../assets/settings-icon.svelte";
   import SunIcon from "../assets/sun-icon.svelte";
   import EthereumIcon from "../assets/ethereum-icon.svelte";
+  import ClockDisplay from "../lib/components/ClockDisplay.svelte";
+  import EndAlarmModal from "./EndAlarmModal.svelte";
+  import {
+    Menu,
+    MenuButton,
+    MenuItems,
+    MenuItem,
+  } from "@rgossiaux/svelte-headlessui";
+
+  import { formatEther } from "viem";
+  import { transactions } from "../lib/transactions";
   import { MINUTE } from "../lib/time";
   import { submitConfirmation } from "../lib/alarmHelpers";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { formatTime, shorthandAddress, timeString } from "../lib/util";
-  import ClockDisplay from "../lib/components/ClockDisplay.svelte";
   import type { UserAlarm } from "../lib/contractStores";
-  import { formatEther } from "viem";
+  import { showEndAlarmModal } from "./stores";
+  import PlayerInfo from "./PlayerInfo.svelte";
 
   export let alarm: UserAlarm;
 
@@ -28,17 +37,18 @@
     initialQuery = true;
   }
 
-  $: account = $getRequiredAccount();
-
   const submitConfirmationTransaction = () => {
     transactions.addTransaction(submitConfirmation(alarmAddress));
   };
 
-  let expanded = false;
+  let showAlarmInfo = false;
+  $: rotatedDopdown = () => (showAlarmInfo ? "rotate-180" : "");
 </script>
 
+<EndAlarmModal {alarm} />
+
 <div class="flex h-full flex-col">
-  <div class="flex flex-grow flex-col gap-1 px-2 py-1">
+  <div class="flex flex-grow flex-col gap-1 px-1 py-1">
     <div class="custom-grid gap-4">
       <div>
         <div class=" rounded-lg p-1 text-xs">ID: {$alarm.id}</div>
@@ -49,8 +59,30 @@
           overrideColor={"zinc-500"}
         />
       </div>
-      <div class="m-1 h-[15px] w-[15px] justify-self-end fill-zinc-500">
-        <SettingsIcon />
+      <div class="justify-self-end">
+        <Menu class="relative">
+          <MenuButton class="z-50 justify-self-end">
+            <SettingsIcon klass="m-1 h-[15px] w-[15px] fill-zinc-500" />
+          </MenuButton>
+          <MenuItems
+            class="absolute right-5 top-5 z-50 flex flex-col gap-0 rounded-lg bg-zinc-900 text-xs font-bold"
+          >
+            <MenuItem>
+              <button
+                class="w-full whitespace-nowrap rounded-lg p-2 hover:bg-zinc-700"
+              >
+                Add Collateral
+              </button>
+            </MenuItem>
+            <MenuItem>
+              <button
+                class="w-full whitespace-nowrap rounded-lg p-2 text-red-700 hover:bg-zinc-700"
+                on:click={() => ($showEndAlarmModal = !$showEndAlarmModal)}
+                >End Alarm</button
+              >
+            </MenuItem>
+          </MenuItems>
+        </Menu>
       </div>
     </div>
     {#if $alarm.status === AlarmStatus.INACTIVE}
@@ -63,76 +95,51 @@
       </div>
     {/if}
 
-    <div class="bg-transparent-grey rounded-t-md p-2 text-sm">
-      <div class="flex justify-between gap-2">
-        <span class="text-zinc-500">submission window:</span>
-        <span
-          ><span class="h-3 w-3 text-cyan-600"
-            >{Number($alarm.submissionWindow) / MINUTE}</span
-          > minutes</span
-        >
-      </div>
-
-      <div class="flex justify-between gap-2">
-        <span class="text-zinc-500">missed alarm penalty:</span>
-        <span
-          ><span class="h-3 w-3 text-cyan-600"
-            >{formatEther($alarm.missedAlarmPenalty)}</span
-          > eth</span
-        >
-      </div>
-      <div class="flex justify-between gap-2">
-        <span class="text-zinc-500">initial deposit:</span>
-        <span
-          ><span class="h-3 w-3 text-cyan-600"
-            >{formatEther($alarm.betAmount)}</span
-          > eth</span
-        >
-      </div>
+    <!--Players Info-->
+    <div
+      class={`flex flex-grow justify-center gap-1 text-sm font-bold ${
+        showAlarmInfo && "overflow-y-auto"
+      }`}
+    >
+      <PlayerInfo player={1} {alarm} />
+      <PlayerInfo player={2} {alarm} />
     </div>
-    <div class="flex flex-grow justify-center gap-1 text-sm font-bold">
-      <div
-        class="bg-transparent-grey flex flex-grow flex-col rounded-bl-md px-2"
-      >
-        <span class="text-zinc-500"
-          >{$alarm.player1 ? shorthandAddress($alarm.player1) : ""}</span
-        >
-        <div class="flex flex-grow items-center justify-evenly pb-1">
-          <div class="flex items-center gap-1">
-            {$alarm.player1Confirmations || "-"}
-            <div class="h-3 w-3 fill-cyan-600">
-              <SunIcon />
-            </div>
-          </div>
-          <div class="flex items-center gap-1">
-            {(p1Balance && formatEther(p1Balance)) || "-"}
-            <div class="h-3 w-3 fill-cyan-600">
-              <EthereumIcon />
-            </div>
-          </div>
+
+    <!--Alarm Info-->
+    <div class="bg-transparent-grey rounded-md p-2 text-sm">
+      <button class="w-full" on:click={() => (showAlarmInfo = !showAlarmInfo)}>
+        <div class="flex justify-between">
+          <div>Alarm Info</div>
+          <div class={`text-[8px] ${rotatedDopdown()}`}>&#9660;</div>
         </div>
-      </div>
-      <div
-        class="bg-transparent-grey flex flex-grow flex-col rounded-br-md px-2"
-      >
-        <span class="text-zinc-500"
-          >{$alarm.player2 ? shorthandAddress($alarm.player2) : ""}</span
-        >
-        <div class="flex flex-grow items-center justify-evenly pb-1">
-          <div class="flex items-center gap-1">
-            {$alarm.player2Confirmations || "-"}
-            <div class="h-3 w-3 fill-cyan-600">
-              <SunIcon />
-            </div>
-          </div>
-          <div class="flex items-center gap-1">
-            {(p2Balance && formatEther(p2Balance)) || "-"}
-            <div class="h-3 w-3 fill-cyan-600">
-              <EthereumIcon />
-            </div>
-          </div>
+      </button>
+      {#if showAlarmInfo}
+        <div class="flex justify-between gap-2">
+          <span class="text-zinc-500">submission window:</span>
+          <span
+            ><span class="h-3 w-3 text-cyan-600"
+              >{Number($alarm.submissionWindow) / MINUTE}</span
+            > minutes</span
+          >
         </div>
-      </div>
+
+        <div class="flex justify-between gap-2">
+          <span class="text-zinc-500">missed alarm penalty:</span>
+          <span
+            ><span class="h-3 w-3 text-cyan-600"
+              >{formatEther($alarm.missedAlarmPenalty)}</span
+            > eth</span
+          >
+        </div>
+        <div class="flex justify-between gap-2">
+          <span class="text-zinc-500">initial deposit:</span>
+          <span
+            ><span class="h-3 w-3 text-cyan-600"
+              >{formatEther($alarm.betAmount)}</span
+            > eth</span
+          >
+        </div>
+      {/if}
     </div>
   </div>
   <div

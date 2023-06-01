@@ -1,17 +1,18 @@
 <script lang="ts">
   import "./app.css";
-  import { userAlarms } from "./lib/contractStores";
-  import ClockDisplay from "./lib/components/ClockDisplay.svelte";
-  import { fade } from "svelte/transition";
 
-  import { SvelteToast } from "@zerodevx/svelte-toast";
+  import ClockDisplay from "./lib/components/ClockDisplay.svelte";
   import Web3Status from "./Web3Status.svelte";
-  import NewAlarm from "./new-alarm/NewAlarm.svelte";
+  import NewAlarm from "./alarm-creation/NewAlarm.svelte";
   import AlarmsSidebar from "./alarms/AlarmsSidebar.svelte";
-  import { writable } from "svelte/store";
-  import { displayedAlarmId } from "./alarms/displayedAlarm";
   import AlarmDetail from "./alarms/AlarmDetail.svelte";
   import SunIcon from "./assets/sun-icon.svelte";
+
+  import { SvelteToast } from "@zerodevx/svelte-toast";
+  import { fade, blur } from "svelte/transition";
+  import { userAlarms } from "./lib/contractStores";
+  import { writable } from "svelte/store";
+  import { displayedAlarmId } from "./alarms/stores";
 
   type Tab = "alarms" | "new";
   const activeTab = writable<Tab>("alarms");
@@ -57,11 +58,11 @@
   </div>
 
   <main
-    class=" font-jura box-border flex min-h-screen items-center justify-center outline"
+    class=" box-border flex min-h-screen items-center justify-center"
     in:fade={{ duration: 500, delay: 500 }}
   >
     <div
-      class="bg-trans main-container-shadow flex h-[320px] w-[580px] flex-col gap-2 rounded-3xl p-3 text-zinc-400 shadow-neutral-500"
+      class="bg-trans main-container-shadow flex min-h-[320px] w-[580px] flex-col gap-2 rounded-3xl p-3 text-zinc-400 shadow-neutral-500"
     >
       <!-- Main content header -->
       <div class="flex justify-between align-middle">
@@ -81,27 +82,33 @@
       </div>
 
       <!-- Main content -->
-      {#if $activeTab === "alarms"}
-        {#if numUserAlarms === 0}
-          <div
-            class="flex-grow rounded-2xl p-2 align-middle tracking-tight text-zinc-400"
-          >
-            You have no active alarms. Create a new alarm or join an existing
-            one.
+      <div class="relative grid">
+        {#if $activeTab === "alarms"}
+          <div transition:blur class="col-start-1 row-start-1">
+            {#if numUserAlarms === 0}
+              <div
+                class="flex-grow rounded-2xl p-2 align-middle tracking-tight text-zinc-400"
+              >
+                You have no active alarms. Create a new alarm or join an
+                existing one.
+              </div>
+            {:else}
+              <div class="alarms-container-grid flex-grow gap-3 text-zinc-400">
+                <AlarmsSidebar />
+                <div class="bg-transparent-grey rounded-2xl">
+                  {#if $displayedAlarmId && $userAlarms[Number($displayedAlarmId)]}
+                    <AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
+                  {/if}
+                </div>
+              </div>
+            {/if}
           </div>
-        {:else}
-          <div class="alarms-container-grid flex-grow gap-3 text-zinc-400">
-            <AlarmsSidebar />
-            <div class="bg-transparent-grey rounded-2xl">
-              {#if $displayedAlarmId && $userAlarms[Number($displayedAlarmId)]}
-                <AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
-              {/if}
-            </div>
+        {:else if $activeTab === "new"}
+          <div transition:blur class="col-start-1 row-start-1">
+            <NewAlarm />
           </div>
         {/if}
-      {:else if $activeTab === "new"}
-        <NewAlarm />
-      {/if}
+      </div>
     </div>
   </main>
 </div>
@@ -116,17 +123,17 @@
   }
 
   .main-container-shadow {
-    box-shadow: 0px 0px 35px 5px rgba(90, 90, 90, 0.32);
+    box-shadow: 0px 0px 35px 5px rgba(18, 18, 18, 0.55);
   }
 
   .bg-trans {
-    background: rgba(30, 30, 30, 0.1);
-    backdrop-filter: blur(6px);
+    background: rgba(10, 10, 10, 0.48);
+    backdrop-filter: blur(20px);
   }
 
   .top-clock {
     background: rgba(37, 37, 37, 0.3);
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(4px);
   }
 
   .alarms-container-grid {

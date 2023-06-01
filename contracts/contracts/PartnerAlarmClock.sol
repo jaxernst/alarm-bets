@@ -137,9 +137,17 @@ contract PartnerAlarmClock is BaseCommitment {
         // Add on the penalty amount to the other player's deposit
         players[otherPlayer].depositAmount += penaltyAmount;
 
+        // TODO: Check security implications of withdrawing like this, this is
+        // the first thing that came to mind and might be dangerous
+
         uint withdrawAmount = players[msg.sender].depositAmount;
         players[msg.sender].depositAmount = 0;
+        players[msg.sender].depositAmount = 0;
         payable(msg.sender).transfer(withdrawAmount);
+        payable(otherPlayer).transfer(address(this).balance);
+
+        emit StatusChanged(status, CommitmentStatus.CANCELLED);
+        status = CommitmentStatus.CANCELLED;
     }
 
     function getPlayerBalance(address player) public view returns (uint) {

@@ -76,6 +76,7 @@ export const creationParams = writable<CreationParams>({
   missedAlarmPenalty: BigInt(0),
 });
 
+// Add check to make sure missed alarm penalty is less than or equal to buy in
 export const isReady = derived(
   [creationParams, account],
   ([

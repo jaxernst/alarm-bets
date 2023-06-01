@@ -1,17 +1,22 @@
 <script lang="ts">
   import AlarmActiveDays from "../lib/components/AlarmActiveDays.svelte";
-  import { getRequiredAccount } from "../lib/chainClient";
+  import { getCurrentAccount } from "../lib/chainClient";
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
-  import { timeString } from "../lib/util";
+  import { formatTime, shorthandAddress, timeString } from "../lib/util";
   import type { UserAlarm } from "../lib/contractStores";
   import { AlarmStatus } from "@sac/contracts/lib/types";
-  import { displayedAlarmId } from "./displayedAlarm";
+  import { displayedAlarmId } from "./stores";
+  import { getOtherPlayer } from "../lib/alarmHelpers";
 
   export let userAlarm: UserAlarm;
 
   $: id = $userAlarm.id;
-  $: account = $getRequiredAccount();
+  $: account = $getCurrentAccount();
   $: daysActive = $userAlarm.alarmDays as number[];
+  $: otherPlayer =
+    account.address === $userAlarm.player1
+      ? $userAlarm.player2
+      : $userAlarm.player1;
   $: alarmTime = $userAlarm.alarmTime;
   $: status = $userAlarm.status;
 
@@ -36,7 +41,7 @@
   {:else if status === AlarmStatus.ACTIVE}
     <div class="flex items-center gap-2">
       <div>
-        <div class="pt-1" style="font-size: 2em">
+        <div class="pt-1" style="font-size: 2em; line-height: 1em">
           <ClockDisplay
             overrideTime={timeString(Number(alarmTime))}
             overrideColor={"orange"}
@@ -44,9 +49,14 @@
         </div>
         <div />
       </div>
-      <div class="" style="font-size: .7em">
+      <div class="" style="font-size: .68em">
         <AlarmActiveDays {daysActive} />
       </div>
+    </div>
+    <div class="pl-1 text-xs">
+      In <span class=""
+        >{formatTime(Number($userAlarm.timeToNextDeadline))}</span
+      >
     </div>
   {/if}
 </button>

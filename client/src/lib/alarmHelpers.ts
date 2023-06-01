@@ -11,7 +11,7 @@ import {
   writeContract,
   readContract,
 } from "@wagmi/core";
-
+import type { UserAlarm } from "./contractStores";
 import {
   type AlarmType,
   type InitializationTypes,
@@ -66,22 +66,28 @@ export const getAlarmConstants = async (alarmAddress: EvmAddress) => {
   };
 };
 
-export const getBetStanding = async (
-  alarmAddress: EvmAddress,
+export const getBetStanding = (
+  alarmStore: UserAlarm,
   targetPlayer: EvmAddress
 ) => {
-  const otherPlayer = await getOtherPlayer(alarmAddress, targetPlayer);
-  const urMissedDeadlines = await getMissedDeadlines(
-    alarmAddress,
-    targetPlayer
-  );
-  const theirMissedDeadlines = await getMissedDeadlines(
-    alarmAddress,
-    otherPlayer
-  );
+  const alarm = get(alarmStore);
+  const zero = BigInt(0);
+  let otherPlayer;
+  let urMissedDeadlines: bigint = BigInt(0);
+  let theirMissedDeadlines: bigint = BigInt(0);
+  if (targetPlayer === alarm.player1) {
+    otherPlayer = alarm.player2;
+    urMissedDeadlines = alarm.player1MissedDeadlines ?? zero;
+    theirMissedDeadlines = alarm.player2MissedDeadlines ?? zero;
+  } else if (targetPlayer === alarm.player2) {
+    otherPlayer = alarm.player1;
+    urMissedDeadlines = alarm.player2MissedDeadlines ?? zero;
+    theirMissedDeadlines = alarm.player1MissedDeadlines ?? zero;
+  } else {
+    throw new Error("Invariant error");
+  }
 
-  const alarmPenalty = await getMissedAlarmPenalty(alarmAddress);
-  return alarmPenalty * theirMissedDeadlines - urMissedDeadlines;
+  return alarm.missedAlarmPenalty * (theirMissedDeadlines - urMissedDeadlines);
 };
 
 export const getOtherPlayer = async (
@@ -202,6 +208,16 @@ export async function startAlarm(alarmAddress: EvmAddress) {
     abi: PartnerAlarmClock,
     functionName: "start",
     value: betAmount,
+  });
+
+  return (await writeContract(request)).hash;
+}
+
+export async function endAlarm(alarmAddress: EvmAddress) {
+  const { request } = await prepareWriteContract({
+    address: alarmAddress,
+    abi: PartnerAlarmClock,
+    functionName: "withdraw",
   });
 
   return (await writeContract(request)).hash;
