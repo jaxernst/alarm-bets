@@ -142,8 +142,10 @@
       {/if}
     </div>
   </div>
+
+  <!--Bottom Buttons-->
   <div
-    class="bottom-0 right-0 flex w-full justify-center rounded-b-xl bg-zinc-800 p-1"
+    class="bg-highlight-transparent-grey bottom-0 right-0 flex w-full justify-center rounded-b-xl p-1"
   >
     {#if $alarm.status === AlarmStatus.INACTIVE}
       <button

@@ -43,7 +43,7 @@
   <div class=" flex h-[30px] gap-2 rounded-xl px-3">
     <input
       type="text"
-      class=" h-full flex-grow rounded-xl bg-zinc-800 px-2 text-zinc-300 placeholder-zinc-500"
+      class=" bg-highlight-transparent-grey h-full flex-grow rounded-xl px-2 text-zinc-300 placeholder-zinc-500"
       placeholder="Enter alarm id to join"
       bind:value={alarmId}
     />

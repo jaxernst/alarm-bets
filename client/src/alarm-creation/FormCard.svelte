@@ -34,7 +34,7 @@
 </script>
 
 <button
-  class={"  relative flex h-[85px] flex-col justify-start gap-2 rounded-xl bg-zinc-800 px-1 pb-1 transition " +
+  class={"  bg-highlight-transparent-grey relative flex h-[85px] flex-col justify-start gap-2 rounded-xl px-1 pb-1 transition " +
     buttonClasses()}
   use:activeOnChildFocus
 >

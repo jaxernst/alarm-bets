@@ -26,7 +26,7 @@
       : "";
 
   $: styleSelected = (alarmId: number) =>
-    $displayedAlarmId === alarmId ? "bg-zinc-800" : "";
+    $displayedAlarmId === alarmId ? "bg-highlight-transparent-grey" : "";
 </script>
 
 <button
@@ -53,7 +53,7 @@
         <AlarmActiveDays {daysActive} />
       </div>
     </div>
-    <div class="pl-1 text-xs">
+    <div class="text-xs">
       In <span class=""
         >{formatTime(Number($userAlarm.timeToNextDeadline))}</span
       >
