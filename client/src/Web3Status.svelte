@@ -2,34 +2,33 @@
   import { account, ensName } from "./lib/chainClient";
   import { web3Modal } from "./lib/chainClient";
   import { shorthandAddress } from "./lib/util";
+  import { transactions } from "./lib/transactions";
 
   import AlarmClockSymbol from "./assets/alarm-clock-symbol.svelte";
   import { userAlarms } from "./lib/contractStores";
+  import ShadowSpinner from "./lib/components/ShadowSpinner.svelte";
+  import DiamondSpinner from "./lib/components/DiamondSpinner.svelte";
+  import { get } from "svelte/store";
 
   let displayName: string | undefined;
   $: if ($account?.address) {
     displayName = $ensName ? $ensName : shorthandAddress($account.address);
   }
-
+  $: console.log($transactions.pending);
   $: indicatorColor = $account && $account.isConnected ? "green" : "red";
 </script>
 
-<button
-  class="flex items-center gap-4 rounded-xl px-4 py-1"
-  on:click={() => $web3Modal.openModal()}
->
-  <div class="flex items-center gap-1">
-    <div class="h-[18px] w-[18px] stroke-cyan-500"><AlarmClockSymbol /></div>
-    <div>{Object.keys($userAlarms).length}</div>
-  </div>
-
-  <div class="flex h-full items-center gap-1">
+<div class="flex h-full items-center gap-4">
+  {#if $transactions.pending}
+    <DiamondSpinner size={"30"} color={"white"} />
+  {/if}
+  <button class="flex items-center" on:click={() => $web3Modal.openModal()}>
     <div class="indicator" style="background-color:{indicatorColor}" />
     <div class="displayName">
       {displayName || ""}
     </div>
-  </div>
-</button>
+  </button>
+</div>
 
 <style>
   .indicator {

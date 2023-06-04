@@ -1,5 +1,5 @@
 import { waitForTransaction, type Hash } from "@wagmi/core";
-import { writable } from "svelte/store";
+import { derived, writable } from "svelte/store";
 import type { TransactionReceipt } from "viem";
 
 type AddTxResult =
@@ -18,17 +18,28 @@ type AddTxResult =
 function MakeTransactionStore() {
   const contractTransactionReceipts = writable<TransactionReceipt[]>([]);
   const transactionHashes = writable<Hash[]>([]);
+  const txPending = writable(false);
+
+  const { subscribe } = derived(
+    [contractTransactionReceipts, transactionHashes, txPending],
+    ([$rcs, $txs, $pending]) => ({
+      receipts: $rcs,
+      hashes: $txs,
+      pending: $pending,
+    })
+  );
 
   /**
    * The store's main subscription is for finalized transactions (receipts), but
    * transaction reponses can also be subcribed to
    */
   return {
-    subscribe: contractTransactionReceipts.subscribe,
-    hashes: { subscribe: transactionHashes.subscribe },
+    subscribe,
     addTransaction: async (
       transaction: Promise<Hash>
     ): Promise<AddTxResult> => {
+      txPending.set(true);
+
       let rc: TransactionReceipt;
       try {
         const submittedTx = await transaction;
@@ -36,11 +47,13 @@ function MakeTransactionStore() {
         rc = await waitForTransaction({ hash: submittedTx });
         contractTransactionReceipts.update((txs) => [...txs, rc]);
       } catch (err) {
+        txPending.set(false);
         return {
           error: err,
         };
       }
 
+      txPending.set(false);
       return {
         rc,
       };
