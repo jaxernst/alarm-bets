@@ -13,6 +13,8 @@
   import { userAlarms } from "./lib/contractStores";
   import { writable } from "svelte/store";
   import { displayedAlarmId } from "./alarms/stores";
+  import Topbar from "./Topbar.svelte";
+  import AlarmClockSymbol from "./assets/alarm-clock-symbol.svelte";
 
   type Tab = "alarms" | "new";
   const activeTab = writable<Tab>("alarms");
@@ -22,39 +24,13 @@
       : " ";
 
   $: numUserAlarms = Object.keys($userAlarms ?? {}).length;
-
-  let backgroundMode: "day" | "night" = "day";
-  const toggleBackgroundMode = () => {
-    backgroundMode === "day"
-      ? (backgroundMode = "night")
-      : (backgroundMode = "day");
-  };
 </script>
 
 <SvelteToast />
 
-<div
-  class="background h-full {backgroundMode === 'day' ? 'bg-day' : 'bg-night'}"
->
+<div class="background h-full">
   <div class="absolute flex w-full justify-center">
-    <div
-      class="top-clock m-4 flex items-center gap-4 rounded-2xl px-6 py-2 text-center"
-    >
-      <div class="text-lg">The Social Alarm Clock</div>
-      |
-      <div style="font-size:1.5em" class="pt-1">
-        <ClockDisplay />
-      </div>
-    </div>
-
-    <button
-      class="absolute right-0 top-0 m-6 {backgroundMode === 'day'
-        ? 'fill-zinc-400'
-        : 'fill-cyan-600'}"
-      on:click={toggleBackgroundMode}
-    >
-      <SunIcon />
-    </button>
+    <Topbar />
   </div>
 
   <main
@@ -66,7 +42,7 @@
     >
       <!-- Main content header -->
       <div class="flex justify-between align-middle">
-        <div class="flex gap-4 rounded-xl px-2 py-1">
+        <div class="flex gap-4 rounded-xl px-2">
           <button
             class={activeTabStyles("alarms")}
             on:click={() => activeTab.set("alarms")}>Alarms</button
@@ -77,7 +53,12 @@
           >
         </div>
         <div>
-          <Web3Status />
+          <div class="flex items-center gap-1 px-2">
+            <div class="h-[18px] w-[18px] stroke-cyan-500">
+              <AlarmClockSymbol />
+            </div>
+            <div>{Object.keys($userAlarms).length}</div>
+          </div>
         </div>
       </div>
 
@@ -131,11 +112,6 @@
   .bg-trans {
     background: rgba(10, 10, 10, 0.48);
     backdrop-filter: blur(20px);
-  }
-
-  .top-clock {
-    background: rgba(37, 37, 37, 0.3);
-    backdrop-filter: blur(4px);
   }
 
   .alarms-container-grid {
