@@ -38,7 +38,7 @@
     in:fade={{ duration: 500, delay: 500 }}
   >
     <div
-      class="bg-trans main-container-shadow flex min-h-[320px] w-[580px] flex-col gap-2 rounded-3xl p-3 text-zinc-400 shadow-neutral-500"
+      class="bg-trans main-container-shadow flex min-h-[340px] w-[620px] flex-col gap-2 rounded-3xl p-3 text-zinc-400 shadow-neutral-500"
     >
       <!-- Main content header -->
       <div class="flex justify-between align-middle">

@@ -17,9 +17,9 @@
   $: otherPlayer = $getCurrentAccount() ? $alarm.player2 : $alarm.player1;
 
   const endAlarm = async () => {
-    const txResult = await transactions.addTransaction(alarm.endAlarm());
+    const txResult = await alarm.endAlarm();
     if (!txResult.error) {
-      toast.push("Alarn ended successfully");
+      toast.push("Alarm ended successfully");
     } else {
       toast.push("Transaction failed with: " + txResult.error.message);
     }

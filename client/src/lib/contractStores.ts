@@ -17,50 +17,7 @@ import { AlarmStatus } from "@sac/contracts/lib/types";
 import { toast } from "@zerodevx/svelte-toast";
 import { watchContractEvent } from "@wagmi/core";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
-
-export const hub = writable<EvmAddress>(
-  "0x5fbdb2315678afecb367f032d93f642f64180aa3"
-);
-
-// Will add listeners to update alarm state and alarm fields after transactions
-let lastAccount: string;
-export const userAlarms = derived(
-  [account, hub, transactions],
-  ([$user, $hub, _], set) => {
-    if (!$user?.address) return set({});
-
-    let alarmStores: Record<string, UserAlarm> = get(userAlarms);
-    if (lastAccount && lastAccount !== $user.address) {
-      alarmStores = {};
-      console.log("Notice: resetting alarm stores");
-      set(alarmStores);
-    }
-    lastAccount = $user.address;
-
-    const queryAndMakeAlarmStores = async (
-      hub: EvmAddress,
-      user: EvmAddress
-    ) => {
-      const alarms = await getUserAlarmsByType(hub, user, "PartnerAlarmClock");
-      if (!alarms) return {};
-
-      for (const [id, alarm] of Object.entries(alarms)) {
-        if (alarmStores[Number(id)]) {
-          console.log("Alarm store already made", id);
-          continue;
-        }
-        alarmStores[Number(id)] = await UserAlarmStore(alarm);
-      }
-
-      return alarmStores;
-    };
-
-    queryAndMakeAlarmStores($hub, $user.address)
-      .then((res) => set(res))
-      .catch((e) => console.log("Could not fetch alarms", e));
-  },
-  {}
-) as Readable<Record<number, UserAlarm>>;
+import SocialAlarmClockHub from "./abi/SocialAlarmClockHub";
 
 export type UserAlarm = Awaited<ReturnType<typeof UserAlarmStore>>;
 export type AlarmState = {
@@ -73,6 +30,117 @@ export type AlarmState = {
   player1Confirmations: bigint | undefined;
   player2Confirmations: bigint | undefined;
 };
+
+export const hub = writable<EvmAddress>(
+  "0x5fbdb2315678afecb367f032d93f642f64180aa3"
+);
+
+const alarmQueryDeps = derived([account, hub], ([$user, $hub]) => {
+  return {
+    user: $user?.address,
+    hub: $hub,
+  };
+});
+
+function MakeUserAlarmsRecord() {
+  const userAlarms = writable<Record<number, UserAlarm>>({});
+
+  // Auto fetch user alarms and create stores for them
+  alarmQueryDeps.subscribe(async ({ hub: $hub, user: $user }) => {
+    if (!$user || !$hub) return {};
+
+    const alarms = await getUserAlarmsByType($hub, $user, "PartnerAlarmClock");
+    if (!alarms) return {};
+
+    const currentAlarms = get(userAlarms);
+    for (const [id, alarm] of Object.entries(alarms)) {
+      if (currentAlarms[Number(id)]) {
+        continue;
+      }
+      currentAlarms[Number(id)] = await UserAlarmStore(alarm);
+    }
+    userAlarms.set(currentAlarms);
+  });
+
+  const addAlarm = async (
+    alarmAddr: EvmAddress,
+    id: number,
+    creationBlock: number
+  ) => {
+    const alarm = await UserAlarmStore({
+      contractAddress: alarmAddr,
+      id,
+      creationBlock,
+    });
+    userAlarms.update((s) => ({ ...s, [Number(id)]: alarm }));
+  };
+
+  const newAlarmListenerUnsub = writable<() => void | undefined>();
+  const joinedAlarmListenerUnsub = writable<() => void | undefined>();
+
+  alarmQueryDeps.subscribe(({ hub: $hub, user: $user }) => {
+    if (!$hub || !$user) return;
+
+    if (!get(newAlarmListenerUnsub)) {
+      console.log("set new alarm listener for ", $user);
+      newAlarmListenerUnsub.set(
+        watchContractEvent(
+          {
+            address: $hub,
+            abi: SocialAlarmClockHub,
+            eventName: "AlarmCreation",
+          },
+          ([log]) => {
+            if (!log.args.alarmAddr || !log.args.id)
+              throw Error("Creation event invalid");
+            addAlarm(
+              log.args.alarmAddr,
+              Number(log.args.id),
+              Number(log.blockNumber)
+            );
+          }
+        )
+      );
+    }
+
+    if (!get(joinedAlarmListenerUnsub)) {
+      joinedAlarmListenerUnsub.set(
+        watchContractEvent(
+          {
+            address: $hub,
+            abi: SocialAlarmClockHub,
+            eventName: "UserJoined",
+          },
+          ([log]) => {
+            if (!log.args.alarmAddr || !log.args.id)
+              throw Error("Creation event invalid");
+            addAlarm(
+              log.args.alarmAddr,
+              Number(log.args.id),
+              Number(log.blockNumber)
+            );
+          }
+        )
+      );
+    }
+  });
+
+  // Clear state when user changes
+  let lastAccount: EvmAddress;
+  alarmQueryDeps.subscribe(({ user: $user }) => {
+    if (!$user) return;
+    if (lastAccount && $user !== lastAccount) {
+      userAlarms.set({});
+    }
+    lastAccount = $user;
+  });
+
+  return {
+    subscribe: userAlarms.subscribe,
+  };
+}
+
+export const userAlarms = MakeUserAlarmsRecord();
 
 /**
  * Store that exposes alarm actions, sets listeners to re-query when deadlines are passed,
@@ -156,7 +224,11 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
       abi: PartnerAlarmClock,
       eventName: "StatusChanged",
     },
-    (log) => console.log(log)
+    ([log]) => {
+      console.log("Status changed", log);
+      const newStatus = log.args.to! as AlarmStatus;
+      alarmState.update((s) => ({ ...s, status: newStatus }));
+    }
   );
 
   // Consolidate params into single store
@@ -178,7 +250,10 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
     initAlarmState: get(initAlarmState),
     submitConfirmation: async () => {},
     startAlarm: async () => {},
-    endAlarm: async () => endAlarm(addr),
+    endAlarm: async () => {
+      const res = await transactions.addTransaction(endAlarm(addr));
+      return res;
+    },
     syncTimeToDeadline: async () => {
       const p1 = get(constants).player1;
       const timeToNextDeadline = await getTimeToNextDeadline(addr, p1);
