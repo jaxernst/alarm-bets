@@ -2,48 +2,14 @@ import { derived, get, writable, type Readable } from "svelte/store";
 import { account } from "../lib/chainClient";
 import { createAlarm as _createAlarm } from "../lib/alarmHelpers";
 import { hub } from "../lib/contractStores";
-import { parseEther, type Hash, type TransactionReceipt } from "viem";
-
-export const SelectionWheel = (numItems: number) => {
-  const i = writable(0); // Selected index
-  return {
-    subscribe: derived(i, ($i) => ({
-      selected: $i,
-      atEnd: $i === numItems - 1,
-      atStart: $i === 0,
-    })).subscribe,
-
-    next: () => {
-      if (get(i) === numItems - 1) return;
-      i.set(get(i) + 1);
-    },
-    prev: () => {
-      if (get(i) === 0) return;
-      i.set(get(i) - 1);
-    },
-  };
-};
+import type { Hash } from "viem";
 
 type Days = "M" | "T" | "W" | "Th" | "F" | "Sa" | "Su";
-
-type ActiveDays = {
-  [key in Days]: boolean;
-};
 
 export enum TimezoneMode {
   SAME_ABSOLUTE_TIME,
   SAME_TIME_OF_DAY,
 }
-
-export const alarmDays = writable({
-  Su: false,
-  M: false,
-  T: false,
-  W: false,
-  Th: false,
-  F: false,
-  Sa: false,
-});
 
 type CreationParams = {
   buyIn: bigint;
@@ -55,16 +21,13 @@ type CreationParams = {
   missedAlarmPenalty: bigint;
 };
 
-export const buyIn = writable<number>(0.001);
-export const timezoneMode = writable<TimezoneMode>(
-  TimezoneMode.SAME_TIME_OF_DAY
-);
-export const alarmTime = writable<string>("06:30");
-export const submissionWindow = writable<number>(60 * 30);
-export const missedAlarmPenalty = writable(parseEther(".01"));
-export const otherPlayer = writable<string>(
-  "0x9B8DB9bffcCd1F2Cc5044d67a1b9C68dD6Deff6a"
-);
+export const otherPlayer = writable<string>("");
+export const alarmDays = writable<number[]>([]);
+export const alarmTime = writable<string>("");
+export const deposit = writable<number>(0);
+export const missedAlarmPenalty = writable(0);
+export const submissionWindow = writable<number>(0);
+export const timezoneOffset = writable<number | null>(null);
 
 export const creationParams = writable<CreationParams>({
   buyIn: BigInt(0),

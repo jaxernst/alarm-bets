@@ -16,9 +16,8 @@
     });
 
   $: alarmIds = sortedAlarms.map((alarm) => get(alarm).id);
-
   $: if ($displayedAlarmId && !alarmIds.includes($displayedAlarmId)) {
-    // If the displayed alarm is cancelled, reset the displayed alarm
+    // Reset if the displayed alarm is no longer available
     $displayedAlarmId = null;
   }
 </script>

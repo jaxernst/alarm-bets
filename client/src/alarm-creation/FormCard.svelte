@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { fade, scale, crossfade, slide } from "svelte/transition";
+  import { fade, slide } from "svelte/transition";
 
   type T = $$Generic;
   export let inputEmpty: boolean;
@@ -24,9 +24,8 @@
 
   $: buttonClasses = () => {
     const classes = [];
-    if (active) classes.push(" duration-500 scale-105 ");
-    if (active && inputEmpty) classes.push(" border border-zinc-200 ");
-    if (inputEmpty) return;
+    if (active) classes.push(" duration-500 scale-105 shadow-lg ");
+    if (inputEmpty) return classes.join(" ");
     if (inputValid) classes.push(" border border-cyan-400 ");
     if (!inputValid) classes.push(" border border-red-500 ");
     return classes.join(" ");
@@ -34,17 +33,17 @@
 </script>
 
 <button
-  class={"  bg-highlight-transparent-grey relative flex h-[85px] flex-col justify-start gap-2 rounded-xl px-1 pb-1 transition " +
-    buttonClasses()}
+  class={`bg-highlight-transparent-grey relative flex h-[75px] flex-col justify-start rounded-xl px-2 pb-2 transition
+    ${buttonClasses()} `}
   use:activeOnChildFocus
 >
-  <div class={"text-s text-bold text-zinc-500"}>
+  <div class={"text-s text-bold pt-1 text-zinc-500"} style="line-height: 1em">
     {itemNumber}
     {#if active || !inputEmpty}
       <span transition:fade>{active || !inputEmpty ? filledHeader : ""}</span>
     {/if}
   </div>
-  <div class="grid">
+  <div class="grid flex-grow items-center">
     {#if active || !inputEmpty}
       <div
         class="col-start-1 row-start-1 px-1"
