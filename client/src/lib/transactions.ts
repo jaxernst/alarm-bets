@@ -48,6 +48,7 @@ function MakeTransactionStore() {
         contractTransactionReceipts.update((txs) => [...txs, rc]);
       } catch (err) {
         txPending.set(false);
+        console.log(err);
         return {
           error: err,
         };

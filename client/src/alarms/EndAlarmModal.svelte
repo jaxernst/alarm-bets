@@ -14,7 +14,9 @@
 
   export let alarm: UserAlarm;
 
-  $: otherPlayer = $getCurrentAccount() ? $alarm.player2 : $alarm.player1;
+  $: otherPlayer = $getCurrentAccount().address
+    ? $alarm.player2
+    : $alarm.player1;
 
   const endAlarm = async () => {
     const txResult = await alarm.endAlarm();

@@ -87,6 +87,6 @@ get(ethClient).watchNetwork((net) => {
 export const getCurrentAccount = derived(account, ($account) => {
   return () => {
     if (!$account) throw new Error("No account connected");
-    return account;
+    return $account;
   };
 }) as Readable<() => Account>;

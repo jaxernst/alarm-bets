@@ -49,7 +49,7 @@
     />
     <button
       class="text-bold text-bold rounded-xl bg-zinc-800 px-4 text-cyan-400"
-      on:click={() => (error = "") || joinAlarm()}>JOIN</button
+      on:click={() => (error = "") || joinAlarm()}>join</button
     >
   </div>
   {#if error}

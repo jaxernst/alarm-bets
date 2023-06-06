@@ -15,8 +15,9 @@
   import { displayedAlarmId } from "./alarms/stores";
   import Topbar from "./Topbar.svelte";
   import AlarmClockSymbol from "./assets/alarm-clock-symbol.svelte";
+  import JoinAlarm from "./alarm-creation/JoinAlarm.svelte";
 
-  type Tab = "alarms" | "new";
+  type Tab = "alarms" | "new" | "join";
   const activeTab = writable<Tab>("alarms");
   $: activeTabStyles = (t: Tab) =>
     t === $activeTab
@@ -50,6 +51,10 @@
           <button
             class={activeTabStyles("new")}
             on:click={() => activeTab.set("new")}>New</button
+          >
+          <button
+            class={activeTabStyles("join")}
+            on:click={() => activeTab.set("join")}>Join</button
           >
         </div>
         <div>
@@ -89,6 +94,10 @@
         {:else if $activeTab === "new"}
           <div transition:blur class="col-start-1 row-start-1">
             <NewAlarm />
+          </div>
+        {:else if $activeTab === "join"}
+          <div transition:blur class="col-start-1 row-start-1">
+            <JoinAlarm />
           </div>
         {/if}
       </div>
