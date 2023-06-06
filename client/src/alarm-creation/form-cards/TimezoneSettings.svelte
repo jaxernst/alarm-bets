@@ -5,7 +5,7 @@
 
 <FormCard
   itemNumber={6}
-  emptyHeader="set timzone settings"
+  emptyHeader="change timezone"
   filledHeader="Timezone"
   inputEmpty={$timezoneOffset === null}
   inputValid={false}

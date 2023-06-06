@@ -33,7 +33,7 @@
 </script>
 
 <button
-  class={`bg-highlight-transparent-grey relative flex h-[75px] flex-col justify-start rounded-xl px-2 pb-2 transition
+  class={`bg-highlight-transparent-grey relative flex h-[65px] flex-col justify-start rounded-xl px-2 pb-2 transition
     ${buttonClasses()} `}
   use:activeOnChildFocus
 >

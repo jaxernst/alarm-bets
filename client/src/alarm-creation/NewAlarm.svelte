@@ -65,6 +65,7 @@
     ChooseInitialDeposit,
     ChoosePenalty,
     ChooseSubmissionWindow,
+    ChooseTimezoneSettings,
   ];
 </script>
 
@@ -81,9 +82,20 @@
   <div class="self-end">
     <button
       on:click={create}
-      class="text-bold text-bold rounded-xl bg-zinc-800 px-4 py-1 text-cyan-400"
+      class="submit-bg text-bold text-bold bg-highlight-transparent-grey rounded-xl px-4 py-1 text-cyan-400 transition duration-200 hover:scale-105 hover:shadow-lg"
     >
       Submit
     </button>
   </div>
 </div>
+
+<style>
+  .submit-bg:hover {
+    background: rgba(0, 0, 0, 0.321187850140056);
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.321187850140056) 0%,
+      rgba(33, 33, 33, 0.19793855042016806) 100%
+    );
+  }
+</style>
