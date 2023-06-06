@@ -130,21 +130,22 @@ contract PartnerAlarmClock is BaseCommitment {
     function withdraw() public onlyPlayer {
         address otherPlayer = msg.sender == player1 ? player2 : player1;
 
-        uint penaltyAmount = getPenaltyAmount(msg.sender);
+        uint senderPenalty = 0;
+        uint otherPlayerPenalty = 0;
+        if (status == CommitmentStatus.ACTIVE) {
+            senderPenalty = getPenaltyAmount(msg.sender);
+            otherPlayerPenalty = getPenaltyAmount(otherPlayer);
+        }
 
-        // Subtract the penalty amount from the player's deposit
-        players[msg.sender].depositAmount -= penaltyAmount;
-        // Add on the penalty amount to the other player's deposit
-        players[otherPlayer].depositAmount += penaltyAmount;
+        uint otherPlayerWithdrawAmount = players[otherPlayer].depositAmount +
+            senderPenalty -
+            otherPlayerPenalty;
 
-        // TODO: Check security implications of withdrawing like this, this is
-        // the first thing that came to mind and might be dangerous
-
-        uint withdrawAmount = players[msg.sender].depositAmount;
         players[msg.sender].depositAmount = 0;
-        players[msg.sender].depositAmount = 0;
-        payable(msg.sender).transfer(withdrawAmount);
-        payable(otherPlayer).transfer(address(this).balance);
+        players[otherPlayer].depositAmount = 0;
+
+        payable(otherPlayer).transfer(otherPlayerWithdrawAmount);
+        payable(msg.sender).transfer(address(this).balance);
 
         emit StatusChanged(status, CommitmentStatus.CANCELLED);
         status = CommitmentStatus.CANCELLED;

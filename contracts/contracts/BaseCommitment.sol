@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import {ICommitment} from "./interfaces/ICommitment.sol";
 import "./types.sol";
-import "hardhat/console.sol";
 
 /**
  * The base commitment defines a primitive commitment implementation, where
