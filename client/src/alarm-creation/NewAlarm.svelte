@@ -1,12 +1,8 @@
 <script lang="ts">
-  import FormCard from "./FormCard.svelte";
-  import { createAlarm, creationParams, isReady } from "./alarmCreation";
-  import { flip } from "svelte/animate";
+  import { createAlarm, isReady } from "./alarmCreation";
 
   import { transactions } from "../lib/transactions";
   import { toast } from "@zerodevx/svelte-toast";
-  import { fetchEnsAddress } from "@wagmi/core";
-  import { account, network } from "../lib/chainClient";
 
   import ChoosePartner from "./form-cards/Partner.svelte";
   import ChooseAlarmTime from "./form-cards/AlarmTime.svelte";
@@ -15,36 +11,6 @@
   import ChoosePenalty from "./form-cards/AlarmPenalty.svelte";
   import ChooseSubmissionWindow from "./form-cards/SubmissionWindow.svelte";
   import ChooseTimezoneSettings from "./form-cards/TimezoneSettings.svelte";
-
-  import { isAddress, parseEther } from "viem";
-
-  function handleAlarmTimeInput(input: string) {
-    const [hours, minutes] = input.split(":");
-    const seconds = parseInt(hours) * 60 * 60 + parseInt(minutes) * 60;
-    $creationParams.alarmTime = seconds;
-  }
-
-  function handleBuyInInput(input: `${number}`) {
-    $creationParams.buyIn = parseEther(input);
-  }
-
-  function handleAlarmPenaltyInput(input: `${number}`) {
-    $creationParams.missedAlarmPenalty = parseEther(input);
-  }
-
-  let partnerInputValid = false;
-  async function handlePartnerInput(input: string) {
-    $creationParams.otherPlayer = input;
-
-    if (!isAddress(input) && input.endsWith(".eth")) {
-      input =
-        (await fetchEnsAddress({
-          chainId: $network?.chain?.id,
-          name: input,
-        })) ?? "";
-    }
-    partnerInputValid = input !== $account?.address;
-  }
 
   $: create = async () => {
     const createAlarmResult = $createAlarm();
@@ -82,7 +48,13 @@
   <div class="self-end">
     <button
       on:click={create}
-      class="submit-bg text-bold text-bold bg-highlight-transparent-grey rounded-xl px-4 py-1 text-cyan-400 transition duration-200 hover:scale-105 hover:shadow-lg"
+      disabled={!$isReady}
+      class={`text-bold text-bold bg-highlight-transparent-grey rounded-xl px-4 py-1 text-cyan-400 transition duration-200 
+        ${
+          $isReady
+            ? "submit-bg hover:scale-105 hover:shadow-lg"
+            : "text-opacity-50"
+        }`}
     >
       Submit
     </button>
@@ -94,7 +66,7 @@
     background: rgba(0, 0, 0, 0.321187850140056);
     background: linear-gradient(
       90deg,
-      rgba(0, 0, 0, 0.321187850140056) 0%,
+      rgba(0, 0, 0, 0.221187850140056) 0%,
       rgba(33, 33, 33, 0.19793855042016806) 100%
     );
   }

@@ -3,10 +3,6 @@
   import FormCard from "../FormCard.svelte";
   import { submissionWindow } from "../alarmCreation";
 
-  function handleTimeframeToggle(timeframeSelected: boolean) {
-    console.log(timeframeSelected);
-  }
-
   const MINUTES_30 = 30 * 60;
   const MINUTES_10 = 10 * 60;
   const MINUTES_5 = 5 * 60;

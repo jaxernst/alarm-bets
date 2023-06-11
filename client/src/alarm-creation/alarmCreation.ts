@@ -2,7 +2,7 @@ import { derived, get, writable, type Readable } from "svelte/store";
 import { account } from "../lib/chainClient";
 import { createAlarm as _createAlarm } from "../lib/alarmHelpers";
 import { hub } from "../lib/contractStores";
-import type { Hash } from "viem";
+import { parseEther, type Hash } from "viem";
 
 type Days = "M" | "T" | "W" | "Th" | "F" | "Sa" | "Su";
 
@@ -31,53 +31,78 @@ export const timezoneOffset = writable<number>(
   -new Date().getTimezoneOffset() / 60
 );
 
-export const creationParams = writable<CreationParams>({
-  buyIn: BigInt(0),
-  submissionWindow: 60 * 30,
-  timezoneMode: TimezoneMode.SAME_TIME_OF_DAY,
-  alarmTime: 0, // 6:30 AM
-  alarmDays: [],
-  otherPlayer: "",
-  missedAlarmPenalty: BigInt(0),
-});
-
-// Add check to make sure missed alarm penalty is less than or equal to buy in
-export const isReady = derived(
-  [creationParams, account],
-  ([
-    { submissionWindow, otherPlayer, buyIn, timezoneMode, alarmTime },
-    $account,
-  ]) => {
-    return (
-      submissionWindow > 0 &&
-      otherPlayer !== $account?.address &&
-      buyIn &&
-      timezoneMode !== null &&
-      alarmTime !== null &&
-      Object.values(alarmDays).some((v) => v)
-    );
-  }
+const bundledParams = derived(
+  [
+    account,
+    otherPlayer,
+    alarmDays,
+    alarmTime,
+    deposit,
+    missedAlarmPenalty,
+    submissionWindow,
+    timezoneOffset,
+  ],
+  (p) => ({
+    account: p[0],
+    otherPlayer: p[1],
+    alarmDays: p[2],
+    alarmTime: p[3],
+    deposit: p[4],
+    missedAlarmPenalty: p[5],
+    submissionWindow: p[6],
+    timezoneOffset: p[7],
+  })
 );
 
+// Add check to make sure missed alarm penalty is less than or equal to buy in
+export const isReady = derived(bundledParams, (p) => {
+  return (
+    p.account?.address &&
+    p.submissionWindow > 0 &&
+    p.otherPlayer !== p.account.address &&
+    p.alarmDays.length > 0 &&
+    p.alarmDays.every((day) => day >= 1 && day <= 7) &&
+    p.alarmTime.length > 0 &&
+    p.deposit > 0 &&
+    p.missedAlarmPenalty > 0 &&
+    p.timezoneOffset >= -12 &&
+    p.timezoneOffset <= 12
+  );
+});
+
 export const createAlarm = derived(
-  [creationParams, isReady, hub],
-  ([c, $isReady, $hub]) => {
+  [bundledParams, isReady, hub],
+  ([p, $isReady, $hub]) => {
     return () => {
-      if (!$isReady) return;
+      if (!$isReady) {
+        return console.error("Cannot create alarm: Params invalid");
+      }
 
       return _createAlarm(
         $hub,
         "PartnerAlarmClock",
         {
-          alarmTime: c.alarmTime,
-          alarmdays: c.alarmDays.sort(),
-          missedAlarmPenalty: c.missedAlarmPenalty,
-          submissionWindow: c.submissionWindow,
-          timezoneOffset: new Date().getTimezoneOffset() * -60,
-          otherPlayer: c.otherPlayer,
+          alarmTime: timeStringToSeconds(p.alarmTime),
+          alarmdays: p.alarmDays.sort(),
+          missedAlarmPenalty: parseEther(`${p.missedAlarmPenalty}`),
+          submissionWindow: p.submissionWindow,
+          timezoneOffset: p.timezoneOffset,
+          otherPlayer: p.otherPlayer,
         },
-        c.buyIn
+        parseEther(`${p.deposit}`)
       );
     };
   }
 ) as Readable<() => Promise<Hash> | undefined>;
+
+function timeStringToSeconds(timeString: string) {
+  const [hours, minutes] = timeString.split(":");
+
+  let totalSeconds = 0;
+
+  // Calculate total seconds
+  totalSeconds += parseInt(hours, 10) * 3600; // 1 hour = 3600 seconds
+  totalSeconds += parseInt(minutes, 10) * 60; // 1 minute = 60 seconds
+
+  return totalSeconds;
+}
