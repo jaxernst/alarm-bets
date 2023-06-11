@@ -86,7 +86,7 @@ export const createAlarm = derived(
           alarmdays: p.alarmDays.sort(),
           missedAlarmPenalty: parseEther(`${p.missedAlarmPenalty}`),
           submissionWindow: p.submissionWindow,
-          timezoneOffset: p.timezoneOffset,
+          timezoneOffset: p.timezoneOffset * 60 * 60,
           otherPlayer: p.otherPlayer,
         },
         parseEther(`${p.deposit}`)
