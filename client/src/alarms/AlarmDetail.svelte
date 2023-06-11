@@ -41,7 +41,8 @@
     transactions.addTransaction(submitConfirmation(alarmAddress));
   };
 
-  let showAlarmInfo = false;
+  // Show details by default when alarm is pending
+  let showAlarmInfo = $alarm.status === AlarmStatus.INACTIVE;
   $: rotatedDopdown = () => (showAlarmInfo ? "rotate-180" : "");
 </script>
 
@@ -150,12 +151,7 @@
   <div
     class="bg-highlight-transparent-grey bottom-0 right-0 flex w-full justify-center rounded-b-xl p-1"
   >
-    {#if $alarm.status === AlarmStatus.INACTIVE}
-      <button
-        class="shadow-l p-1 text-sm font-bold text-red-700 transition hover:scale-105 hover:text-green-600"
-        >Cancel Request</button
-      >
-    {:else}
+    {#if $alarm.status === AlarmStatus.ACTIVE}
       <button
         class="shadow-l p-1 text-sm font-bold text-green-600 transition hover:scale-105 disabled:text-green-900"
         disabled={$alarm.timeToNextDeadline > $alarm.submissionWindow}

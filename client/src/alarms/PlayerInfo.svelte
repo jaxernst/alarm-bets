@@ -43,7 +43,7 @@
         {standing > BigInt(0)
           ? "+"
           : standing === BigInt(0)
-          ? "+/-"
+          ? "+ "
           : ""}{formatEther(standing)}
         <div class={icon}>
           <EthereumIcon />
