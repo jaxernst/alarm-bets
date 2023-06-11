@@ -15,8 +15,6 @@
       return ($alarmDays = $alarmDays.filter((d) => d !== dayNumber));
     }
   }
-
-  $: console.log($alarmDays);
 </script>
 
 <FormCard
