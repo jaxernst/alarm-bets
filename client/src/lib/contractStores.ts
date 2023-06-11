@@ -75,9 +75,11 @@ function MakeUserAlarmsRecord() {
     userAlarms.update((s) => ({ ...s, [Number(id)]: alarm }));
   };
 
+  // Event listener stores
   const newAlarmListenerUnsub = writable<() => void | undefined>();
   const joinedAlarmListenerUnsub = writable<() => void | undefined>();
 
+  // Mansge event listeners
   alarmQueryDeps.subscribe(({ hub: $hub, user: $user }) => {
     if (!$hub || !$user) return;
 
@@ -137,6 +139,12 @@ function MakeUserAlarmsRecord() {
 
   return {
     subscribe: userAlarms.subscribe,
+    removeAlarm: (id: number) => {
+      userAlarms.update((alarms) => {
+        const { [id]: _, ...updatedAlarms } = alarms;
+        return updatedAlarms;
+      });
+    },
   };
 }
 
@@ -228,6 +236,9 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
       console.log("Status changed", log);
       const newStatus = log.args.to! as AlarmStatus;
       alarmState.update((s) => ({ ...s, status: newStatus }));
+      if (newStatus === AlarmStatus.CANCELLED) {
+        userAlarms.removeAlarm(get(constants).id);
+      }
     }
   );
 
