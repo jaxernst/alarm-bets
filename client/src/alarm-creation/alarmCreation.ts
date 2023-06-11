@@ -27,7 +27,9 @@ export const alarmTime = writable<string>("");
 export const deposit = writable<number>(0);
 export const missedAlarmPenalty = writable(0);
 export const submissionWindow = writable<number>(0);
-export const timezoneOffset = writable<number | null>(null);
+export const timezoneOffset = writable<number>(
+  -new Date().getTimezoneOffset() / 60
+);
 
 export const creationParams = writable<CreationParams>({
   buyIn: BigInt(0),
