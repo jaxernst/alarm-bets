@@ -1,18 +1,34 @@
 <script lang="ts">
-  import { fade, slide } from "svelte/transition";
+  import { activeTab } from "../view";
+
+  import { onDestroy } from "svelte";
+
+  import { writable } from "svelte/store";
+
+  import { onMount } from "svelte";
+  import { fade, scale, slide } from "svelte/transition";
 
   type T = $$Generic;
-  export let inputEmpty: boolean;
+  export let inputEmpty: boolean = true;
   export let inputValid: boolean;
   export let emptyHeader: string;
   export let filledHeader: string;
   export let itemNumber: number;
-
+  export let completeOnFocus: boolean = false;
   let active = false;
+  let container: HTMLElement;
+  let initialWidth = writable(0);
+  onMount(() => {
+    $initialWidth = container.getBoundingClientRect().width;
+  });
 
   function activeOnChildFocus(node: HTMLElement) {
-    const handleFocusIn = () =>
-      (active = node.contains(document.activeElement));
+    const handleFocusIn = () => {
+      if (completeOnFocus && $activeTab) {
+        inputEmpty = false;
+      }
+      active = node.contains(document.activeElement);
+    };
 
     document.addEventListener("focusin", handleFocusIn);
     return {
@@ -34,8 +50,9 @@
 
 <button
   class={`bg-highlight-transparent-grey relative flex h-[65px] flex-col justify-start rounded-xl px-2 pb-2 transition
-    ${buttonClasses()} `}
+    ${buttonClasses()}`}
   use:activeOnChildFocus
+  bind:this={container}
 >
   <div class={"text-s text-bold pt-1 text-zinc-500"} style="line-height: 1em">
     {itemNumber}
@@ -45,10 +62,7 @@
   </div>
   <div class="grid flex-grow items-center">
     {#if active || !inputEmpty}
-      <div
-        class="col-start-1 row-start-1 px-1"
-        transition:slide={{ axis: "x" }}
-      >
+      <div class="col-start-1 row-start-1 self-center px-1" transition:scale>
         <slot />
       </div>
     {:else}
