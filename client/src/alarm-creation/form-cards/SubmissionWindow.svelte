@@ -15,10 +15,11 @@
 <FormCard
   itemNumber={6}
   emptyHeader="set submission window"
-  filledHeader="Submission window"
+  filledHeader="Submission Window"
   inputEmpty={!$submissionWindow}
   inputValid={true}
-  ><div class="flex gap-2">
+>
+  <div class="flex gap-4 px-2">
     <button style="all:unset" on:click={() => ($submissionWindow = MINUTES_30)}>
       <div
         class={"letter" + ($submissionWindow === MINUTES_30 ? "active" : "")}
