@@ -11,13 +11,13 @@
 <FormCard
   itemNumber={5}
   emptyHeader="set missed alarm penalty"
-  filledHeader="Penalty"
+  filledHeader="Missed Alarm Penalty"
   inputEmpty={$missedAlarmPenalty === 0}
   inputValid={$missedAlarmPenalty < $deposit}
   ><div class="flex items-center gap-1">
     <input
       type="number"
-      class="bg-highlight-transparent-grey w-[80px] rounded-lg text-center"
+      class="bg-highlight-transparent-grey w-[100px] rounded-lg text-center"
       min="0"
       step="0.001"
       bind:value={$missedAlarmPenalty}
