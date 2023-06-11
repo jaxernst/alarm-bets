@@ -9,12 +9,12 @@
   import { fade, scale, slide } from "svelte/transition";
 
   type T = $$Generic;
-  export let inputEmpty: boolean = true;
+  export let inputEmpty: boolean;
   export let inputValid: boolean;
   export let emptyHeader: string;
   export let filledHeader: string;
   export let itemNumber: number;
-  export let completeOnFocus: boolean = false;
+
   let active = false;
   let container: HTMLElement;
   let initialWidth = writable(0);
@@ -23,12 +23,8 @@
   });
 
   function activeOnChildFocus(node: HTMLElement) {
-    const handleFocusIn = () => {
-      if (completeOnFocus && $activeTab) {
-        inputEmpty = false;
-      }
-      active = node.contains(document.activeElement);
-    };
+    const handleFocusIn = () =>
+      (active = node.contains(document.activeElement));
 
     document.addEventListener("focusin", handleFocusIn);
     return {

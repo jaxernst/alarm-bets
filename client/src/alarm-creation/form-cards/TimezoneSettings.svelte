@@ -26,28 +26,41 @@
     return `UTC${getReadableOffset()} (${localTimezone ?? "non-local"}) `;
   };
 
-  $: showCompleted = false;
+  let hasBeenFocussed = false;
+  function recordFocus(node: HTMLElement) {
+    const handleFocusIn = () => {
+      if (node.contains(document.activeElement)) hasBeenFocussed = true;
+    };
+    document.addEventListener("focusin", handleFocusIn);
+    return {
+      destroy: () => {
+        document.removeEventListener("focusin", handleFocusIn);
+      },
+    };
+  }
 </script>
 
-<FormCard
-  itemNumber={6}
-  emptyHeader="change timezone"
-  filledHeader="Timezone Offset"
-  inputValid={true}
-  completeOnFocus={true}
->
-  <div class="flex gap-1">
-    <button
-      class="bg-highlight-transparent-grey rounded p-1 focus:border active:bg-zinc-400"
-      style="line-height: .5"
-      on:click={() => updateOffset(-1)}>-</button
-    >
-    <button
-      class="bg-highlight-transparent-grey rounded p-1 focus:border focus:border-zinc-300 active:bg-zinc-400
-      "
-      style="line-height: .5"
-      on:click={() => updateOffset(1)}>+</button
-    >
-    <p class="px-1 text-sm">Timezone: {getReadableTimezone()}</p>
-  </div>
-</FormCard>
+<div use:recordFocus>
+  <FormCard
+    itemNumber={6}
+    emptyHeader="change timezone"
+    filledHeader="Timezone Offset"
+    inputEmpty={!hasBeenFocussed}
+    inputValid={true}
+  >
+    <div class="flex gap-1">
+      <button
+        class="bg-highlight-transparent-grey rounded p-1 focus:border active:bg-zinc-400"
+        style="line-height: .5"
+        on:click={() => updateOffset(-1)}>-</button
+      >
+      <button
+        class="bg-highlight-transparent-grey rounded p-1 focus:border focus:border-zinc-300 active:bg-zinc-400
+    "
+        style="line-height: .5"
+        on:click={() => updateOffset(1)}>+</button
+      >
+      <p class="px-1 text-sm">Timezone: {getReadableTimezone()}</p>
+    </div>
+  </FormCard>
+</div>
