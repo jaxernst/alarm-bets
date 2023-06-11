@@ -66,7 +66,9 @@
       <div class="justify-self-end">
         <Menu class="relative">
           <MenuButton class="z-50 justify-self-end">
-            <SettingsIcon klass="m-1 h-[15px] w-[15px] fill-zinc-500" />
+            <SettingsIcon
+              klass="m-1 h-[15px] w-[15px] fill-zinc-500 hover:fill-zinc-300 hover:scale-105"
+            />
           </MenuButton>
           <MenuItems
             class="absolute right-5 top-5 z-50 flex flex-col gap-0 rounded-lg bg-zinc-900 text-xs font-bold"
