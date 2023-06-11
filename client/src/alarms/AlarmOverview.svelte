@@ -30,7 +30,7 @@
 </script>
 
 <button
-  class="rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
+  class="h-[50px] rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
     status
   )} {styleSelected(id)}"
   on:click={() => ($displayedAlarmId = id)}

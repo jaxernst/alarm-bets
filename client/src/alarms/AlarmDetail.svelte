@@ -53,7 +53,10 @@
       <div>
         <div class=" rounded-lg p-1 text-xs">ID: {$alarm.id}</div>
       </div>
-      <div class="justify-self-center" style="font-size: 1.6em">
+      <div
+        class="justify-self-center py-1"
+        style="font-size: 2em; line-height: 1em;"
+      >
         <ClockDisplay
           overrideTime={timeString(Number($alarm.alarmTime))}
           overrideColor={"zinc-500"}

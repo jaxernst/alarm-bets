@@ -6,18 +6,27 @@
   import { shorthandAddress } from "../lib/util";
   import { getBetStanding } from "../lib/alarmHelpers";
   import EthSymbol from "../lib/components/EthSymbol.svelte";
+  import { AlarmStatus } from "@sac/contracts/lib/types";
 
   export let player: 1 | 2;
   export let alarm: UserAlarm;
 
   $: address = player === 1 ? $alarm.player1 : $alarm.player2;
-  $: balance = formatEther(
-    (player === 1 ? $alarm.player1Balance : $alarm.player2Balance) ?? BigInt(0)
-  );
+
+  let balance: bigint;
+  $: if ($alarm.status === AlarmStatus.INACTIVE) {
+    balance = player === 1 ? $alarm.betAmount : BigInt(0);
+  } else {
+    balance =
+      (player === 1 ? $alarm.player1Balance : $alarm.player2Balance) ??
+      BigInt(0);
+  }
+
   $: confirmations =
     player === 1 ? $alarm.player1Confirmations : $alarm.player2Confirmations;
 
   $: standing = getBetStanding(alarm, address);
+
   const row = "flex w-full items-center justify-between text-xs";
   const icon = "flex h-3 w-3 fill-cyan-600";
 </script>
@@ -44,7 +53,7 @@
     <div class={row}>
       Balance
       <div class="flex items-center gap-1">
-        {balance ?? "-"}
+        {formatEther(balance) ?? "-"}
         <div class={icon}>
           <EthereumIcon />
         </div>
