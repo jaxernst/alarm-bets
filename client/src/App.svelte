@@ -16,9 +16,8 @@
   import Topbar from "./Topbar.svelte";
   import AlarmClockSymbol from "./assets/alarm-clock-symbol.svelte";
   import JoinAlarm from "./alarm-creation/JoinAlarm.svelte";
+  import { type Tab, activeTab } from "./view";
 
-  type Tab = "alarms" | "new" | "join";
-  const activeTab = writable<Tab>("alarms");
   $: activeTabStyles = (t: Tab) =>
     t === $activeTab
       ? " underline underline-offset-4 text-bold font-bold "
