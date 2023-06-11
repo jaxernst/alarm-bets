@@ -30,7 +30,7 @@
 </script>
 
 <button
-  class="h-[50px] rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
+  class="h-[60px] rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
     status
   )} {styleSelected(id)}"
   on:click={() => ($displayedAlarmId = id)}
@@ -41,7 +41,7 @@
   {:else if status === AlarmStatus.ACTIVE}
     <div class="flex items-center gap-2">
       <div>
-        <div class="pt-1" style="font-size: 2em; line-height: 1em">
+        <div class="pt-1" style="font-size: 2em; line-height: .8em">
           <ClockDisplay
             overrideTime={timeString(Number(alarmTime))}
             overrideColor={"orange"}
@@ -49,7 +49,7 @@
         </div>
         <div />
       </div>
-      <div class="" style="font-size: .68em">
+      <div class="" style="font-size: .74em">
         <AlarmActiveDays {daysActive} />
       </div>
     </div>
