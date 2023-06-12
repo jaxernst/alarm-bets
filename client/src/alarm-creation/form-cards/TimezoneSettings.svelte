@@ -5,10 +5,10 @@
 
   const updateOffset = (increment: number) => {
     let newVal = $offset + increment;
-    if (newVal > 12) {
-      $offset = 12;
-    } else if (newVal < -12) {
-      $offset = -12;
+    if (newVal > 11) {
+      $offset = 11;
+    } else if (newVal < -11) {
+      $offset = -11;
     } else {
       $offset = newVal;
     }
@@ -43,7 +43,7 @@
 <div use:recordFocus>
   <FormCard
     itemNumber={6}
-    emptyHeader="change timezone"
+    emptyHeader="confirm timezone"
     filledHeader="Timezone Offset"
     inputEmpty={!hasBeenFocussed}
     inputValid={true}
