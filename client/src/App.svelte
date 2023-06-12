@@ -82,7 +82,7 @@
                 class="alarms-container-grid flex-grow gap-3 self-stretch text-zinc-400"
               >
                 <AlarmsSidebar />
-                <div class="bg-transparent-grey rounded-2xl">
+                <div class=" rounded-2xl">
                   {#if $displayedAlarmId && $userAlarms[Number($displayedAlarmId)]}
                     <AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
                   {/if}

@@ -20,6 +20,14 @@
   import type { UserAlarm } from "../lib/contractStores";
   import { showEndAlarmModal } from "./stores";
   import PlayerInfo from "./PlayerInfo.svelte";
+  import { slide } from "svelte/transition";
+  import {
+    cubicInOut,
+    expoInOut,
+    expoOut,
+    quintInOut,
+    sineInOut,
+  } from "svelte/easing";
 
   export let alarm: UserAlarm;
 
@@ -43,13 +51,13 @@
 
   // Show details by default when alarm is pending
   let showAlarmInfo = $alarm.status === AlarmStatus.INACTIVE;
-  $: rotatedDopdown = () => (showAlarmInfo ? "rotate-180" : "");
+  $: rotatedDropdown = () => (showAlarmInfo ? "rotate-180" : "");
 </script>
 
 <EndAlarmModal {alarm} />
 
 <div class="flex h-full flex-col">
-  <div class="flex flex-grow flex-col gap-1 px-1 py-1">
+  <div class="flex flex-grow flex-col gap-1 p-1">
     <div class="custom-grid gap-4">
       <div>
         <div class=" rounded-lg p-1 text-xs">ID: {$alarm.id}</div>
@@ -107,43 +115,53 @@
         showAlarmInfo && "overflow-y-auto"
       }`}
     >
-      <PlayerInfo player={1} {alarm} />
-      <PlayerInfo player={2} {alarm} />
+      <div class="bg-transparent-grey flex flex-grow flex-col rounded-lg px-2">
+        <PlayerInfo player={1} {alarm} />
+      </div>
+      <div class="bg-transparent-grey flex flex-grow flex-col rounded-lg px-2">
+        <PlayerInfo player={2} {alarm} />
+      </div>
     </div>
 
     <!--Alarm Info-->
-    <div class="bg-transparent-grey rounded-md p-2 text-sm">
+    <div class="bg-transparent-grey rounded-lg p-2 text-sm">
       <button class="w-full" on:click={() => (showAlarmInfo = !showAlarmInfo)}>
         <div class="flex justify-between">
           <div>Alarm Info</div>
-          <div class={`text-[8px] ${rotatedDopdown()}`}>&#9660;</div>
+          <div
+            class={`text-[8px] ${rotatedDropdown()} transition duration-100`}
+          >
+            &#9660;
+          </div>
         </div>
       </button>
       {#if showAlarmInfo}
-        <div class="flex justify-between gap-2">
-          <span class="text-zinc-500">submission window:</span>
-          <span
-            ><span class="h-3 w-3 text-cyan-600"
-              >{Number($alarm.submissionWindow) / MINUTE}</span
-            > minutes</span
-          >
-        </div>
+        <div transition:slide={{ easing: expoOut, duration: 600 }}>
+          <div class="flex justify-between gap-2">
+            <span class="text-zinc-500">submission window:</span>
+            <span
+              ><span class="h-3 w-3 text-cyan-600"
+                >{Number($alarm.submissionWindow) / MINUTE}</span
+              > minutes</span
+            >
+          </div>
 
-        <div class="flex justify-between gap-2">
-          <span class="text-zinc-500">missed alarm penalty:</span>
-          <span
-            ><span class="h-3 w-3 text-cyan-600"
-              >{formatEther($alarm.missedAlarmPenalty)}</span
-            > eth</span
-          >
-        </div>
-        <div class="flex justify-between gap-2">
-          <span class="text-zinc-500">initial deposit:</span>
-          <span
-            ><span class="h-3 w-3 text-cyan-600"
-              >{formatEther($alarm.betAmount)}</span
-            > eth</span
-          >
+          <div class="flex justify-between gap-2">
+            <span class="text-zinc-500">missed alarm penalty:</span>
+            <span
+              ><span class="h-3 w-3 text-cyan-600"
+                >{formatEther($alarm.missedAlarmPenalty)}</span
+              > eth</span
+            >
+          </div>
+          <div class="flex justify-between gap-2">
+            <span class="text-zinc-500">initial deposit:</span>
+            <span
+              ><span class="h-3 w-3 text-cyan-600"
+                >{formatEther($alarm.betAmount)}</span
+              > eth</span
+            >
+          </div>
         </div>
       {/if}
     </div>
@@ -151,11 +169,11 @@
 
   <!--Bottom Buttons-->
   <div
-    class="bg-highlight-transparent-grey bottom-0 right-0 flex w-full justify-center rounded-b-xl p-1"
+    class="bg-highlight-transparent-grey mx-1 flex justify-center rounded-lg"
   >
     {#if $alarm.status === AlarmStatus.ACTIVE}
       <button
-        class="shadow-l p-1 text-sm font-bold text-green-600 transition hover:scale-105 disabled:text-green-900"
+        class="shadow-l p-2 text-sm font-bold text-green-600 transition hover:scale-105 disabled:text-green-900"
         disabled={$alarm.timeToNextDeadline > $alarm.submissionWindow}
         on:click={submitConfirmationTransaction}>Confirm Wakeup</button
       >

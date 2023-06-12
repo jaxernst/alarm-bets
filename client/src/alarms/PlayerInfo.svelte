@@ -23,8 +23,6 @@
       BigInt(0);
   }
 
-  $: console.log($alarm);
-
   let confirmations: bigint | undefined;
   let missedAlarms: bigint | undefined;
   $: if (player === 1) {
@@ -41,52 +39,50 @@
   const icon = "flex h-3 w-3 fill-cyan-600";
 </script>
 
-<div class="bg-transparent-grey flex flex-grow flex-col rounded-md px-2">
-  <span class="text-zinc-500">{shorthandAddress(address)}</span>
-  <div class="flex flex-grow flex-col items-center justify-evenly gap-1 pb-2">
-    <div class="flex items-center">
-      <div
-        class={`flex flex-grow items-center gap-2 py-1 ${
-          standing < BigInt(0) ? "text-red-600" : "text-green-500"
-        }`}
-      >
-        {standing > BigInt(0)
-          ? "+"
-          : standing === BigInt(0)
-          ? "+ "
-          : ""}{formatEther(standing)}
-        <div class={icon}>
-          <EthereumIcon />
-        </div>
+<span class="font-bold text-zinc-500">{shorthandAddress(address)}</span>
+<div class="flex flex-grow flex-col items-center justify-evenly gap-1 pb-2">
+  <div class="flex items-center">
+    <div
+      class={`flex flex-grow items-center gap-2 py-1 ${
+        standing < BigInt(0) ? "text-red-600" : "text-green-500"
+      }`}
+    >
+      {standing > BigInt(0)
+        ? "+"
+        : standing === BigInt(0)
+        ? "+ "
+        : ""}{formatEther(standing)}
+      <div class={icon}>
+        <EthereumIcon />
       </div>
     </div>
-    <div class={row}>
-      Balance
-      <div class="flex items-center gap-1">
-        {formatEther(balance) ?? "-"}
-        <div class={icon}>
-          <EthereumIcon />
-        </div>
+  </div>
+  <div class={row}>
+    Balance
+    <div class="flex items-center gap-1">
+      {formatEther(balance) ?? "-"}
+      <div class={icon}>
+        <EthereumIcon />
       </div>
     </div>
+  </div>
 
-    <div class={row}>
-      Wakeups
-      <div class="flex items-center gap-1">
-        {confirmations ?? "-"}
-        <div class={icon}>
-          <SunIcon />
-        </div>
+  <div class={row}>
+    Wakeups
+    <div class="flex items-center gap-1">
+      {confirmations ?? "-"}
+      <div class={icon}>
+        <SunIcon />
       </div>
     </div>
+  </div>
 
-    <div class={row}>
-      Missed Alarms
-      <div class="flex items-center gap-1">
-        {missedAlarms ?? "-"}
-        <div class={icon}>
-          <Deadline />
-        </div>
+  <div class={row}>
+    Missed Alarms
+    <div class="flex items-center gap-1">
+      {missedAlarms ?? "-"}
+      <div class={icon}>
+        <Deadline />
       </div>
     </div>
   </div>
