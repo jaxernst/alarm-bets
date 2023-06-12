@@ -157,7 +157,7 @@ library AlarmSchedule {
         uint8 nextDay = _nextAlarmDay(self, curDay);
 
         uint8 daysAway;
-        if (nextDay >= curDay) {
+        if (nextDay > curDay) {
             daysAway = nextDay - curDay;
         } else {
             daysAway = 7 - curDay + _nextAlarmDay(self, 0);

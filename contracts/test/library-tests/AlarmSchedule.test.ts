@@ -58,74 +58,72 @@ describe("Alarm Schedule Test", () => {
       weekDay = dayOfWeek(blockTime);
     });
 
-    describe("Submiting entries", async () => {
-      it("Only allows entries to be recorded when the block time is within submission window of an alarm time", async () => {
-        // Init an alarm that will be due in 60 seconds (30 second submission window)
-        await (
-          await schedule.init(
-            curTimeOfDay + 60,
-            [weekDay, (weekDay % 7) + 1],
-            30,
-            0
-          )
-        ).wait();
+    it("Only allows entries to be recorded when the block time is within submission window of an alarm time", async () => {
+      // Init an alarm that will be due in 60 seconds (30 second submission window)
+      await (
+        await schedule.init(
+          curTimeOfDay + 60,
+          [weekDay, (weekDay % 7) + 1],
+          30,
+          0
+        )
+      ).wait();
 
-        await expect(schedule.recordEntry()).to.revertedWith(
-          "NOT_IN_SUBMISSION_WINDOW"
-        );
-        await advanceTime(30);
-        await expect(schedule.recordEntry()).to.not.reverted;
-        expect(await schedule.entries()).to.equal(1);
-      });
+      await expect(schedule.recordEntry()).to.revertedWith(
+        "NOT_IN_SUBMISSION_WINDOW"
+      );
+      await advanceTime(30);
+      await expect(schedule.recordEntry()).to.not.reverted;
+      expect(await schedule.entries()).to.equal(1);
+    });
 
-      it("Prevents duplicate entries", async () => {
-        await (
-          await schedule.init(
-            curTimeOfDay + 60,
-            [weekDay, (weekDay % 7) + 1],
-            60,
-            0
-          )
-        ).wait();
+    it("Prevents duplicate entries", async () => {
+      await (
+        await schedule.init(
+          curTimeOfDay + 60,
+          [weekDay, (weekDay % 7) + 1],
+          60,
+          0
+        )
+      ).wait();
 
-        await expect(schedule.recordEntry()).to.not.reverted;
-        await expect(schedule.recordEntry()).to.revertedWith(
-          "ALREADY_SUBMITTED_TODAY"
-        );
-        expect(await schedule.entries()).to.equal(1);
-        expect(await schedule.missedDeadlines()).to.equal(0);
-      });
+      await expect(schedule.recordEntry()).to.not.reverted;
+      await expect(schedule.recordEntry()).to.revertedWith(
+        "ALREADY_SUBMITTED_TODAY"
+      );
+      expect(await schedule.entries()).to.equal(1);
+      expect(await schedule.missedDeadlines()).to.equal(0);
+    });
 
-      it("Will not accept an entry on the same initialization day if alarm time has passed", async () => {
-        const missedBySeconds = 60;
+    it("Will not accept an entry on the same initialization day if alarm time has passed", async () => {
+      const missedBySeconds = 60;
 
-        await (
-          await schedule.init(
-            curTimeOfDay - missedBySeconds,
-            [weekDay, (weekDay % 7) + 1],
-            60,
-            0
-          )
-        ).wait();
+      await (
+        await schedule.init(
+          curTimeOfDay - missedBySeconds,
+          [weekDay, (weekDay % 7) + 1],
+          60,
+          0
+        )
+      ).wait();
 
-        await expect(schedule.recordEntry()).to.revertedWith(
-          "NOT_IN_SUBMISSION_WINDOW"
-        );
-        expect(await schedule.entries()).to.equal(0);
-        expect(await schedule.missedDeadlines()).to.equal(0);
+      await expect(schedule.recordEntry()).to.revertedWith(
+        "NOT_IN_SUBMISSION_WINDOW"
+      );
+      expect(await schedule.entries()).to.equal(0);
+      expect(await schedule.missedDeadlines()).to.equal(0);
 
-        // Advance time by a little less than a week
-        await advanceTime(WEEK - (missedBySeconds + 10));
-        await expect(schedule.recordEntry()).to.not.reverted;
-        expect(await schedule.entries()).to.equal(1);
-      });
+      // Advance time by a little less than a week
+      await advanceTime(WEEK - (missedBySeconds + 10));
+      await expect(schedule.recordEntry()).to.not.reverted;
+      expect(await schedule.entries()).to.equal(1);
+    });
 
-      it("Allows entries to be recorded when making a same day alarm within the submission window", async () => {
-        await schedule.init(curTimeOfDay + 60, [1, 2, 3, 4, 5, 6, 7], 5000, 0);
-        await schedule.recordEntry();
-        await advanceTime(70);
-        expect(await schedule.entries()).to.equal(1);
-      });
+    it("Allows entries to be recorded when making a same day alarm within the submission window", async () => {
+      await schedule.init(curTimeOfDay + 60, [1, 2, 3, 4, 5, 6, 7], 5000, 0);
+      await schedule.recordEntry();
+      await advanceTime(70);
+      expect(await schedule.entries()).to.equal(1);
     });
   });
 
@@ -173,6 +171,26 @@ describe("Alarm Schedule Test", () => {
           ` (offset: ${offset}hrs)`,
         async () => {}
       );
+      it("Returns the expected number of missed deadlines after several weeks", async () => {
+        const alarmDays = [1, 3, 4, 5, 7];
+        const curTimeOfDay = timeOfDay(blockTime, offset);
+        await schedule.init(curTimeOfDay - 60, alarmDays, 60, offset * HOUR);
+        expect(await schedule.missedDeadlines()).to.equal(0);
+
+        let curDay = dayOfWeek(blockTime, offset);
+        let expectedDeadlines = 0;
+
+        for (let _ in Array(55)) {
+          curDay = (curDay % 7) + 1;
+          await advanceTime(1 * DAY);
+
+          if (alarmDays.includes(curDay)) {
+            expectedDeadlines++;
+          }
+        }
+
+        expect(await schedule.missedDeadlines()).to.equal(expectedDeadlines);
+      });
     }
   });
 
@@ -217,26 +235,27 @@ describe("Alarm Schedule Test", () => {
           );
         }
       );
-      it("Returns the expected number of missed dealdines after several weeks", async () => {
-        const alarmDays = [1, 3, 4, 5, 7];
-        const curTimeOfDay = timeOfDay(blockTime, offset);
-        await schedule.init(curTimeOfDay - 60, alarmDays, 60, offset * HOUR);
-        expect(await schedule.missedDeadlines()).to.equal(0);
+      it(
+        "Returns the next alarm time for a single day alarm schedule" +
+          ` offset: ${offset}hrs`,
+        async () => {
+          const currentDay = dayOfWeek(blockTime, offset);
+          const curTimeOfDay = timeOfDay(blockTime, offset);
+          await schedule.init(
+            curTimeOfDay + 60,
+            [currentDay],
+            60,
+            offset * HOUR
+          );
 
-        let curDay = dayOfWeek(blockTime, offset);
-        let expectedDeadlines = 0;
-
-        for (let _ in Array(55)) {
-          curDay = (curDay % 7) + 1;
-          await advanceTime(1 * DAY);
-
-          if (alarmDays.includes(curDay)) {
-            expectedDeadlines++;
-          }
+          expect(await schedule.timeToNextDeadline()).to.approximately(60, 3);
+          await advanceTime(70);
+          expect(await schedule.timeToNextDeadline()).to.approximately(
+            1 * WEEK - 10,
+            4
+          );
         }
-
-        expect(await schedule.missedDeadlines()).to.equal(expectedDeadlines);
-      });
+      );
       it(
         "Returns the next alarm time on the next week" +
           ` offset: ${offset / HOUR}hrs`,
@@ -245,7 +264,7 @@ describe("Alarm Schedule Test", () => {
     }
 
     it("Returns correct time when local timezone offset is used", async () => {
-      const localOffset = -7;
+      const localOffset = Math.floor(-new Date().getTimezoneOffset() / 60);
       const currentDay = dayOfWeek(blockTime, localOffset);
       const curTimeOfDay = timeOfDay(blockTime, localOffset);
       const expTimeTilNext = 4 * HOUR;
