@@ -30,7 +30,7 @@
 </script>
 
 <button
-  class="h-[60px] rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
+  class="h-[60px] whitespace-nowrap rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
     status
   )} {styleSelected(id)}"
   on:click={() => ($displayedAlarmId = id)}
@@ -40,23 +40,22 @@
     <div class="text-xs">Waiting on Player 2 to start alarm...</div>
   {:else if status === AlarmStatus.ACTIVE}
     <div class="flex items-center gap-2">
-      <div>
+      <div class=" max-w-[65%]">
         <div class="pt-1" style="font-size: 2em; line-height: .8em">
           <ClockDisplay
             overrideTime={timeString(Number(alarmTime))}
             overrideColor={"orange"}
           />
         </div>
-        <div />
+        <div class="overflow-visible text-xs">
+          In <span class=""
+            >{formatTime(Number($userAlarm.timeToNextDeadline))}</span
+          >
+        </div>
       </div>
-      <div class="" style="font-size: .74em">
+      <div class="" style="font-size: .8em">
         <AlarmActiveDays {daysActive} />
       </div>
-    </div>
-    <div class="text-xs">
-      In <span class=""
-        >{formatTime(Number($userAlarm.timeToNextDeadline))}</span
-      >
     </div>
   {/if}
 </button>

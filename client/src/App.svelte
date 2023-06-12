@@ -118,7 +118,7 @@
   }
 
   .bg-trans {
-    background: rgba(10, 10, 10, 0.48);
+    background: rgba(0, 0, 0, 0.48);
     backdrop-filter: blur(20px);
   }
 

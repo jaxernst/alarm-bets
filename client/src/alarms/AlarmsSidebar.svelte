@@ -22,7 +22,7 @@
   }
 </script>
 
-<div class="bg-transparent-grey flex flex-col gap-1 overflow-y-auto rounded-xl">
+<div class="bg-transparent-grey flex flex-col overflow-y-auto rounded-xl">
   {#each sortedAlarms as userAlarm}
     {#if get(userAlarm).status !== AlarmStatus.CANCELLED}
       <AlarmOverview {userAlarm} />
