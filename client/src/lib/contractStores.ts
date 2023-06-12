@@ -201,26 +201,33 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
     };
   }) as Readable<() => Promise<void>>;
 
-  // Decrement time to next deadline counter
-  const timeToDeadlineUpdater = () => {
+  // Function to run at an interval for decrementing the time to next alarm
+  const timeToDeadlineUpdater = (timeDeltaSeconds: number) => {
     alarmState.update((s) => {
       if (!s || !s.timeToNextDeadline) return s;
       return {
         ...s,
-        timeToNextDeadline: s.timeToNextDeadline - BigInt(1),
+        timeToNextDeadline: s.timeToNextDeadline - BigInt(timeDeltaSeconds),
       };
     });
   };
 
+  // Manage count down timers on alarm state
+  const countdownInterval = 1; // Update countdown every second
   let interval: ReturnType<typeof setInterval>;
   alarmState.subscribe((s) => {
     if (!s) return;
     // Set interval when there's no interval set, alarm is active, and there's a time value to decrement
     if (!interval && s.status === AlarmStatus.ACTIVE && s.timeToNextDeadline) {
-      interval = setInterval(timeToDeadlineUpdater, 1000);
+      interval = setInterval(
+        () => timeToDeadlineUpdater(countdownInterval),
+        countdownInterval * 1000
+      );
     }
-    // Re-query for time to deadline once 0 is hit
-    if (s.timeToNextDeadline <= 0) get(syncTimeToDeadline)();
+    // Re-query for alarm state once deadline has passed
+    if (s.timeToNextDeadline <= 0) {
+      get(initAlarmState)();
+    }
     // Clear interval for inactive alarms
     if (s.status !== AlarmStatus.ACTIVE) clearInterval(interval);
   });
@@ -241,6 +248,9 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
       }
     }
   );
+
+  // Add confirmation listener
+  watchContractEvent({});
 
   // Consolidate params into single store
   const { subscribe } = derived(

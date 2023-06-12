@@ -35,7 +35,7 @@
     missedAlarms = $alarm.player2MissedDeadlines;
   }
 
-  $: standing = getBetStanding(alarm, address);
+  $: standing = $alarm && getBetStanding(alarm, address);
 
   const row = "flex w-full items-center justify-between text-xs";
   const icon = "flex h-3 w-3 fill-cyan-600";
