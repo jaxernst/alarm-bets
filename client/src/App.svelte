@@ -34,7 +34,7 @@
   </div>
 
   <main
-    class=" box-border flex min-h-screen scale-125 items-center justify-center"
+    class=" box-border flex min-h-screen items-center justify-center"
     in:fade={{ duration: 500, delay: 500 }}
   >
     <div
