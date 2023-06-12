@@ -7,6 +7,7 @@
   import { getBetStanding } from "../lib/alarmHelpers";
   import EthSymbol from "../lib/components/EthSymbol.svelte";
   import { AlarmStatus } from "@sac/contracts/lib/types";
+  import Deadline from "../assets/deadline.svelte";
 
   export let player: 1 | 2;
   export let alarm: UserAlarm;
@@ -22,8 +23,17 @@
       BigInt(0);
   }
 
-  $: confirmations =
-    player === 1 ? $alarm.player1Confirmations : $alarm.player2Confirmations;
+  $: console.log($alarm);
+
+  let confirmations: bigint | undefined;
+  let missedAlarms: bigint | undefined;
+  $: if (player === 1) {
+    confirmations = $alarm.player1Confirmations;
+    missedAlarms = $alarm.player1MissedDeadlines;
+  } else {
+    confirmations = $alarm.player2Confirmations;
+    missedAlarms = $alarm.player2MissedDeadlines;
+  }
 
   $: standing = getBetStanding(alarm, address);
 
@@ -33,11 +43,11 @@
 
 <div class="bg-transparent-grey flex flex-grow flex-col rounded-md px-2">
   <span class="text-zinc-500">{shorthandAddress(address)}</span>
-  <div class="flex flex-grow flex-col items-center justify-evenly pb-2">
+  <div class="flex flex-grow flex-col items-center justify-evenly gap-1 pb-2">
     <div class="flex items-center">
       <div
         class={`flex flex-grow items-center gap-2 py-1 ${
-          standing <= BigInt(0) ? "text-red-600" : "text-green-500"
+          standing < BigInt(0) ? "text-red-600" : "text-green-500"
         }`}
       >
         {standing > BigInt(0)
@@ -66,6 +76,16 @@
         {confirmations ?? "-"}
         <div class={icon}>
           <SunIcon />
+        </div>
+      </div>
+    </div>
+
+    <div class={row}>
+      Missed Alarms
+      <div class="flex items-center gap-1">
+        {missedAlarms ?? "-"}
+        <div class={icon}>
+          <Deadline />
         </div>
       </div>
     </div>
