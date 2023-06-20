@@ -13,15 +13,24 @@
 </script>
 
 <div class="flex h-full items-center gap-4">
-  {#if $transactions.pending}
-    <DiamondSpinner size={"30"} color={"white"} />
+  {#if !$account || !$account.isConnected}
+    <button
+      class="hover:bg-highlight-transparent-grey rounded-2xl bg-local p-2 px-3 text-cyan-500 hover:font-bold"
+      on:click={() => $web3Modal.openModal()}
+    >
+      Connect Wallet
+    </button>
+  {:else}
+    {#if $transactions.pending}
+      <DiamondSpinner size={"30"} color={"white"} />
+    {/if}
+    <button class="flex items-center" on:click={() => $web3Modal.openModal()}>
+      <div class="indicator" style="background-color:{indicatorColor}" />
+      <div class="displayName">
+        {displayName || ""}
+      </div>
+    </button>
   {/if}
-  <button class="flex items-center" on:click={() => $web3Modal.openModal()}>
-    <div class="indicator" style="background-color:{indicatorColor}" />
-    <div class="displayName">
-      {displayName || ""}
-    </div>
-  </button>
 </div>
 
 <style>
@@ -36,5 +45,9 @@
   .displayName {
     font-size: smaller;
     color: rgb(201, 145, 34);
+  }
+
+  .bg-local {
+    background-color: rgba(37, 37, 37, 0.3);
   }
 </style>
