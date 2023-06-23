@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let daysActive = [];
+  export let daysActive: readonly number[] = [];
   export let activeColor = "#00FF30";
 
   const days = [
