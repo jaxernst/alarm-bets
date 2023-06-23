@@ -57,7 +57,7 @@
 <EndAlarmModal {alarm} />
 
 <div class="flex h-full flex-col">
-  <div class="flex flex-grow flex-col gap-1 p-1">
+  <div class="flex flex-grow flex-col gap-1">
     <div class="custom-grid gap-4">
       <div>
         <div class=" rounded-lg p-1 text-xs">ID: {$alarm.id}</div>
