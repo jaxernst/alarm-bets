@@ -17,6 +17,7 @@
   import AlarmActiveDays from "../lib/components/AlarmActiveDays.svelte";
 
   // TODO: Make sure user can't join an already active alarm
+  // Todo: Make button styling consistent with other pages
 
   let alarmId = "";
   let error: null | string = null;
