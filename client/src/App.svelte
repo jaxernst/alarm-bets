@@ -24,6 +24,9 @@
       : " ";
 
   $: numUserAlarms = Object.keys($userAlarms ?? {}).length;
+  $: if (numUserAlarms > 0 && !$displayedAlarmId) {
+    $displayedAlarmId = Number(Object.keys($userAlarms)[0]);
+  }
 </script>
 
 <SvelteToast />
