@@ -16,18 +16,12 @@
   import { MINUTE } from "../lib/time";
   import { submitConfirmation } from "../lib/alarmHelpers";
   import { AlarmStatus } from "@sac/contracts/lib/types";
-  import { formatTime, shorthandAddress, timeString } from "../lib/util";
+  import { formatTime, timeString } from "../lib/util";
   import type { UserAlarm } from "../lib/contractStores";
   import { showEndAlarmModal } from "./stores";
   import PlayerInfo from "./PlayerInfo.svelte";
   import { slide } from "svelte/transition";
-  import {
-    cubicInOut,
-    expoInOut,
-    expoOut,
-    quintInOut,
-    sineInOut,
-  } from "svelte/easing";
+  import { expoOut } from "svelte/easing";
 
   export let alarm: UserAlarm;
 
@@ -36,8 +30,6 @@
   }
 
   $: alarmAddress = $alarm.address;
-  $: p1Balance = $alarm.player1Balance;
-  $: p2Balance = $alarm.player2Balance;
 
   let initialQuery = false;
   if (!initialQuery && $alarm.status === AlarmStatus.ACTIVE) {
