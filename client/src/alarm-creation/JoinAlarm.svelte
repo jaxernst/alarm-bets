@@ -16,6 +16,8 @@
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
   import AlarmActiveDays from "../lib/components/AlarmActiveDays.svelte";
 
+  // TODO: Make sure user can't join an already active alarm
+
   let alarmId = "";
   let error: null | string = null;
 
