@@ -70,7 +70,7 @@
       </div>
 
       <!-- Main content -->
-      <div class="relative grid flex-grow">
+      <div class="relative grid flex-grow pt-1">
         {#if $activeTab === "alarms"}
           <div transition:blur class="col-start-1 row-start-1 flex flex-col">
             {#if numUserAlarms === 0}

@@ -38,8 +38,8 @@
   };
 </script>
 
-<div>
-  <h3 class="py-2">Join an Alarm</h3>
+<div class="flex flex-col gap-2">
+  <h3 class="px-2">Join an Alarm</h3>
   <div class=" flex h-[30px] gap-2 rounded-xl px-3">
     <input
       type="text"
