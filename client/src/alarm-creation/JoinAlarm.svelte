@@ -6,16 +6,18 @@
     getAlarmById,
     getAlarmConstants,
     getPlayer,
+    getStatus,
     startAlarm,
   } from "../lib/alarmHelpers";
   import { transactions } from "../lib/transactions";
   import { shorthandAddress, timeString } from "../lib/util";
-  import AlarmOverview from "../alarms/AlarmOverview.svelte";
   import { formatEther } from "viem";
   import { MINUTE } from "../lib/time";
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
   import AlarmActiveDays from "../lib/components/AlarmActiveDays.svelte";
   import ActionButton from "../lib/styled-components/ActionButton.svelte";
+  import type { EvmAddress } from "../types";
+  import { AlarmStatus } from "@sac/contracts/lib/types";
 
   // TODO: Make sure user can't join an already active alarm
   // Todo: Make button styling consistent with other pages
@@ -44,18 +46,29 @@
     }
   };
 
-  let searchedAlarmId = "0";
-  let searchedAlarm: null | Awaited<ReturnType<typeof getAlarmConstants>> =
-    null;
+  let searchedAlarm: null | {
+    player1: EvmAddress;
+    player2: EvmAddress;
+    status: AlarmStatus;
+    id: string;
+  } = null;
 
   const searchForAlarm = async () => {
     error = null;
     try {
       const alarmAddr = await getAlarmById(alarmId, $hub);
-      searchedAlarm = await getAlarmConstants(alarmAddr);
-      searchedAlarmId = alarmId;
+      searchedAlarm = {
+        ...(await getAlarmConstants(alarmAddr)),
+        status: await getStatus(alarmAddr),
+        id: alarmId,
+      };
     } catch {
       error = "No alarm contract found for provided ID";
+      return;
+    }
+
+    if (searchedAlarm?.status !== AlarmStatus.INACTIVE) {
+      error = "This alarm is already active";
     }
 
     if (searchedAlarm?.player1 === account) {
@@ -92,7 +105,7 @@
 
   {#if !error && searchedAlarm}
     <div class="flex flex-grow flex-col">
-      <h3 class="">Alarm #{searchedAlarmId} Details</h3>
+      <h3 class="">Alarm #{searchedAlarm.id} Details</h3>
       <div class="flex justify-center">
         <div class="max-w-[60%] flex-grow px-2">
           <div class="flex justify-center py-2">
