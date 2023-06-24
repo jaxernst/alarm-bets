@@ -78,8 +78,11 @@
       bind:value={alarmId}
     />
     <button
-      class="rounded-xl px-2 text-sm text-cyan-400"
-      on:click={() => searchForAlarm()}>Search</button
+      class={`rounded-xl px-2 text-sm text-cyan-400 ${
+        !account ? "opacity-50" : ""
+      }`}
+      on:click={() => searchForAlarm()}
+      disabled={!account}>Search</button
     >
   </div>
 
