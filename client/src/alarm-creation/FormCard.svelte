@@ -46,7 +46,7 @@
 
 <button
   class={`bg-highlight-transparent-grey relative flex h-[65px] flex-col justify-start rounded-xl px-2 transition
-    ${buttonClasses()} ${active ? "" : "pb-2"}`}
+    ${buttonClasses()} ${active || !inputEmpty ? "" : "pb-2"}`}
   use:activeOnChildFocus
   bind:this={container}
 >
