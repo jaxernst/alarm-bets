@@ -17,7 +17,7 @@
   ><div class="flex items-center gap-1">
     <input
       type="number"
-      class="bg-highlight-transparent-grey w-[100px] rounded-lg text-center"
+      class="bg-highlight-transparent-grey w-[90px] rounded-lg text-center"
       min="0"
       step="0.001"
       bind:value={$missedAlarmPenalty}
