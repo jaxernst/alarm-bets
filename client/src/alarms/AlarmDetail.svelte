@@ -161,7 +161,7 @@
 
   <!--Bottom Buttons-->
   <div
-    class="bg-highlight-transparent-grey my-1 flex justify-center rounded-lg"
+    class="bg-highlight-transparent-grey mt-1 flex justify-center rounded-lg"
   >
     {#if $alarm.status === AlarmStatus.ACTIVE}
       <button
