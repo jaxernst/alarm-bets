@@ -161,11 +161,11 @@
 
   <!--Bottom Buttons-->
   <div
-    class="bg-highlight-transparent-grey mx-1 flex justify-center rounded-lg"
+    class="bg-highlight-transparent-grey my-1 flex justify-center rounded-lg"
   >
     {#if $alarm.status === AlarmStatus.ACTIVE}
       <button
-        class="shadow-l p-2 text-sm font-bold text-green-600 transition hover:scale-105 disabled:text-green-900"
+        class="shadow-l p-1 text-sm font-bold text-green-600 transition hover:scale-105 disabled:text-green-900"
         disabled={$alarm.timeToNextDeadline > $alarm.submissionWindow}
         on:click={submitConfirmationTransaction}>Confirm Wakeup</button
       >
