@@ -6,14 +6,14 @@
 <button
   on:click={onClick}
   disabled={!isReady}
-  class={`text-bold text-bold bg-highlight-transparent-grey rounded-xl px-4 py-1 text-cyan-400 transition duration-200 
+  class={`text-bold text-bold bg-highlight-transparent-grey rounded-xl px-3 py-1 text-sm text-cyan-400 transition duration-200 
         ${
           isReady
             ? "submit-bg hover:scale-105 hover:shadow-lg"
             : "text-opacity-50"
         }`}
 >
-  Submit
+  <slot />
 </button>
 
 <style>

@@ -78,7 +78,7 @@
       bind:value={alarmId}
     />
     <button
-      class="rounded-xl bg-zinc-800 px-2 text-sm text-cyan-400"
+      class="rounded-xl px-2 text-sm text-cyan-400"
       on:click={() => searchForAlarm()}>Search</button
     >
   </div>
@@ -89,57 +89,58 @@
 
   {#if !error && searchedAlarm}
     <div class="flex flex-grow flex-col">
-      <h3 class="italic text-zinc-500">Alarm #{searchedAlarmId}</h3>
-      <div class="flex-grow px-2">
-        <div class="flex justify-center py-2">
-          <div>
-            <div class="pt-1" style="font-size: 2em; line-height: .8em">
-              <ClockDisplay
-                overrideTime={timeString(Number(searchedAlarm.alarmTime))}
-                overrideColor={"orange"}
-              />
-            </div>
+      <h3 class="">Alarm #{searchedAlarmId} Details</h3>
+      <div class="flex justify-center">
+        <div class="max-w-[60%] flex-grow px-2">
+          <div class="flex justify-center py-2">
             <div>
-              <AlarmActiveDays daysActive={searchedAlarm.alarmDays} />
+              <div class="pt-1" style="font-size: 2em; line-height: .8em">
+                <ClockDisplay
+                  overrideTime={timeString(Number(searchedAlarm.alarmTime))}
+                  overrideColor={"orange"}
+                />
+              </div>
+              <div>
+                <AlarmActiveDays daysActive={searchedAlarm.alarmDays} />
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flex justify-between gap-2">
-          <span class="text-zinc-500">initiating player:</span>
-          <span
-            ><span class="h-3 w-3 text-cyan-600"
-              >{shorthandAddress(searchedAlarm.player1)}</span
-            ></span
-          >
-        </div>
-        <div class="flex justify-between gap-2">
-          <span class="text-zinc-500">submission window:</span>
-          <span
-            ><span class="h-3 w-3 text-cyan-600"
-              >{Number(searchedAlarm.submissionWindow) / MINUTE}</span
-            > minutes</span
-          >
-        </div>
-
-        <div class="flex justify-between gap-2">
-          <span class="text-zinc-500">missed alarm penalty:</span>
-          <span
-            ><span class="h-3 w-3 text-cyan-600"
-              >{formatEther(searchedAlarm.missedAlarmPenalty)}</span
-            > eth</span
-          >
-        </div>
-        <div class="flex justify-between gap-2">
-          <span class="text-zinc-500">initial deposit:</span>
-          <span
-            ><span class="h-3 w-3 text-cyan-600"
-              >{formatEther(searchedAlarm.betAmount)}</span
-            > eth</span
-          >
+          <div class="flex justify-between gap-2">
+            <span class="text-zinc-500">initiating player:</span>
+            <span
+              ><span class="h-3 w-3 text-cyan-600"
+                >{shorthandAddress(searchedAlarm.player1)}</span
+              ></span
+            >
+          </div>
+          <div class="flex justify-between gap-2">
+            <span class="text-zinc-500">submission window:</span>
+            <span
+              ><span class="h-3 w-3 text-cyan-600"
+                >{Number(searchedAlarm.submissionWindow) / MINUTE}</span
+              > minutes</span
+            >
+          </div>
+          <div class="flex justify-between gap-2">
+            <span class="text-zinc-500">missed alarm penalty:</span>
+            <span
+              ><span class="h-3 w-3 text-cyan-600"
+                >{formatEther(searchedAlarm.missedAlarmPenalty)}</span
+              > eth</span
+            >
+          </div>
+          <div class="flex justify-between gap-2">
+            <span class="text-zinc-500">initial deposit:</span>
+            <span
+              ><span class="h-3 w-3 text-cyan-600"
+                >{formatEther(searchedAlarm.betAmount)}</span
+              > eth</span
+            >
+          </div>
         </div>
       </div>
-      <div class="flex justify-end">
-        <ActionButton onClick={joinAlarm} isReady={!error} />
+      <div class="mb-1 flex justify-end">
+        <ActionButton onClick={joinAlarm} isReady={!error}>Join</ActionButton>
       </div>
     </div>
   {/if}

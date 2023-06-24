@@ -47,6 +47,6 @@
   </div>
 
   <div class="self-end">
-    <ActionButton onClick={create} isReady={!!$isReady} />
+    <ActionButton onClick={create} isReady={!!$isReady}>Submit</ActionButton>
   </div>
 </div>
