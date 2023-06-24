@@ -15,6 +15,7 @@
   import { MINUTE } from "../lib/time";
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
   import AlarmActiveDays from "../lib/components/AlarmActiveDays.svelte";
+  import ActionButton from "../lib/styled-components/ActionButton.svelte";
 
   // TODO: Make sure user can't join an already active alarm
   // Todo: Make button styling consistent with other pages
@@ -138,10 +139,7 @@
         </div>
       </div>
       <div class="flex justify-end">
-        <button
-          class="text-bold text-bold bg-highlight-transparent-grey my-2 rounded-xl px-4 py-1 text-cyan-400 transition duration-200"
-          on:click={() => joinAlarm()}>Join</button
-        >
+        <ActionButton onClick={joinAlarm} isReady={!error} />
       </div>
     </div>
   {/if}

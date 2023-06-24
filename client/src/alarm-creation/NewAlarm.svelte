@@ -11,6 +11,7 @@
   import ChoosePenalty from "./form-cards/AlarmPenalty.svelte";
   import ChooseSubmissionWindow from "./form-cards/SubmissionWindow.svelte";
   import ChooseTimezoneSettings from "./form-cards/TimezoneSettings.svelte";
+  import ActionButton from "../lib/styled-components/ActionButton.svelte";
 
   $: create = async () => {
     const createAlarmResult = $createAlarm();
@@ -46,28 +47,6 @@
   </div>
 
   <div class="self-end">
-    <button
-      on:click={create}
-      disabled={!$isReady}
-      class={`text-bold text-bold bg-highlight-transparent-grey rounded-xl px-4 py-1 text-cyan-400 transition duration-200 
-        ${
-          $isReady
-            ? "submit-bg hover:scale-105 hover:shadow-lg"
-            : "text-opacity-50"
-        }`}
-    >
-      Submit
-    </button>
+    <ActionButton onClick={create} isReady={!!$isReady} />
   </div>
 </div>
-
-<style>
-  .submit-bg:hover {
-    background: rgba(0, 0, 0, 0.321187850140056);
-    background: linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.221187850140056) 0%,
-      rgba(33, 33, 33, 0.19793855042016806) 100%
-    );
-  }
-</style>
