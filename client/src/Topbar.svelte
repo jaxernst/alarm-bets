@@ -16,9 +16,7 @@
   <div
     class="grid grid-cols-2 items-center gap-3 rounded-3xl px-4 sm:grid-cols-3"
   >
-    <div class="justify-self-start text-lg font-bold">
-      The Social Alarm Clock
-    </div>
+    <div class="justify-self-start text-lg font-bold">gm</div>
     <!-- Empty div for the first column -->
     <div class="flex items-center justify-center sm:visible">
       <div class="top-clock-bg rounded-2xl">
