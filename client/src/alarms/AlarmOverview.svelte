@@ -39,9 +39,11 @@
     <div class="text-sm font-bold">Alarm ID: {id}</div>
     <div class="text-xs">Waiting on Player 2 to start alarm...</div>
   {:else if status === AlarmStatus.ACTIVE}
-    <div class="flex items-start gap-2">
-      <div class="flex max-w-[65%] flex-col justify-center">
-        <div class="pt-1" style="font-size: 2em; line-height: .8em">
+    <div class="flex h-full items-start">
+      <div
+        class="flex h-full max-w-[63%] flex-col items-start justify-center overflow-visible"
+      >
+        <div class="pt-1" style="font-size: 2.1em; line-height: .8em">
           <ClockDisplay
             overrideTime={timeString(Number(alarmTime))}
             overrideColor={"orange"}
@@ -53,7 +55,7 @@
           >
         </div>
       </div>
-      <div class="" style="font-size: .8em">
+      <div class="" style="font-size: .7em">
         <AlarmActiveDays {daysActive} />
       </div>
     </div>
