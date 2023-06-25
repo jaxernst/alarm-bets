@@ -27,6 +27,8 @@
   $: if (numUserAlarms > 0 && !$displayedAlarmId) {
     $displayedAlarmId = Number(Object.keys($userAlarms)[0]);
   }
+
+  $: displayedAlarm = $userAlarms[Number($displayedAlarmId)];
 </script>
 
 <SvelteToast />
@@ -86,8 +88,8 @@
               >
                 <AlarmsSidebar />
                 <div class=" rounded-2xl">
-                  {#if $displayedAlarmId && $userAlarms[Number($displayedAlarmId)]}
-                    <AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
+                  {#if $displayedAlarm}
+                    <AlarmDetail alarm={displayedAlarm} />
                   {/if}
                 </div>
               </div>
