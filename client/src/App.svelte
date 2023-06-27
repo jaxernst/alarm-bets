@@ -19,6 +19,7 @@
   import { type Tab, activeTab } from "./view";
   import { get } from "svelte/store";
   import { AlarmStatus } from "@sac/contracts/lib/types";
+  import { account } from "./lib/chainClient";
 
   $: activeTabStyles = (t: Tab) =>
     t === $activeTab
@@ -69,13 +70,16 @@
             on:click={() => activeTab.set("join")}>Join</button
           >
         </div>
-        <div>
+        <div class="flex gap-2">
           <div class="flex items-center gap-1 px-2">
             <div class="h-[18px] w-[18px] stroke-cyan-500">
               <AlarmClockSymbol />
             </div>
             <div>{Object.keys($userAlarms).length}</div>
           </div>
+          {#if $account}
+            <Web3Status />
+          {/if}
         </div>
       </div>
 
@@ -92,10 +96,10 @@
               </div>
             {:else}
               <div
-                class="alarms-container-grid flex-grow gap-3 self-stretch text-zinc-400"
+                class="grid flex-grow grid-cols-1 gap-3 self-stretch text-zinc-400 sm:grid-cols-[1fr_60%]"
               >
                 <AlarmsSidebar />
-                <div class=" rounded-2xl">
+                <div class="row-start-1 rounded-2xl sm:col-start-2">
                   {#if $displayedAlarmId}
                     <AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
                   {/if}
