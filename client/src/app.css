@@ -23,7 +23,8 @@
 }
 
 body {
-  background-image: url("assets/deep-gradient-lined.png");
+  background-image: url("assets/");
+
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
