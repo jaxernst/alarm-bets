@@ -248,7 +248,7 @@ export type AlarmBaseInfo = {
   id: number;
   contractAddress: EvmAddress;
   creationBlock: number;
-  status?: AlarmStatus;
+  status: AlarmStatus;
 };
 
 export async function getUserAlarmsByType<T extends AlarmType>(

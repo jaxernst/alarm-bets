@@ -11,24 +11,32 @@
   import { SvelteToast } from "@zerodevx/svelte-toast";
   import { fade, blur } from "svelte/transition";
   import { userAlarms } from "./lib/contractStores";
-  import { writable } from "svelte/store";
+
   import { displayedAlarmId } from "./alarms/stores";
   import Topbar from "./Topbar.svelte";
   import AlarmClockSymbol from "./assets/alarm-clock-symbol.svelte";
   import JoinAlarm from "./alarm-creation/JoinAlarm.svelte";
   import { type Tab, activeTab } from "./view";
+  import { get } from "svelte/store";
+  import { AlarmStatus } from "@sac/contracts/lib/types";
 
   $: activeTabStyles = (t: Tab) =>
     t === $activeTab
       ? " underline underline-offset-4 text-bold font-bold "
       : " ";
 
-  $: numUserAlarms = Object.keys($userAlarms ?? {}).length;
-  $: if (numUserAlarms > 0 && !$displayedAlarmId) {
-    $displayedAlarmId = Number(Object.keys($userAlarms)[0]);
-  }
+  $: currentAlarms =
+    $userAlarms &&
+    userAlarms.getByStatus([
+      AlarmStatus.INACTIVE,
+      AlarmStatus.ACTIVE,
+      AlarmStatus.COMPLETE,
+      AlarmStatus.PAUSED,
+    ]);
 
-  $: displayedAlarm = $displayedAlarmId && $userAlarms[$displayedAlarmId];
+  $: if (currentAlarms.length > 0) {
+    $displayedAlarmId = get(currentAlarms[0]).id;
+  }
 </script>
 
 <SvelteToast />
@@ -75,7 +83,7 @@
       <div class="relative grid flex-grow pt-1">
         {#if $activeTab === "alarms"}
           <div transition:blur class="col-start-1 row-start-1 flex flex-col">
-            {#if numUserAlarms === 0}
+            {#if currentAlarms.length === 0}
               <div
                 class="flex-grow rounded-2xl p-2 align-middle tracking-tight text-zinc-400"
               >
@@ -88,8 +96,8 @@
               >
                 <AlarmsSidebar />
                 <div class=" rounded-2xl">
-                  {#if displayedAlarm}
-                    <AlarmDetail alarm={displayedAlarm} />
+                  {#if $displayedAlarmId}
+                    <AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
                   {/if}
                 </div>
               </div>

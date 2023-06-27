@@ -18,6 +18,7 @@ import { toast } from "@zerodevx/svelte-toast";
 import { watchContractEvent } from "@wagmi/core";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
 import SocialAlarmClockHub from "./abi/SocialAlarmClockHub";
+import { subscribe } from "svelte/internal";
 
 export type UserAlarm = Awaited<ReturnType<typeof UserAlarmStore>>;
 export type AlarmState = {
@@ -45,6 +46,22 @@ const alarmQueryDeps = derived([account, hub], ([$user, $hub]) => {
 function MakeUserAlarmsRecord() {
   const userAlarms = writable<Record<number, UserAlarm>>({});
 
+  const addAlarm = async (
+    alarmAddr: EvmAddress,
+    id: number,
+    creationBlock: number,
+    initialStatus: AlarmStatus
+  ) => {
+    const alarm = await UserAlarmStore({
+      contractAddress: alarmAddr,
+      id,
+      creationBlock,
+      status: initialStatus,
+    });
+
+    userAlarms.update((s) => ({ ...s, [Number(id)]: alarm }));
+  };
+
   // Auto fetch user alarms and create stores for them
   alarmQueryDeps.subscribe(async ({ hub: $hub, user: $user }) => {
     if (!$user || !$hub) return {};
@@ -62,24 +79,11 @@ function MakeUserAlarmsRecord() {
     userAlarms.set(currentAlarms);
   });
 
-  const addAlarm = async (
-    alarmAddr: EvmAddress,
-    id: number,
-    creationBlock: number
-  ) => {
-    const alarm = await UserAlarmStore({
-      contractAddress: alarmAddr,
-      id,
-      creationBlock,
-    });
-    userAlarms.update((s) => ({ ...s, [Number(id)]: alarm }));
-  };
-
   // Event listener stores
   const newAlarmListenerUnsub = writable<() => void | undefined>();
   const joinedAlarmListenerUnsub = writable<() => void | undefined>();
 
-  // Mansge event listeners
+  // Create new alarm event listeners
   alarmQueryDeps.subscribe(({ hub: $hub, user: $user }) => {
     if (!$hub || !$user) return;
 
@@ -98,7 +102,8 @@ function MakeUserAlarmsRecord() {
             addAlarm(
               log.args.alarmAddr,
               Number(log.args.id),
-              Number(log.blockNumber)
+              Number(log.blockNumber),
+              AlarmStatus.INACTIVE
             );
           }
         )
@@ -119,7 +124,8 @@ function MakeUserAlarmsRecord() {
             addAlarm(
               log.args.alarmAddr,
               Number(log.args.id),
-              Number(log.blockNumber)
+              Number(log.blockNumber),
+              AlarmStatus.ACTIVE
             );
           }
         )
@@ -139,6 +145,11 @@ function MakeUserAlarmsRecord() {
 
   return {
     subscribe: userAlarms.subscribe,
+    getByStatus: (statusArr: AlarmStatus[]) => {
+      return Object.values(get(userAlarms)).filter((alarm) =>
+        statusArr.includes(get(alarm).status)
+      );
+    },
     removeAlarm: (id: number) => {
       userAlarms.update((alarms) => {
         const { [id]: _, ...updatedAlarms } = alarms;
@@ -163,7 +174,9 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
     ...constantsResult,
   });
 
-  const alarmState = writable<AlarmState>();
+  const alarmState = writable<Partial<AlarmState> & { status: AlarmStatus }>({
+    status: alarm.status,
+  });
 
   const initAlarmState = derived(constants, ($constants) => {
     return async () => {
@@ -225,7 +238,7 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
       );
     }
     // Re-query for alarm state once deadline has passed
-    if (s.timeToNextDeadline <= 0) {
+    if (s.timeToNextDeadline && s.timeToNextDeadline <= 0) {
       get(initAlarmState)();
     }
     // Clear interval for inactive alarms
@@ -250,7 +263,7 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
   );
 
   // Add confirmation listener
-  watchContractEvent({});
+  // watchContractEvent({});
 
   // Consolidate params into single store
   const { subscribe } = derived(
