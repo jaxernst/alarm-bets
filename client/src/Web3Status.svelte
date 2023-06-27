@@ -15,7 +15,7 @@
 <div class="flex h-full items-center gap-4">
   {#if !$account || !$account.isConnected}
     <button
-      class="hover:bg-highlight-transparent-grey rounded-2xl bg-local p-2 px-3 text-cyan-500 hover:font-bold"
+      class=" rounded-2xl bg-local px-2 py-1 text-cyan-500 transition-colors duration-200 hover:text-cyan-300"
       on:click={() => $web3Modal.openModal()}
     >
       Connect Wallet
