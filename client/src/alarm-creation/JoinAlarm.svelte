@@ -46,12 +46,14 @@
     }
   };
 
-  let searchedAlarm: null | {
-    player1: EvmAddress;
-    player2: EvmAddress;
-    status: AlarmStatus;
-    id: string;
-  } = null;
+  let searchedAlarm:
+    | null
+    | ({
+        player1: EvmAddress;
+        player2: EvmAddress;
+        status: AlarmStatus;
+        id: string;
+      } & Awaited<ReturnType<typeof getAlarmConstants>>) = null;
 
   const searchForAlarm = async () => {
     error = null;
@@ -68,7 +70,7 @@
     }
 
     if (searchedAlarm?.status !== AlarmStatus.INACTIVE) {
-      error = "This alarm is already active";
+      error = "This alarm has already been activated";
     }
 
     if (searchedAlarm?.player1 === account) {
@@ -81,7 +83,7 @@
   };
 </script>
 
-<div class="flex h-full flex-col gap-2 px-2">
+<div class="flex h-full flex-col gap-1 px-2">
   <h3 class="">Join an Alarm</h3>
   <div class=" flex h-[30px] gap-2 rounded-xl px-2">
     <input
@@ -105,7 +107,7 @@
 
   {#if !error && searchedAlarm}
     <div class="flex flex-grow flex-col">
-      <h3 class="">Alarm #{searchedAlarm.id} Details</h3>
+      <h3 class="mt-1">Alarm #{searchedAlarm.id} Details</h3>
       <div class="flex justify-center">
         <div class="max-w-[60%] flex-grow px-2">
           <div class="flex justify-center py-2">
@@ -155,8 +157,10 @@
           </div>
         </div>
       </div>
-      <div class="mb-1 flex justify-end">
-        <ActionButton onClick={joinAlarm} isReady={!error}>Join</ActionButton>
+      <div class="mb-1 mt-3 flex justify-end">
+        <ActionButton onClick={joinAlarm} isReady={!error}
+          >Join and Activate Alarm</ActionButton
+        >
       </div>
     </div>
   {/if}
