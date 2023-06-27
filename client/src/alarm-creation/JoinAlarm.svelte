@@ -109,7 +109,7 @@
     <div class="flex flex-grow flex-col">
       <h3 class="mt-1">Alarm #{searchedAlarm.id} Details</h3>
       <div class="flex justify-center">
-        <div class="max-w-[60%] flex-grow px-2">
+        <div class="flex-grow px-2 sm:max-w-[60%]">
           <div class="flex justify-center py-2">
             <div>
               <div class="pt-1" style="font-size: 2em; line-height: .8em">
