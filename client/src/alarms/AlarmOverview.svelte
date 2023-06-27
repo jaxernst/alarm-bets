@@ -22,7 +22,7 @@
 
   const stylePending = (status: AlarmStatus) =>
     status === AlarmStatus.INACTIVE
-      ? "border border-dashed border-zinc-600"
+      ? "border border-dashed border-zinc-600 my-[1px]"
       : "";
 
   $: styleSelected = (alarmId: number) =>
@@ -39,9 +39,9 @@
     <div class="text-sm font-bold">Alarm ID: {id}</div>
     <div class="text-xs">Waiting on Player 2 to start alarm...</div>
   {:else if status === AlarmStatus.ACTIVE}
-    <div class="flex h-full items-start">
+    <div class="grid h-full grid-cols-[63%_1fr] items-start">
       <div
-        class="flex h-full max-w-[63%] flex-col items-start justify-center overflow-visible"
+        class="flex h-full flex-col items-start justify-center overflow-visible px-1"
       >
         <div class="pt-1" style="font-size: 2.1em; line-height: .8em">
           <ClockDisplay
@@ -55,7 +55,7 @@
           >
         </div>
       </div>
-      <div class="" style="font-size: .7em">
+      <div class="" style="font-size: .78em">
         <AlarmActiveDays {daysActive} />
       </div>
     </div>
