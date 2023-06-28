@@ -29,6 +29,7 @@
       <ToggleLetter
         on:toggle={(e) => handleAlarmDayToggle(e.detail, i + 1)}
         value={letter}
+        toggled={$alarmDays.includes(i + 1)}
       />
     {/each}
   </div>
