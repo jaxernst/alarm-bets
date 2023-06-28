@@ -11,6 +11,7 @@
   import { shorthandAddress } from "../lib/util";
   import { transactions } from "../lib/transactions";
   import { toast } from "@zerodevx/svelte-toast";
+  import DiamondSpinner from "../lib/components/DiamondSpinner.svelte";
 
   export let alarm: UserAlarm;
 
@@ -18,14 +19,22 @@
     ? $alarm.player2
     : $alarm.player1;
 
+  let endPending = false;
   const endAlarm = async () => {
-    const txResult = await alarm.endAlarm();
-    if (!txResult.error) {
-      toast.push("Alarm ended successfully");
-    } else {
-      toast.push("Transaction failed with: " + txResult.error.message);
+    if (endPending) return;
+    endPending = true;
+
+    try {
+      const txResult = await alarm.endAlarm();
+      if (!txResult.error) {
+        toast.push("Alarm ended successfully");
+      } else {
+        toast.push("Transaction failed with: " + txResult.error.message);
+      }
+      $showEndAlarmModal = false;
+    } finally {
+      endPending = false;
     }
-    $showEndAlarmModal = false;
   };
 </script>
 
@@ -47,9 +56,15 @@
     This will withdraw and return each player's remaining balance
   </div>
   <div class="flex justify-end gap-4">
-    <button class="text-cyan-600 hover:font-bold" on:click={endAlarm}
-      >End</button
-    >
+    <button class="text-cyan-600 hover:font-bold" on:click={endAlarm}>
+      {#if endPending}
+        <div class="p-1">
+          <DiamondSpinner size={"30"} color={"white"} />
+        </div>
+      {:else}
+        End
+      {/if}
+    </button>
     <button
       class="text-red-700 hover:font-bold"
       on:click={() => ($showEndAlarmModal = false)}>Cancel</button
