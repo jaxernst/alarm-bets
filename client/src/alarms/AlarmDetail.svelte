@@ -77,7 +77,7 @@
               <button
                 class="w-full whitespace-nowrap rounded-lg p-2 hover:bg-zinc-700"
               >
-                Add Collateral
+                Add to Balance
               </button>
             </MenuItem>
             <MenuItem>
