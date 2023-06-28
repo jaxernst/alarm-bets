@@ -12,17 +12,27 @@
   import ChooseSubmissionWindow from "./form-cards/SubmissionWindow.svelte";
   import ChooseTimezoneSettings from "./form-cards/TimezoneSettings.svelte";
   import ActionButton from "../lib/styled-components/ActionButton.svelte";
+  import DiamondSpinner from "../lib/components/DiamondSpinner.svelte";
 
+  let creationPending = false;
   $: create = async () => {
+    if (creationPending) return;
+    creationPending = true;
     const createAlarmResult = $createAlarm();
     if (!createAlarmResult) return;
 
-    const txResult = await transactions.addTransaction(createAlarmResult);
-    if (!txResult.error) {
-      toast.push("Alarm creation successful!");
-    } else {
-      toast.push("Alarm creation failed with: " + txResult.error.message);
-    }
+    transactions
+      .addTransaction(createAlarmResult)
+      .then((txResult) => {
+        if (!txResult.error) {
+          toast.push("Alarm creation successful!");
+        } else {
+          toast.push("Alarm creation failed with: " + txResult.error.message);
+        }
+      })
+      .finally(() => {
+        creationPending = false;
+      });
   };
 
   const cards = [
@@ -47,6 +57,14 @@
   </div>
 
   <div class="self-end">
-    <ActionButton onClick={create} isReady={!!$isReady}>Submit</ActionButton>
+    <ActionButton onClick={create} isReady={!!$isReady}>
+      {#if creationPending}
+        <div class="p-1">
+          <DiamondSpinner size={"30"} color={"white"} />
+        </div>
+      {:else}
+        Submit
+      {/if}
+    </ActionButton>
   </div>
 </div>
