@@ -62,7 +62,9 @@
         id: string;
       } & Awaited<ReturnType<typeof getAlarmConstants>>) = null;
 
+  let searching = false;
   const searchForAlarm = async () => {
+    searching = true;
     error = null;
     try {
       const alarmAddr = await getAlarmById(alarmId, $hub);
@@ -73,6 +75,7 @@
       };
     } catch {
       error = "No alarm contract found for provided ID";
+      searching = false;
       return;
     }
 
@@ -112,7 +115,7 @@
     <div class="pl-3 text-red-600">{error}</div>
   {/if}
 
-  {#if !error && searchedAlarm}
+  {#if !error && searchedAlarm && !searching}
     <div class="flex flex-grow flex-col">
       <h3 class="mt-1">Alarm #{searchedAlarm.id} Details</h3>
       <div class="flex justify-center">
