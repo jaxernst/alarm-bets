@@ -50,90 +50,108 @@ describe("Partner Alarm Clock test", () => {
     blockTime = (await currentTimestamp()).toNumber();
   });
 
-  it("Cannot record entries or view missed deadlines until started", async () => {
-    const alarm = await initAlarm(p2.address);
-    await expect(alarm.connect(p1).submitConfirmation()).to.be.revertedWith(
-      "NOT_STARTED"
+  describe("Alarm Creation", () => {
+    it("Allows players to create alarms through the AlarmClockHub");
+    it(
+      "Marks the alarm as inactive when created (while waiting for the other player to start"
     );
-    await expect(alarm.connect(p2).submitConfirmation()).to.be.revertedWith(
-      "NOT_STARTED"
-    );
-
-    await expect(alarm.missedDeadlines(p1.address)).to.be.revertedWith(
-      "NOT_STARTED"
-    );
-    await expect(alarm.missedDeadlines(p2.address)).to.be.revertedWith(
-      "NOT_STARTED"
-    );
+    it("Requires both players to deposit a specified amount of collateral");
+    it("Starts the alarm when the other player joins");
+    it("Only allows the alarm to be started by the other player");
   });
 
-  it("Returns the time until the next alarm is due (0 offset)", async () => {
-    const curTime = timeOfDay(blockTime);
-    const curDay = dayOfWeek(blockTime);
+  describe("Alarm Enforcement", () => {
+    it("Cannot record entries or view missed deadlines until started", async () => {
+      const alarm = await initAlarm(p2.address);
+      await expect(alarm.connect(p1).submitConfirmation()).to.be.revertedWith(
+        "NOT_STARTED"
+      );
+      await expect(alarm.connect(p2).submitConfirmation()).to.be.revertedWith(
+        "NOT_STARTED"
+      );
 
-    const alarm = await createAlarm(
-      hub,
-      "PartnerAlarmClock",
-      {
-        alarmTime: curTime + 60,
-        alarmdays: [curDay],
-        missedAlarmPenalty: parseEther("0.1"),
-        submissionWindow: submissionWindow,
-        timezoneOffset: 0,
-        otherPlayer: p2.address,
-      },
-      collateralVal
+      await expect(alarm.missedDeadlines(p1.address)).to.be.revertedWith(
+        "NOT_STARTED"
+      );
+      await expect(alarm.missedDeadlines(p2.address)).to.be.revertedWith(
+        "NOT_STARTED"
+      );
+    });
+    it(
+      "Allows entries (wakeup confirmations) to be recorded only while in the submission window"
     );
+    it("Returns the time until the next alarm is due (0 offset)", async () => {
+      const curTime = timeOfDay(blockTime);
+      const curDay = dayOfWeek(blockTime);
 
-    await alarm.connect(p2).start({ value: collateralVal });
+      const alarm = await createAlarm(
+        hub,
+        "PartnerAlarmClock",
+        {
+          alarmTime: curTime + 60,
+          alarmdays: [curDay],
+          missedAlarmPenalty: parseEther("0.1"),
+          submissionWindow: submissionWindow,
+          timezoneOffset: 0,
+          otherPlayer: p2.address,
+        },
+        collateralVal
+      );
 
-    const resultP1 = await alarm.timeToNextDeadline(p1.address);
-    const resultP2 = await alarm.timeToNextDeadline(p2.address);
-    expect(resultP1).to.approximately(60, 3);
-    expect(resultP2).to.approximately(60, 3);
+      await alarm.connect(p2).start({ value: collateralVal });
+
+      const resultP1 = await alarm.timeToNextDeadline(p1.address);
+      const resultP2 = await alarm.timeToNextDeadline(p2.address);
+      expect(resultP1).to.approximately(60, 3);
+      expect(resultP2).to.approximately(60, 3);
+    });
+    it("Returns the time until the next alarm is due (local tz offset)", async () => {
+      const localOffsetHrs = new Date().getTimezoneOffset() / -60;
+      const curTime = timeOfDay(blockTime, localOffsetHrs);
+      const curDay = dayOfWeek(blockTime, localOffsetHrs);
+      const alarmTime = curTime + 60;
+      const alarm = await createAlarm(
+        hub,
+        "PartnerAlarmClock",
+        {
+          alarmTime: alarmTime,
+          alarmdays: [curDay, curDay + 1],
+          missedAlarmPenalty: parseEther("0.1"),
+          submissionWindow: submissionWindow,
+          timezoneOffset: localOffsetHrs * HOUR,
+          otherPlayer: p2.address,
+        },
+        collateralVal
+      );
+
+      await alarm.connect(p2).start({ value: collateralVal });
+
+      const resultP1 = await alarm.timeToNextDeadline(p1.address);
+      const resultP2 = await alarm.timeToNextDeadline(p2.address);
+      expect(resultP1).to.approximately(60, 3);
+      expect(resultP2).to.approximately(60, 3);
+
+      // Advance time to the next day
+      await advanceTime(60 * 60 * 20);
+      const blockTime2 = (await currentTimestamp()).toNumber();
+      const curTime2 = timeOfDay(blockTime2, localOffsetHrs);
+      expect(curTime2).to.approximately((curTime + HOUR * 20) % DAY, 5);
+
+      const result2P1 = await alarm.timeToNextDeadline(p1.address);
+      const result2P2 = await alarm.timeToNextDeadline(p2.address);
+      expect(result2P1).to.approximately(alarmTime - curTime2, 3);
+      expect(result2P2).to.approximately(alarmTime - curTime2, 3);
+    });
+    it("Records missed deadlines when either player misses an alarm");
   });
 
-  it("Returns the time until the next alarm is due (local tz offset)", async () => {
-    const localOffsetHrs = new Date().getTimezoneOffset() / -60;
-    const curTime = timeOfDay(blockTime, localOffsetHrs);
-    const curDay = dayOfWeek(blockTime, localOffsetHrs);
-    const alarmTime = curTime + 60;
-    const alarm = await createAlarm(
-      hub,
-      "PartnerAlarmClock",
-      {
-        alarmTime: alarmTime,
-        alarmdays: [curDay, curDay + 1],
-        missedAlarmPenalty: parseEther("0.1"),
-        submissionWindow: submissionWindow,
-        timezoneOffset: localOffsetHrs * HOUR,
-        otherPlayer: p2.address,
-      },
-      collateralVal
+  describe("Alarm Termination", () => {
+    it(
+      "Allows the creating player to withdraw (cancel request) before the alarm is started"
     );
-
-    await alarm.connect(p2).start({ value: collateralVal });
-
-    const resultP1 = await alarm.timeToNextDeadline(p1.address);
-    const resultP2 = await alarm.timeToNextDeadline(p2.address);
-    expect(resultP1).to.approximately(60, 3);
-    expect(resultP2).to.approximately(60, 3);
-
-    // Advance time to the next day
-    await advanceTime(60 * 60 * 20);
-    const blockTime2 = (await currentTimestamp()).toNumber();
-    const curTime2 = timeOfDay(blockTime2, localOffsetHrs);
-    expect(curTime2).to.approximately((curTime + HOUR * 20) % DAY, 5);
-
-    const result2P1 = await alarm.timeToNextDeadline(p1.address);
-    const result2P2 = await alarm.timeToNextDeadline(p2.address);
-    expect(result2P1).to.approximately(alarmTime - curTime2, 3);
-    expect(result2P2).to.approximately(alarmTime - curTime2, 3);
-  });
-
-  describe("Ending alarms", () => {
     it(
       "When any player withdraws (ends the alarm), both player's funds are returned to them"
     );
+    it("");
   });
 });
