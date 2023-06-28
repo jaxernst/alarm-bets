@@ -157,7 +157,7 @@
           </div>
         </div>
       </div>
-      <div class="mb-1 mt-3 flex justify-end">
+      <div class="mb-1 mt-4 flex justify-end">
         <ActionButton onClick={joinAlarm} isReady={!error}
           >Join and Activate Alarm</ActionButton
         >
