@@ -22,10 +22,12 @@
   }
 </script>
 
-<div class="bg-transparent-grey flex flex-col overflow-y-auto rounded-xl">
-  {#each sortedAlarms as userAlarm}
-    {#if get(userAlarm).status !== AlarmStatus.CANCELLED}
-      <AlarmOverview {userAlarm} />
-    {/if}
-  {/each}
+<div class="max-h-[330px] overflow-y-auto">
+  <div class="bg-transparent-grey flex flex-col rounded-xl">
+    {#each sortedAlarms as userAlarm}
+      {#if get(userAlarm).status !== AlarmStatus.CANCELLED}
+        <AlarmOverview {userAlarm} />
+      {/if}
+    {/each}
+  </div>
 </div>
