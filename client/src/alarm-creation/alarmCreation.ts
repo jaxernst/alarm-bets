@@ -27,6 +27,7 @@ export const alarmTime = writable<string>("");
 export const deposit = writable<number>(0);
 export const missedAlarmPenalty = writable(0);
 export const submissionWindow = writable<number>(0);
+export const timezoneOffsetConfirmed = writable(false);
 export const timezoneOffset = writable<number>(
   -new Date().getTimezoneOffset() / 60
 );
@@ -41,6 +42,7 @@ const bundledParams = derived(
     missedAlarmPenalty,
     submissionWindow,
     timezoneOffset,
+    timezoneOffsetConfirmed,
   ],
   (p) => ({
     account: p[0],
@@ -51,6 +53,7 @@ const bundledParams = derived(
     missedAlarmPenalty: p[5],
     submissionWindow: p[6],
     timezoneOffset: p[7],
+    timezoneOffsetConfirmed: p[8],
   })
 );
 
@@ -65,6 +68,7 @@ export const isReady = derived(bundledParams, (p) => {
     p.alarmTime.length > 0 &&
     p.deposit > 0 &&
     p.missedAlarmPenalty > 0 &&
+    p.timezoneOffsetConfirmed &&
     p.timezoneOffset >= -12 &&
     p.timezoneOffset <= 12
   );

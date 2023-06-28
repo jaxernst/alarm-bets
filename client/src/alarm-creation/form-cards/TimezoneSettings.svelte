@@ -1,7 +1,10 @@
 <script lang="ts">
   import { writable } from "svelte/store";
   import FormCard from "../FormCard.svelte";
-  import { timezoneOffset as offset } from "../alarmCreation";
+  import {
+    timezoneOffset as offset,
+    timezoneOffsetConfirmed,
+  } from "../alarmCreation";
 
   const updateOffset = (increment: number) => {
     let newVal = $offset + increment;
@@ -26,10 +29,12 @@
     return `UTC${getReadableOffset()} (${localTimezone ?? "non-local"}) `;
   };
 
-  let hasBeenFocussed = false;
+  // User has to focus (click) on the timezone form card to confirm the timezone
   function recordFocus(node: HTMLElement) {
     const handleFocusIn = () => {
-      if (node.contains(document.activeElement)) hasBeenFocussed = true;
+      if (node.contains(document.activeElement)) {
+        $timezoneOffsetConfirmed = true;
+      }
     };
     document.addEventListener("focusin", handleFocusIn);
     return {
@@ -45,7 +50,7 @@
     itemNumber={6}
     emptyHeader="confirm timezone"
     filledHeader="Timezone Offset"
-    inputEmpty={!hasBeenFocussed}
+    inputEmpty={!$timezoneOffsetConfirmed}
     inputValid={true}
   >
     <div class="flex gap-1">
