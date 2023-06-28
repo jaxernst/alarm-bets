@@ -21,9 +21,6 @@
       Connect Wallet
     </button>
   {:else}
-    {#if $transactions.pending}
-      <DiamondSpinner size={"30"} color={"white"} />
-    {/if}
     <button class="flex items-center" on:click={() => $web3Modal.openModal()}>
       <div class="indicator" style="background-color:{indicatorColor}" />
       <div class="displayName">
