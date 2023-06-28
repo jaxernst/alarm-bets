@@ -18,6 +18,7 @@
   import ActionButton from "../lib/styled-components/ActionButton.svelte";
   import type { EvmAddress } from "../types";
   import { AlarmStatus } from "@sac/contracts/lib/types";
+  import DiamondSpinner from "../lib/components/DiamondSpinner.svelte";
 
   // TODO: Make sure user can't join an already active alarm
   // Todo: Make button styling consistent with other pages
@@ -27,22 +28,28 @@
 
   $: account = $getCurrentAccount().address;
 
+  let joinPending = false;
   const joinAlarm = async () => {
-    // Check if other player has an alarm with connected account's address
-    const targetAlarm = await getAlarmById(alarmId, $hub);
+    if (joinPending) return;
+    joinPending = true;
 
-    // Check if other player's alarm has the connected account's address as a partner
-    const player2 = await getPlayer(targetAlarm, 2);
+    try {
+      // Check if other player has an alarm with connected account's address
+      const targetAlarm = await getAlarmById(alarmId, $hub);
+      const otherPlayer = await getPlayer(targetAlarm, 1);
 
-    const otherPlayer = await getPlayer(targetAlarm, 1);
-    const txResult = await transactions.addTransaction(startAlarm(targetAlarm));
-
-    if (!txResult.error) {
-      toast.push(
-        `Successfully joined alarm with ${shorthandAddress(otherPlayer)}!`
+      const txResult = await transactions.addTransaction(
+        startAlarm(targetAlarm)
       );
-    } else {
-      toast.push("Alarm creation failed with: " + txResult.error.message);
+      if (!txResult.error) {
+        toast.push(
+          `Successfully joined alarm with ${shorthandAddress(otherPlayer)}!`
+        );
+      } else {
+        toast.push("Alarm creation failed with: " + txResult.error.message);
+      }
+    } finally {
+      joinPending = false;
     }
   };
 
@@ -158,9 +165,15 @@
         </div>
       </div>
       <div class="mb-1 mt-4 flex justify-end">
-        <ActionButton onClick={joinAlarm} isReady={!error}
-          >Join and Activate Alarm</ActionButton
-        >
+        <ActionButton onClick={joinAlarm} isReady={!error}>
+          {#if joinPending}
+            <div class="p-1">
+              <DiamondSpinner size={"30"} color={"white"} />
+            </div>
+          {:else}
+            Join and Activate Alarm
+          {/if}
+        </ActionButton>
       </div>
     </div>
   {/if}
