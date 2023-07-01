@@ -1,4 +1,4 @@
-import { account } from "./chainClient";
+import { account, network } from "./chainClient";
 import { derived, writable, type Readable, get } from "svelte/store";
 import {
   getUserAlarmsByType,
@@ -14,11 +14,10 @@ import {
 import { transactions } from "./transactions";
 import type { EvmAddress } from "../types";
 import { AlarmStatus } from "@sac/contracts/lib/types";
-import { toast } from "@zerodevx/svelte-toast";
 import { watchContractEvent } from "@wagmi/core";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
 import SocialAlarmClockHub from "./abi/SocialAlarmClockHub";
-import { subscribe } from "svelte/internal";
+import { deploymentChainIds, hubDeployments } from "./hubdeployments";
 
 export type UserAlarm = Awaited<ReturnType<typeof UserAlarmStore>>;
 export type AlarmState = {
@@ -32,9 +31,25 @@ export type AlarmState = {
   player2Confirmations: bigint | undefined;
 };
 
-export const hub = writable<EvmAddress>(
-  "0x5fbdb2315678afecb367f032d93f642f64180aa3"
-);
+type NetworkError = "UNSUPPORTED_NETWORK" | "NO_CHAIN";
+
+export const networkError = writable<NetworkError | undefined>();
+
+export const hub = derived(network, ($network) => {
+  if (!$network?.chain?.id) {
+    networkError.set("NO_CHAIN");
+    return undefined;
+  } else if (!($network.chain.id in hubDeployments)) {
+    networkError.set("UNSUPPORTED_NETWORK");
+    return undefined;
+  } else {
+    networkError.set(undefined);
+  }
+
+  return hubDeployments[
+    $network.chain.id as (typeof deploymentChainIds)[number]
+  ];
+});
 
 const alarmQueryDeps = derived([account, hub], ([$user, $hub]) => {
   return {
