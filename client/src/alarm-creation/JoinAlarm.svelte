@@ -75,8 +75,9 @@
       };
     } catch {
       error = "No alarm contract found for provided ID";
-      searching = false;
       return;
+    } finally {
+      searching = false;
     }
 
     if (searchedAlarm?.status !== AlarmStatus.INACTIVE) {
