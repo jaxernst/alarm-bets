@@ -17,10 +17,11 @@ import {
   w3mProvider,
 } from "@web3modal/ethereum";
 import type { EvmAddress } from "../types";
+import { baseGoerli } from "viem/chains";
 
 export type Account = GetAccountResult & { address: EvmAddress };
 
-const supportedChains = [hardhat];
+const supportedChains = [hardhat, baseGoerli];
 const projectId = "698bddafdbc932fc6eb19c24ab471c3a";
 
 const { publicClient } = configureChains(supportedChains, [
@@ -76,9 +77,9 @@ get(ethClient).watchAccount(account.set);
 get(ethClient).watchNetwork((net) => {
   if (!net.chain) return;
   network.set(net);
-  if (!supportedChains.map((c) => c.id as number).includes(net.chain.id)) {
+  /* if (!supportedChains.map((c) => c.id as number).includes(net.chain.id)) {
     switchNetwork({ chainId: supportedChains[0].id });
-  }
+  } */
 });
 
 /*
