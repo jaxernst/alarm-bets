@@ -1,11 +1,12 @@
 import { HardhatUserConfig, task } from "hardhat/config";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 import "@nomiclabs/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "hardhat-abi-exporter";
 import "@typechain/hardhat";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-const BURNER = "";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 task("automine", "Turn automine off or on")
   .addFlag("off")
@@ -37,11 +38,13 @@ task("automine", "Turn automine off or on")
 const config: HardhatUserConfig = {
   solidity: "0.8.9",
   networks: {
-    networks: {
-      lattice: {
-        url: "http://localhost:8545",
-        accounts: [BURNER],
-      },
+    lattice: {
+      url: "http://localhost:8545",
+      accounts: [process.env.TEST_U1_KEY ?? ""],
+    },
+    "base-goerli": {
+      url: "https://goerli.base.org",
+      accounts: [process.env.TEST_U1_KEY ?? ""],
     },
   },
   abiExporter: [
