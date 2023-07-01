@@ -95,16 +95,31 @@ function MakeUserAlarmsRecord() {
   });
 
   // Event listener stores
-  const newAlarmListenerUnsub = writable<() => void | undefined>();
-  const joinedAlarmListenerUnsub = writable<() => void | undefined>();
+  const newAlarmListener = writable<(() => void) | undefined>();
+  const joinedAlarmListener = writable<(() => void) | undefined>();
 
   // Create new alarm event listeners
   alarmQueryDeps.subscribe(({ hub: $hub, user: $user }) => {
+    const _newAlarmListener = get(newAlarmListener);
+    if (_newAlarmListener) {
+      console.log("Removed new alarm listener");
+      _newAlarmListener(); // Unsub function
+      newAlarmListener.set(undefined);
+    }
+
+    const _joinedAlarmListener = get(joinedAlarmListener);
+    if (_joinedAlarmListener) {
+      console.log("Removed joined alarm listener");
+      _joinedAlarmListener(); // Unsub funciton
+      joinedAlarmListener.set(undefined);
+    }
+
+    // Do not set a new listener without a hub and user
     if (!$hub || !$user) return;
 
-    if (!get(newAlarmListenerUnsub)) {
+    if (!get(newAlarmListener)) {
       console.log("set new alarm listener for ", $user);
-      newAlarmListenerUnsub.set(
+      newAlarmListener.set(
         watchContractEvent(
           {
             address: $hub,
@@ -112,6 +127,7 @@ function MakeUserAlarmsRecord() {
             eventName: "AlarmCreation",
           },
           ([log]) => {
+            if (log.args.user !== $user) return;
             if (!log.args.alarmAddr || !log.args.id)
               throw Error("Creation event invalid");
             addAlarm(
@@ -125,8 +141,9 @@ function MakeUserAlarmsRecord() {
       );
     }
 
-    if (!get(joinedAlarmListenerUnsub)) {
-      joinedAlarmListenerUnsub.set(
+    if (!get(joinedAlarmListener)) {
+      console.log("set joined alarm listener for ", $user);
+      joinedAlarmListener.set(
         watchContractEvent(
           {
             address: $hub,
@@ -134,6 +151,7 @@ function MakeUserAlarmsRecord() {
             eventName: "UserJoined",
           },
           ([log]) => {
+            if (log.args.user !== $user) return;
             if (!log.args.alarmAddr || !log.args.id)
               throw Error("Creation event invalid");
             addAlarm(
@@ -148,14 +166,18 @@ function MakeUserAlarmsRecord() {
     }
   });
 
-  // Clear state when user changes
-  let lastAccount: EvmAddress;
-  alarmQueryDeps.subscribe(({ user: $user }) => {
-    if (!$user) return;
-    if (lastAccount && $user !== lastAccount) {
+  // Clear state when user or hub changes
+  let lastAccount: EvmAddress | undefined;
+  let lastHub: EvmAddress | undefined;
+  alarmQueryDeps.subscribe(({ user: $user, hub: $hub }) => {
+    if (
+      (lastAccount && $user !== lastAccount) ||
+      (lastHub && $hub !== lastHub)
+    ) {
       userAlarms.set({});
     }
     lastAccount = $user;
+    lastHub = $hub;
   });
 
   return {
