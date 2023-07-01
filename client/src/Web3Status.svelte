@@ -4,6 +4,7 @@
   import { shorthandAddress } from "./lib/util";
   import { transactions } from "./lib/transactions";
   import DiamondSpinner from "./lib/components/DiamondSpinner.svelte";
+  import { networkError } from "./lib/contractStores";
 
   let displayName: string | undefined;
   $: if ($account?.address) {
@@ -13,21 +14,24 @@
 </script>
 
 <div class="flex h-full items-center gap-4">
-  {#if !$account || !$account.isConnected}
-    <button
-      class=" rounded-2xl bg-local px-2 py-1 text-cyan-500 transition-colors duration-200 hover:text-cyan-300"
-      on:click={() => $web3Modal.openModal()}
-    >
-      Connect Wallet
-    </button>
-  {:else}
-    <button class="flex items-center" on:click={() => $web3Modal.openModal()}>
+  <button class="flex items-center" on:click={() => $web3Modal.openModal()}>
+    {#if !$account || !$account.isConnected}
+      <button
+        class=" rounded-2xl bg-local px-2 py-1 text-cyan-500 transition-colors duration-200 hover:text-cyan-300"
+        on:click={() => $web3Modal.openModal()}
+      >
+        Connect Wallet
+      </button>
+    {:else if $networkError === "UNSUPPORTED_NETWORK"}
+      <div class="indicator" style="background-color:{indicatorColor}" />
+      <div class="text-red-600">Wrong Network</div>
+    {:else}
       <div class="indicator" style="background-color:{indicatorColor}" />
       <div class="displayName">
         {displayName || ""}
       </div>
-    </button>
-  {/if}
+    {/if}
+  </button>
 </div>
 
 <style>
