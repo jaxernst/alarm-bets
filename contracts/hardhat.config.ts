@@ -5,6 +5,8 @@ import "hardhat-abi-exporter";
 import "@typechain/hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
+const BURNER = "";
+
 task("automine", "Turn automine off or on")
   .addFlag("off")
   .addFlag("on")
@@ -34,7 +36,14 @@ task("automine", "Turn automine off or on")
 
 const config: HardhatUserConfig = {
   solidity: "0.8.9",
-  networks: {},
+  networks: {
+    networks: {
+      lattice: {
+        url: "http://localhost:8545",
+        accounts: [BURNER],
+      },
+    },
+  },
   abiExporter: [
     {
       runOnCompile: false,
