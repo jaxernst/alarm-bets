@@ -83,7 +83,7 @@ get(ethClient).watchNetwork((net) => {
 });
 
 /*
- * Accout store to for contexts and pages where an account is assumed to always be present
+ * Account store to for contexts and pages where an account is assumed to always be present
  */
 export const getCurrentAccount = derived(account, ($account) => {
   return () => {

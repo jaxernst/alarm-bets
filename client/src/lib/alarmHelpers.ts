@@ -11,7 +11,7 @@ import {
   writeContract,
   readContract,
 } from "@wagmi/core";
-import type { UserAlarm } from "./contractStores";
+import type { UserAlarm } from "./dappStores";
 import {
   type AlarmType,
   type InitializationTypes,
