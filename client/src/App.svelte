@@ -10,7 +10,7 @@
 
   import { SvelteToast } from "@zerodevx/svelte-toast";
   import { fade, blur } from "svelte/transition";
-  import { userAlarms } from "./lib/contractStores";
+  import { userAlarms } from "./lib/dappStores";
 
   import { displayedAlarmId } from "./alarms/stores";
   import Topbar from "./Topbar.svelte";

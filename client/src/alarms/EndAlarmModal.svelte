@@ -5,7 +5,7 @@
     DialogOverlay,
     DialogTitle,
   } from "@rgossiaux/svelte-headlessui";
-  import type { UserAlarm } from "../lib/contractStores";
+  import type { UserAlarm } from "../lib/dappStores";
   import { getCurrentAccount } from "../lib/chainClient";
   import { showEndAlarmModal } from "./stores";
   import { shorthandAddress } from "../lib/util";

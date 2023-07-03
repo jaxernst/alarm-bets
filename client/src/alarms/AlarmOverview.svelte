@@ -3,7 +3,7 @@
   import { getCurrentAccount } from "../lib/chainClient";
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
   import { formatTime, shorthandAddress, timeString } from "../lib/util";
-  import type { UserAlarm } from "../lib/contractStores";
+  import type { UserAlarm } from "../lib/dappStores";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { displayedAlarmId } from "./stores";
   import { getOtherPlayer } from "../lib/alarmHelpers";

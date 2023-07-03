@@ -1,7 +1,7 @@
 <script lang="ts">
   import { toast } from "@zerodevx/svelte-toast";
   import { getCurrentAccount } from "../lib/chainClient";
-  import { hub } from "../lib/contractStores";
+  import { hub } from "../lib/dappStores";
   import {
     getAlarmById,
     getAlarmConstants,

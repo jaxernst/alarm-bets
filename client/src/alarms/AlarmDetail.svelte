@@ -17,7 +17,7 @@
   import { submitConfirmation } from "../lib/alarmHelpers";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { formatTime, timeString } from "../lib/util";
-  import type { UserAlarm } from "../lib/contractStores";
+  import type { UserAlarm } from "../lib/dappStores";
   import { showEndAlarmModal } from "./stores";
   import PlayerInfo from "./PlayerInfo.svelte";
   import { slide } from "svelte/transition";

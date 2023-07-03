@@ -2,7 +2,7 @@
   import { formatEther } from "viem";
   import EthereumIcon from "../assets/ethereum-icon.svelte";
   import SunIcon from "../assets/sun-icon.svelte";
-  import type { UserAlarm } from "../lib/contractStores";
+  import type { UserAlarm } from "../lib/dappStores";
   import { shorthandAddress } from "../lib/util";
   import { getBetStanding } from "../lib/alarmHelpers";
   import EthSymbol from "../lib/components/EthSymbol.svelte";

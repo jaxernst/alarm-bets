@@ -4,7 +4,7 @@
   import { shorthandAddress } from "./lib/util";
   import { transactions } from "./lib/transactions";
   import DiamondSpinner from "./lib/components/DiamondSpinner.svelte";
-  import { networkError } from "./lib/contractStores";
+  import { networkError } from "./lib/dappStores";
 
   let displayName: string | undefined;
   $: if ($account?.address) {
