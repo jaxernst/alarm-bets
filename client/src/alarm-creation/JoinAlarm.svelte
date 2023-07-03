@@ -1,7 +1,6 @@
 <script lang="ts">
   import { toast } from "@zerodevx/svelte-toast";
   import { getCurrentAccount } from "../lib/chainClient";
-  import { hub } from "../lib/dappStores";
   import {
     getAlarmById,
     getAlarmConstants,
@@ -19,6 +18,7 @@
   import type { EvmAddress } from "../types";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import DiamondSpinner from "../lib/components/DiamondSpinner.svelte";
+  import { hub } from "../lib/dappStores";
 
   // TODO: Make sure user can't join an already active alarm
   // Todo: Make button styling consistent with other pages
@@ -30,7 +30,7 @@
 
   let joinPending = false;
   const joinAlarm = async () => {
-    if (joinPending) return;
+    if (joinPending || !$hub) return;
     joinPending = true;
 
     try {
@@ -64,6 +64,12 @@
 
   let searching = false;
   const searchForAlarm = async () => {
+    if (!$hub) {
+      // Lower level error - shouldn'tbe exposed to users
+      error = "No alarm clock hub available on this network";
+      return;
+    }
+
     searching = true;
     error = null;
     try {
