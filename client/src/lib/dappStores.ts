@@ -51,6 +51,16 @@ export const hub = derived(network, ($network) => {
   ];
 });
 
+/*
+ * Hub address store to for contexts and pages where the hub is assumed to always be defined
+ */
+export const getRequiredHub = derived(hub, ($hub) => {
+  return () => {
+    if (!$hub) throw new Error("No account connected");
+    return $hub;
+  };
+}) as Readable<() => EvmAddress>;
+
 const alarmQueryDeps = derived([account, hub], ([$user, $hub]) => {
   return {
     user: $user?.address,
