@@ -10,6 +10,7 @@ import {
   prepareWriteContract,
   writeContract,
   readContract,
+  multicall,
 } from "@wagmi/core";
 import type { UserAlarm } from "./dappStores";
 import {
@@ -46,24 +47,37 @@ export const getAlarmById = async (
   return alarmAddr;
 };
 
-// TODO: batch these queries with a multicall
 export const getAlarmConstants = async (alarmAddress: EvmAddress) => {
   const args = { address: alarmAddress, abi: PartnerAlarmClock };
-  return {
-    alarmTime: await readContract({ ...args, functionName: "alarmTime" }),
-    alarmDays: await readContract({ ...args, functionName: "alarmDays" }),
-    betAmount: await readContract({ ...args, functionName: "betAmount" }),
-    player1: await readContract({ ...args, functionName: "player1" }),
-    player2: await readContract({ ...args, functionName: "player2" }),
-    missedAlarmPenalty: await readContract({
+  const contractFunctions = [
+    "alarmTime",
+    "alarmDays",
+    "betAmount",
+    "player1",
+    "player2",
+    "missedAlarmPenalty",
+    "submissionWindow",
+  ];
+
+  const res = await multicall({
+    contracts: contractFunctions.map((functionName) => ({
       ...args,
-      functionName: "missedAlarmPenalty",
-    }),
-    submissionWindow: await readContract({
-      ...args,
-      functionName: "submissionWindow",
-    }),
-  };
+      functionName,
+    })),
+  });
+
+  const constants = {};
+  for (let i = 0; i < contractFunctions.length; i++) {
+    const functionName = contractFunctions[i];
+    const result = res[i];
+
+    constants[functionName] =
+      result.status === "success"
+        ? result.result
+        : await readContract({ ...args, functionName });
+  }
+
+  return constants;
 };
 
 export const getBetStanding = (
