@@ -6,7 +6,7 @@
   import type { UserAlarm } from "../lib/dappStores";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { displayedAlarmId } from "./stores";
-  import { getOtherPlayer } from "../lib/alarmHelpers";
+  import { getOtherPlayer, getTimeToNextDeadline } from "../lib/alarmHelpers";
 
   export let userAlarm: UserAlarm;
 
@@ -49,11 +49,13 @@
             overrideColor={"orange"}
           />
         </div>
-        <div class="overflow-visible whitespace-nowrap text-xs">
-          In <span class=""
-            >{formatTime(Number($userAlarm.timeToNextDeadline))}</span
-          >
-        </div>
+        {#if $userAlarm.timeToNextDeadline}
+          <div class="overflow-visible whitespace-nowrap text-xs">
+            In <span class=""
+              >{formatTime(Number($userAlarm.timeToNextDeadline))}</span
+            >
+          </div>
+        {/if}
       </div>
       <div class="" style="font-size: .78em">
         <AlarmActiveDays {daysActive} />
