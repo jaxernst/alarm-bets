@@ -5,9 +5,11 @@
   export let duration: SpinnerTypes["duration"] = "1.5s";
   export let size: SpinnerTypes["size"] = "60";
   export let pause: SpinnerTypes["pause"] = false;
+  export let klass: string = "";
 </script>
 
 <span
+  class={klass}
   style="--size: {size}{unit}; --color:{color}; --duration: {duration};"
   class:pause-animation={pause}
 >
