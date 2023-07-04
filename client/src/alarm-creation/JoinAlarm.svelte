@@ -102,20 +102,24 @@
 
 <div class="flex h-full flex-col gap-1 px-2">
   <h3 class="">Join an Alarm</h3>
-  <div class=" flex h-[30px] gap-2 rounded-xl px-2">
+  <div class=" flex h-[30px] items-center gap-2 rounded-xl px-2">
     <input
       type="text"
       class=" bg-highlight-transparent-grey h-full flex-grow rounded-xl px-3 text-zinc-300 placeholder-zinc-500"
       placeholder="Enter alarm id"
       bind:value={alarmId}
     />
-    <button
-      class={`rounded-xl px-2 text-sm text-cyan-400 ${
-        !account ? "opacity-50" : ""
-      }`}
-      on:click={() => searchForAlarm()}
-      disabled={!account}>Search</button
-    >
+    {#if searching}
+      <DiamondSpinner klass="mx-4" size={"30"} color={"#22D3EE"} />
+    {:else}
+      <button
+        class={`rounded-xl px-2 text-sm text-cyan-400 ${
+          !account ? "opacity-50" : ""
+        }`}
+        on:click={() => searchForAlarm()}
+        disabled={!account}>Search</button
+      >
+    {/if}
   </div>
 
   {#if error}
