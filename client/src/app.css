@@ -23,7 +23,8 @@
 }
 
 body {
-  background-image: url("assets/");
+  background-image: url("assets/dark-elegent-purple-texture.png");
+  background-color: rgb(72, 72, 72);
 
   background-size: cover;
   background-repeat: no-repeat;
