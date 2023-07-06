@@ -42,7 +42,7 @@
 
 <SvelteToast />
 
-<div class="background h-full">
+<div class="h-full">
   <div class="absolute flex w-full justify-center">
     <Topbar />
   </div>
@@ -122,16 +122,8 @@
 </div>
 
 <style>
-  .background .radial-background {
-    background: radial-gradient(
-      circle,
-      rgba(26, 26, 26, 1) 0%,
-      rgba(31, 31, 31, 1) 100%
-    );
-  }
-
   .main-container-shadow {
-    box-shadow: 0px 0px 18px 7px rgba(10, 10, 10, 0.676);
+    box-shadow: 0px 0px 12px 0px rgba(10, 10, 10, 0.476);
   }
 
   .bg-trans {

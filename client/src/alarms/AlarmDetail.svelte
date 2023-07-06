@@ -1,7 +1,5 @@
 <script lang="ts">
   import SettingsIcon from "../assets/settings-icon.svelte";
-  import SunIcon from "../assets/sun-icon.svelte";
-  import EthereumIcon from "../assets/ethereum-icon.svelte";
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
   import EndAlarmModal from "./EndAlarmModal.svelte";
   import {
@@ -115,7 +113,7 @@
       <div class="-translate-y-1 pb-1 text-center">
         Alarm request pending...
       </div>
-    {:else if $alarm.status === AlarmStatus.ACTIVE}
+    {:else if $alarm.status === AlarmStatus.ACTIVE && $alarm.timeToNextDeadline !== undefined}
       <div class="-translate-y-1 rounded-md pb-1 text-center">
         Next Deadline in {formatTime(Number($alarm.timeToNextDeadline))}...
       </div>
