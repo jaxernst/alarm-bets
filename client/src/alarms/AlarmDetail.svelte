@@ -22,6 +22,8 @@
   import PlayerInfo from "./PlayerInfo.svelte";
   import { slide } from "svelte/transition";
   import { expoOut } from "svelte/easing";
+  import { toast } from "@zerodevx/svelte-toast";
+  import DiamondSpinner from "../lib/components/DiamondSpinner.svelte";
 
   export let alarm: UserAlarm;
 
@@ -37,8 +39,26 @@
     initialQuery = true;
   }
 
-  const submitConfirmationTransaction = () => {
-    transactions.addTransaction(submitConfirmation(alarmAddress));
+  let submitPending = false;
+  const submitConfirmationTransaction = async () => {
+    if (submitPending) return;
+    submitPending = true;
+
+    try {
+      const txResult = await transactions.addTransaction(
+        submitConfirmation(alarmAddress)
+      );
+      if (!txResult.error) {
+        toast.push("You woke up on time!");
+      } else {
+        toast.push(
+          "Confirmation failed. Were you too late? Here's the error: " +
+            txResult.error.message
+        );
+      }
+    } finally {
+      submitPending = false;
+    }
   };
 
   // Show details by default when alarm is pending
@@ -164,11 +184,17 @@
     class="bg-highlight-transparent-grey mt-1 flex justify-center rounded-lg"
   >
     {#if $alarm.status === AlarmStatus.ACTIVE}
-      <button
-        class="shadow-l p-2 text-sm font-bold text-green-600 transition hover:scale-105 disabled:text-green-900"
-        disabled={($alarm.timeToNextDeadline ?? 0) > $alarm.submissionWindow}
-        on:click={submitConfirmationTransaction}>Confirm Wakeup</button
-      >
+      {#if submitPending}
+        <div class="p-2">
+          <DiamondSpinner size={"30"} color={"white"} />
+        </div>
+      {:else}
+        <button
+          class="shadow-l p-2 text-sm font-bold text-green-600 transition hover:scale-105 disabled:text-green-900"
+          disabled={($alarm.timeToNextDeadline ?? 0) > $alarm.submissionWindow}
+          on:click={submitConfirmationTransaction}>Confirm Wakeup</button
+        >
+      {/if}
     {/if}
   </div>
 </div>
