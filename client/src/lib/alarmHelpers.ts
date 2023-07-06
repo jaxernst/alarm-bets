@@ -49,35 +49,32 @@ export const getAlarmById = async (
 
 export const getAlarmConstants = async (alarmAddress: EvmAddress) => {
   const args = { address: alarmAddress, abi: PartnerAlarmClock };
-  const contractFunctions = [
-    "alarmTime",
-    "alarmDays",
-    "betAmount",
-    "player1",
-    "player2",
-    "missedAlarmPenalty",
-    "submissionWindow",
-  ];
-
   const res = await multicall({
-    contracts: contractFunctions.map((functionName) => ({
-      ...args,
-      functionName,
-    })),
+    contracts: [
+      { ...args, functionName: "alarmTime" },
+      { ...args, functionName: "alarmDays" },
+      { ...args, functionName: "betAmount" },
+      { ...args, functionName: "player1" },
+      { ...args, functionName: "player2" },
+      { ...args, functionName: "missedAlarmPenalty" },
+      { ...args, functionName: "submissionWindow" },
+    ],
   });
 
-  const constants = {};
-  for (let i = 0; i < contractFunctions.length; i++) {
-    const functionName = contractFunctions[i];
-    const result = res[i];
-
-    constants[functionName] =
-      result.status === "success"
-        ? result.result
-        : await readContract({ ...args, functionName });
+  if (res.some((r) => r.status !== "success")) {
+    throw new Error("Multicall error");
   }
 
-  return constants;
+  // Todo: Check for failures and maybe make fallback queries
+  return {
+    alarmTime: res[0].result,
+    alarmDays: res[1].result,
+    betAmount: res[2].result,
+    player1: res[3].result,
+    player2: res[4].result,
+    missedAlarmPenalty: res[5].result,
+    submissionWindow: res[6].result,
+  };
 };
 
 export const getBetStanding = (
@@ -85,6 +82,8 @@ export const getBetStanding = (
   targetPlayer: EvmAddress
 ) => {
   const alarm = get(alarmStore);
+  if (!alarm.missedAlarmPenalty) return 0;
+
   const zero = BigInt(0);
   let otherPlayer;
   let urMissedDeadlines: bigint = BigInt(0);
