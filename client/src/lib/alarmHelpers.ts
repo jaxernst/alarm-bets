@@ -61,19 +61,22 @@ export const getAlarmConstants = async (alarmAddress: EvmAddress) => {
     ],
   });
 
-  if (res.some((r) => r.status !== "success")) {
+  if (
+    res.some((r) => r.status !== "success") ||
+    res.some((r) => r.result === undefined)
+  ) {
     throw new Error("Multicall error");
   }
 
   // Todo: Check for failures and maybe make fallback queries
   return {
-    alarmTime: res[0].result,
-    alarmDays: res[1].result,
-    betAmount: res[2].result,
-    player1: res[3].result,
-    player2: res[4].result,
-    missedAlarmPenalty: res[5].result,
-    submissionWindow: res[6].result,
+    alarmTime: res[0].result!,
+    alarmDays: res[1].result!,
+    betAmount: res[2].result!,
+    player1: res[3].result!,
+    player2: res[4].result!,
+    missedAlarmPenalty: res[5].result!,
+    submissionWindow: res[6].result!,
   };
 };
 
