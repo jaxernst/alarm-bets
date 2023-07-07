@@ -43,7 +43,7 @@
       <div
         class="flex h-full flex-col items-start justify-center overflow-visible px-1"
       >
-        <div class="pt-1" style="font-size: 2.1em; line-height: .8em">
+        <div class="pt-1" style="font-size: 2.1em; line-height: .85em">
           <ClockDisplay
             overrideTime={timeString(Number(alarmTime))}
             overrideColor={"orange"}
