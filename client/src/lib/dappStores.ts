@@ -5,10 +5,8 @@ import {
   type AlarmBaseInfo,
   getAlarmConstants,
   getStatus,
-  getMissedDeadlines,
   getTimeToNextDeadline,
-  getPlayerBalance,
-  getNumConfirmations,
+  getAlarmState,
   endAlarm,
 } from "./alarmHelpers";
 import { transactions } from "./transactions";
@@ -17,7 +15,7 @@ import { AlarmStatus } from "@sac/contracts/lib/types";
 import { watchContractEvent } from "@wagmi/core";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
 import SocialAlarmClockHub from "./abi/SocialAlarmClockHub";
-import { deploymentChainIds, hubDeployments } from "./hubdeployments";
+import { deploymentChainIds, hubDeployments } from "./hubDeployments";
 
 export type UserAlarm = Awaited<ReturnType<typeof UserAlarmStore>>;
 export type AlarmState = {
@@ -68,6 +66,7 @@ const alarmQueryDeps = derived([account, hub], ([$user, $hub]) => {
   };
 });
 
+// Get alarm info for all non-cancelled alarms
 function MakeUserAlarmsRecord() {
   const userAlarms = writable<Record<number, UserAlarm>>({});
 
@@ -90,18 +89,20 @@ function MakeUserAlarmsRecord() {
   // Auto fetch user alarms and create stores for them
   alarmQueryDeps.subscribe(async ({ hub: $hub, user: $user }) => {
     if (!$user || !$hub) return {};
-
     const alarms = await getUserAlarmsByType($hub, $user, "PartnerAlarmClock");
     if (!alarms) return {};
 
     const currentAlarms = get(userAlarms);
     for (const [id, alarm] of Object.entries(alarms)) {
-      if (currentAlarms[Number(id)]) {
+      if (
+        get(userAlarms)[Number(id)] ||
+        alarm.status === AlarmStatus.CANCELLED
+      ) {
         continue;
       }
       currentAlarms[Number(id)] = await UserAlarmStore(alarm);
+      userAlarms.set(currentAlarms);
     }
-    userAlarms.set(currentAlarms);
   });
 
   // Event listener stores
@@ -214,38 +215,36 @@ export const userAlarms = MakeUserAlarmsRecord();
  */
 async function UserAlarmStore(alarm: AlarmBaseInfo) {
   const addr = alarm.contractAddress;
-  const constantsResult = await getAlarmConstants(addr);
+
   const constants = writable({
     id: alarm.id,
     address: addr,
-    ...constantsResult,
+    ...(await getAlarmConstants(addr)),
   });
 
   const alarmState = writable<Partial<AlarmState> & { status: AlarmStatus }>({
     status: alarm.status,
   });
 
+  let stateInitialized = false;
   const initAlarmState = derived(constants, ($constants) => {
     return async () => {
-      const [p1, p2] = [$constants.player1, $constants.player2];
+      const [p1, p2] = [$constants["player1"], $constants.player2];
       if (!p1 || !p2) throw new Error("Constants not available");
 
       let _alarmState: Partial<AlarmState> = {
-        status: await getStatus(addr),
+        // Don't query for status on first state initializaiton (already passed in with 'alarm')
+        status: stateInitialized ? await getStatus(addr) : alarm.status,
       };
 
       if (_alarmState.status === AlarmStatus.ACTIVE) {
         _alarmState = {
           ..._alarmState,
-          timeToNextDeadline: await getTimeToNextDeadline(addr, p1),
-          player1MissedDeadlines: await getMissedDeadlines(addr, p1),
-          player2MissedDeadlines: await getMissedDeadlines(addr, p2),
-          player1Confirmations: await getNumConfirmations(addr, p1),
-          player2Confirmations: await getNumConfirmations(addr, p2),
-          player1Balance: await getPlayerBalance(addr, p1),
-          player2Balance: await getPlayerBalance(addr, p2),
+          ...(await getAlarmState(addr, p1, p2)),
         };
       }
+
+      stateInitialized = true;
 
       alarmState.update((s) => ({
         ...s,
@@ -324,6 +323,7 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
   );
 
   // Initialize alarm state automatically when created
+
   get(initAlarmState)();
 
   return {
