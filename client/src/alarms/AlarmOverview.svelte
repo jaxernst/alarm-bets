@@ -57,7 +57,7 @@
           </div>
         {/if}
       </div>
-      <div class="" style="font-size: .78em">
+      <div class="" style="font-size: .78em; line-height: 1.3em">
         <AlarmActiveDays {daysActive} />
       </div>
     </div>
