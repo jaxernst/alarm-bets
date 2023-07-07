@@ -59,24 +59,56 @@ export const getAlarmConstants = async (alarmAddress: EvmAddress) => {
       { ...args, functionName: "missedAlarmPenalty" },
       { ...args, functionName: "submissionWindow" },
     ],
+    allowFailure: false,
   });
 
-  if (
-    res.some((r) => r.status !== "success") ||
-    res.some((r) => r.result === undefined)
-  ) {
-    throw new Error("Multicall error");
-  }
-
-  // Todo: Check for failures and maybe make fallback queries
   return {
-    alarmTime: res[0].result!,
-    alarmDays: res[1].result!,
-    betAmount: res[2].result!,
-    player1: res[3].result!,
-    player2: res[4].result!,
-    missedAlarmPenalty: res[5].result!,
-    submissionWindow: res[6].result!,
+    alarmTime: res[0],
+    alarmDays: res[1],
+    betAmount: res[2],
+    player1: res[3],
+    player2: res[4],
+    missedAlarmPenalty: res[5],
+    submissionWindow: res[6],
+  };
+};
+
+export const getAlarmState = async (
+  alarmAddress: EvmAddress,
+  p1: EvmAddress,
+  p2: EvmAddress
+) => {
+  const args = { address: alarmAddress, abi: PartnerAlarmClock };
+
+  const [
+    timeToNextDeadline,
+    p1Missed,
+    p2Missed,
+    p1Confirms,
+    p2Confirms,
+    p1Balance,
+    p2Balance,
+  ] = await multicall({
+    contracts: [
+      { ...args, functionName: "timeToNextDeadline", args: [p1] },
+      { ...args, functionName: "missedDeadlines", args: [p1] },
+      { ...args, functionName: "missedDeadlines", args: [p2] },
+      { ...args, functionName: "numConfirmations", args: [p1] },
+      { ...args, functionName: "numConfirmations", args: [p2] },
+      { ...args, functionName: "getPlayerBalance", args: [p1] },
+      { ...args, functionName: "getPlayerBalance", args: [p2] },
+    ],
+    allowFailure: false,
+  });
+
+  return {
+    timeToNextDeadline,
+    player1MissedDeadlines: p1Missed,
+    player2MissedDeadlines: p2Missed,
+    player1Confirmations: p1Confirms,
+    player2Confirmations: p2Confirms,
+    player1Balance: p1Balance,
+    player2Balance: p2Balance,
   };
 };
 
@@ -282,22 +314,36 @@ export async function getUserAlarmsByType<T extends AlarmType>(
 
   if (!creationEvents) return;
 
-  const out: Record<number, AlarmBaseInfo> = {};
+  const alarms: Omit<AlarmBaseInfo, "status">[] = [];
   for (const { args, blockNumber } of [...creationEvents, ...joinEvents]) {
-    if (!args.id || !args.alarmAddr || !args.user || !blockNumber)
+    if (!args.id || !args.alarmAddr || !args.user || !blockNumber) {
       throw new Error("Bad event query");
+    }
 
-    // TODO: Use a multicall to query for all alarm status at once)
-    const id = Number(args.id);
-    out[id] = {
-      id,
+    alarms.push({
+      id: Number(args.id),
       contractAddress: args.alarmAddr,
       creationBlock: Number(blockNumber),
-      status: await getStatus(args.alarmAddr),
-    };
+    });
   }
 
-  return out;
+  // Factor out the status queries someday
+  const statusQueryRes = await multicall({
+    contracts: alarms.map(({ contractAddress }) => ({
+      address: contractAddress,
+      abi: PartnerAlarmClock,
+      functionName: "status",
+    })),
+    allowFailure: false,
+  });
+
+  return alarms.reduce<Record<number, AlarmBaseInfo>>((acc, alarm, i) => {
+    acc[alarm.id] = {
+      ...alarm,
+      status: statusQueryRes[i],
+    };
+    return acc;
+  }, {});
 }
 
 export async function queryAlarmCreationEvents(
