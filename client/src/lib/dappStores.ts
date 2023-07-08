@@ -316,7 +316,30 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
   );
 
   // Add confirmation listener
-  // watchContractEvent({});
+  watchContractEvent(
+    {
+      address: addr,
+      abi: PartnerAlarmClock,
+      eventName: "ConfirmationSubmitted",
+    },
+    ([log]) => {
+      console.log("Confirmation submitted", log.args);
+      let newConfirmationCount: Partial<AlarmState>;
+      alarmState.update((s) => {
+        if (log.args.from === get(constants).player1) {
+          newConfirmationCount = {
+            player1Confirmations: (s.player1Confirmations ?? 0n) + 1n,
+          };
+        } else {
+          newConfirmationCount = {
+            player2Confirmations: (s.player2Confirmations ?? 0n) + 1n,
+          };
+        }
+        console.log("new confirmation count", newConfirmationCount);
+        return { ...s, ...newConfirmationCount };
+      });
+    }
+  );
 
   // Consolidate params into single store
   const { subscribe } = derived(
@@ -330,7 +353,6 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
   );
 
   // Initialize alarm state automatically when created
-
   get(initAlarmState)();
 
   return {
