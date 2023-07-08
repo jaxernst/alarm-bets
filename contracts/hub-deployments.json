@@ -1,4 +1,7 @@
 {
   "base-goerli": "0x4a07b0728F9F52a64fD18C00C96a8a2bA5e34311",
-  "optimism-goerli": "0x4a07b0728F9F52a64fD18C00C96a8a2bA5e34311"
+  "optimism-goerli": [
+    "0x4a07b0728F9F52a64fD18C00C96a8a2bA5e34311",
+    "0x6e69B24Afd983B33773B65c129dDe277F97420a3"
+  ]
 }

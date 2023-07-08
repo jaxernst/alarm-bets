@@ -33,7 +33,14 @@ export default [
   },
   {
     anonymous: false,
-    inputs: [],
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+    ],
     name: "ConfirmationSubmitted",
     type: "event",
   },
