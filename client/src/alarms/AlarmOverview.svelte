@@ -10,15 +10,12 @@
 
   export let userAlarm: UserAlarm;
 
-  $: id = $userAlarm.id;
-  $: account = $getCurrentAccount();
-  $: daysActive = $userAlarm.alarmDays as number[];
-  $: otherPlayer =
-    account.address === $userAlarm.player1
-      ? $userAlarm.player2
-      : $userAlarm.player1;
-  $: alarmTime = $userAlarm.alarmTime;
-  $: status = $userAlarm.status;
+  $: [id, daysActive, alarmTime, status] = [
+    $userAlarm.id,
+    $userAlarm.alarmDays as number[],
+    $userAlarm.alarmTime,
+    $userAlarm.status,
+  ];
 
   const stylePending = (status: AlarmStatus) =>
     status === AlarmStatus.INACTIVE
