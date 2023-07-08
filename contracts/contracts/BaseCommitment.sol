@@ -50,7 +50,7 @@ contract BaseCommitment is ICommitment {
      * but derived commitments to not have to abide by this state change
      */
     function submitConfirmation() public virtual override onlyOwner {
-        emit ConfirmationSubmitted();
+        emit ConfirmationSubmitted(msg.sender);
         emit StatusChanged(status, CommitmentStatus.COMPLETE);
         status = CommitmentStatus.COMPLETE;
     }

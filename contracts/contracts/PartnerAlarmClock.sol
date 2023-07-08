@@ -106,7 +106,7 @@ contract PartnerAlarmClock is BaseCommitment {
      */
     function submitConfirmation() public override onlyPlayer {
         players[msg.sender].schedule.recordEntry();
-        emit ConfirmationSubmitted();
+        emit ConfirmationSubmitted(msg.sender);
     }
 
     function missedDeadlines(address player) public view returns (uint) {

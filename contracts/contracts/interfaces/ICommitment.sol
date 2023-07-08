@@ -5,7 +5,7 @@ import "../types.sol";
 
 interface ICommitment {
     event CommitmentInitialized(string description);
-    event ConfirmationSubmitted();
+    event ConfirmationSubmitted(address from);
     event ProofSubmitted(string uri, uint proofId);
     event ConfirmationRevoked(string uri, uint proofId);
     event StatusChanged(CommitmentStatus from, CommitmentStatus to);
