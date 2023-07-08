@@ -274,6 +274,7 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
   // Manage count down timers on alarm state
   const countdownInterval = 1; // Update countdown every second
   let interval: ReturnType<typeof setInterval>;
+  let reinitializingState = false;
   alarmState.subscribe((s) => {
     if (!s) return;
     // Set interval when there's no interval set, alarm is active, and there's a time value to decrement
@@ -284,8 +285,14 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
       );
     }
     // Re-query for alarm state once deadline has passed
-    if (s.timeToNextDeadline && s.timeToNextDeadline <= 0) {
-      get(initAlarmState)();
+    if (
+      s.timeToNextDeadline !== undefined &&
+      s.timeToNextDeadline <= 0 &&
+      !reinitializingState
+    ) {
+      console.log("getting new alarm state");
+      reinitializingState = true;
+      get(initAlarmState)().finally(() => (reinitializingState = false));
     }
     // Clear interval for inactive alarms
     if (s.status !== AlarmStatus.ACTIVE) clearInterval(interval);
