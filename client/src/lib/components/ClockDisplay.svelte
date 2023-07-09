@@ -49,10 +49,9 @@
 </div>
 
 <style>
-  /* latin */
   @font-face {
     font-family: "digital-clock";
-    src: url("fonts/digital-7.ttf");
+    src: url("/fonts/digital-7.ttf");
   }
 
   .clock-text-container {
