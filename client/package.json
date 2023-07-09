@@ -1,6 +1,5 @@
 {
   "name": "@sac/interface",
-  "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -33,6 +32,7 @@
     "@wagmi/core": "^1.0.5",
     "@web3modal/ethereum": "^2.4.1",
     "@web3modal/html": "^2.4.1",
+    "contracts": "^0.4.0",
     "svelte-web3": "^4.0.1",
     "viem": "^0.3.26"
   }

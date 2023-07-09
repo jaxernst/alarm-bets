@@ -1742,6 +1742,7 @@ __metadata:
     "@web3modal/html": ^2.4.1
     "@zerodevx/svelte-toast": ^0.9.3
     autoprefixer: ^10.4.14
+    contracts: ^0.4.0
     postcss: latest
     prettier: ^2.8.8
     prettier-plugin-svelte: ^2.10.0
@@ -2985,6 +2986,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"JSV@npm:3.5.0":
+  version: 3.5.0
+  resolution: "JSV@npm:3.5.0"
+  checksum: 890877b313f5fb886e766bfbd69a84df4ae78fa81ea079e57ab3b9936888a89bb17f518499935200b97136ff0f5d624fbf859b2216d379d3ddc1028ad026ec5b
+  languageName: node
+  linkType: hard
+
 "abbrev@npm:^1.0.0":
   version: 1.1.1
   resolution: "abbrev@npm:1.1.1"
@@ -3913,6 +3921,16 @@ __metadata:
   version: 1.1.0
   resolution: "console-control-strings@npm:1.1.0"
   checksum: 8755d76787f94e6cf79ce4666f0c5519906d7f5b02d4b884cf41e11dcd759ed69c57da0670afd9236d229a46e0f9cf519db0cd829c6dca820bb5a5c3def584ed
+  languageName: node
+  linkType: hard
+
+"contracts@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "contracts@npm:0.4.0"
+  dependencies:
+    JSV: 3.5.0
+    validator: 0.2.9
+  checksum: 9125f4f8b0dc6e67abbcfbcb0ba8563c44a6d1f399847fe04816e5428a1f73643ce4a6db9127358f258a1047f5a4b24639632df229ec8649b37c9fd294e7eeae
   languageName: node
   linkType: hard
 
@@ -8346,6 +8364,13 @@ __metadata:
   version: 3.0.1
   resolution: "v8-compile-cache-lib@npm:3.0.1"
   checksum: 78089ad549e21bcdbfca10c08850022b22024cdcc2da9b168bcf5a73a6ed7bf01a9cebb9eac28e03cd23a684d81e0502797e88f3ccd27a32aeab1cfc44c39da0
+  languageName: node
+  linkType: hard
+
+"validator@npm:0.2.9":
+  version: 0.2.9
+  resolution: "validator@npm:0.2.9"
+  checksum: 98132fa3957be6a6525655994463876e569f2ae02619face489547db592c0720f438881c091dcf01f02cf3998b1bab9a33b1b0362d395d39ebfa5b1811c7b729
   languageName: node
   linkType: hard
 
