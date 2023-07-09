@@ -9,8 +9,8 @@
     "start-local-interface": "yarn workspace @scp/protocol deploy-local && yarn workspace @social-alarm-clock/interface dev"
   },
   "workspaces": [
-    "client",
-    "contracts"
+    "client/*",
+    "contracts/*"
   ],
   "dependencies": {
     "ts-node": "^10.9.1",
