@@ -100,6 +100,12 @@ contract PartnerAlarmClock is BaseCommitment {
         emit CommitmentInitialized("Alarm Bet Started");
     }
 
+    function addToBalance(address player) public payable onlyPlayer {
+        require(status == CommitmentStatus.ACTIVE, "NOT_ACTIVE");
+        require(player == player1 || player == player2, "INVALID_PLAYER");
+        players[msg.sender].depositAmount += msg.value;
+    }
+
     /**
      * Allow either player to 'confirm' a wakeup. Wakeups must be submitted within
      * the submission window on an alarm day for the entry to be recorded
@@ -125,8 +131,7 @@ contract PartnerAlarmClock is BaseCommitment {
         return alarmActiveDays;
     }
 
-    // When a player withdraws, their total penalty is calculated based of their missed deadlines,
-    // and the penalty is added to the other player's deposit
+    // Ends the alarm and withdraws funds for both players with penalties/earnings applied
     function withdraw() public onlyPlayer {
         address otherPlayer = msg.sender == player1 ? player2 : player1;
 
