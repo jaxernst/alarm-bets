@@ -13,6 +13,7 @@ import {
 } from "./helpers/time";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { BigNumber } from "ethers";
 
 describe("Partner Alarm Clock test", () => {
   let hub: SocialAlarmClockHub;
@@ -21,23 +22,23 @@ describe("Partner Alarm Clock test", () => {
   let p1: SignerWithAddress;
   let p2: SignerWithAddress;
 
-  const collateralVal = parseEther("1");
-  const deadline = 60; // seconds in the future
-  const submissionWindow = 30; // seconds
+  // Defaults
+  const INITIAL_DEPOSIT = parseEther("1");
+  const SUBMISSION_WINDOW = 30; // seconds
 
-  const initAlarm = async (otherPlayer: string) => {
+  const initAlarm = async (otherPlayer: string, initDeposit: BigNumber) => {
     return await createAlarm(
       hub,
       "PartnerAlarmClock",
       {
         alarmTime: 0,
         alarmdays: [1, 2, 3, 4, 5, 6, 7],
-        submissionWindow: submissionWindow,
+        submissionWindow: SUBMISSION_WINDOW,
         missedAlarmPenalty: parseEther("0.1"),
         timezoneOffset: 0,
         otherPlayer,
       },
-      collateralVal
+      initDeposit
     );
   };
 
@@ -62,7 +63,7 @@ describe("Partner Alarm Clock test", () => {
 
   describe("Alarm Enforcement", () => {
     it("Cannot record entries or view missed deadlines until started", async () => {
-      const alarm = await initAlarm(p2.address);
+      const alarm = await initAlarm(p2.address, INITIAL_DEPOSIT);
       await expect(alarm.connect(p1).submitConfirmation()).to.be.revertedWith(
         "NOT_STARTED"
       );
@@ -91,14 +92,14 @@ describe("Partner Alarm Clock test", () => {
           alarmTime: curTime + 60,
           alarmdays: [curDay],
           missedAlarmPenalty: parseEther("0.1"),
-          submissionWindow: submissionWindow,
+          submissionWindow: SUBMISSION_WINDOW,
           timezoneOffset: 0,
           otherPlayer: p2.address,
         },
-        collateralVal
+        INITIAL_DEPOSIT
       );
 
-      await alarm.connect(p2).start({ value: collateralVal });
+      await alarm.connect(p2).start({ value: INITIAL_DEPOSIT });
 
       const resultP1 = await alarm.timeToNextDeadline(p1.address);
       const resultP2 = await alarm.timeToNextDeadline(p2.address);
@@ -117,14 +118,14 @@ describe("Partner Alarm Clock test", () => {
           alarmTime: alarmTime,
           alarmdays: [curDay, curDay + 1],
           missedAlarmPenalty: parseEther("0.1"),
-          submissionWindow: submissionWindow,
+          submissionWindow: SUBMISSION_WINDOW,
           timezoneOffset: localOffsetHrs * HOUR,
           otherPlayer: p2.address,
         },
-        collateralVal
+        INITIAL_DEPOSIT
       );
 
-      await alarm.connect(p2).start({ value: collateralVal });
+      await alarm.connect(p2).start({ value: INITIAL_DEPOSIT });
 
       const resultP1 = await alarm.timeToNextDeadline(p1.address);
       const resultP2 = await alarm.timeToNextDeadline(p2.address);
@@ -145,13 +146,31 @@ describe("Partner Alarm Clock test", () => {
     it("Records missed deadlines when either player misses an alarm");
   });
 
-  describe("Alarm Termination", () => {
+  describe("Alarm Management", () => {
     it(
       "Allows the creating player to withdraw (cancel request) before the alarm is started"
     );
     it(
       "When any player withdraws (ends the alarm), both player's funds are returned to them"
     );
-    it("");
+    it("Either player can add to their balance when the alarm is active", async () => {
+      const alarm = await initAlarm(p2.address, INITIAL_DEPOSIT);
+      await expect(alarm.addToBalance(p1.address, { value: parseEther("0.1") }))
+        .to.be.reverted;
+
+      await alarm.connect(p2).start({ value: INITIAL_DEPOSIT });
+
+      expect(await alarm.getPlayerBalance(p1.address)).to.equal(
+        INITIAL_DEPOSIT
+      );
+      expect(await alarm.getPlayerBalance(p2.address)).to.equal(
+        INITIAL_DEPOSIT
+      );
+
+      await alarm.addToBalance(p1.address, { value: parseEther("0.1") });
+      expect(await alarm.getPlayerBalance(p1.address)).to.equal(
+        INITIAL_DEPOSIT.add(parseEther("0.1"))
+      );
+    });
   });
 });
