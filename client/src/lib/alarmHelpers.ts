@@ -271,6 +271,21 @@ export async function endAlarm(alarmAddress: EvmAddress) {
   return (await writeContract(request)).hash;
 }
 
+export async function addToBalance(
+  alarmAddress: EvmAddress,
+  playerAddress: EvmAddress,
+  amount: bigint
+) {
+  const { request } = await prepareWriteContract({
+    address: alarmAddress,
+    abi: PartnerAlarmClock,
+    functionName: "addToBalance",
+    args: [playerAddress],
+    value: amount,
+  });
+  return (await writeContract(request)).hash;
+}
+
 export async function submitConfirmation(alarmAddress: EvmAddress) {
   const { request } = await prepareWriteContract({
     address: alarmAddress,

@@ -8,6 +8,7 @@ import {
   getTimeToNextDeadline,
   getAlarmState,
   endAlarm,
+  addToBalance,
 } from "./alarmHelpers";
 import { transactions } from "./transactions";
 import type { EvmAddress } from "../types";
@@ -16,6 +17,7 @@ import { watchContractEvent } from "@wagmi/core";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
 import SocialAlarmClockHub from "./abi/SocialAlarmClockHub";
 import { deploymentChainIds, hubDeployments } from "./hubDeployments";
+import { parseEther } from "viem";
 
 export type UserAlarm = Awaited<ReturnType<typeof UserAlarmStore>>;
 export type AlarmState = {
@@ -229,7 +231,7 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
   let stateInitialized = false;
   const initAlarmState = derived(constants, ($constants) => {
     return async () => {
-      const [p1, p2] = [$constants["player1"], $constants.player2];
+      const [p1, p2] = [$constants.player1, $constants.player2];
       if (!p1 || !p2) throw new Error("Constants not available");
 
       let _alarmState: Partial<AlarmState> = {
@@ -360,6 +362,23 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
     initAlarmState: get(initAlarmState),
     submitConfirmation: async () => {},
     startAlarm: async () => {},
+    addToBalance: async (player: EvmAddress, ethAmount: number) => {
+      const parsedAmount = parseEther(ethAmount.toString() as `${number}`);
+      const res = await transactions.addTransaction(
+        addToBalance(addr, player, parsedAmount)
+      );
+
+      if (!res.error) {
+        alarmState.update((s) => ({
+          ...s,
+          ...(player === get(constants).player1
+            ? { player1Balance: (s.player1Balance ?? 0n) + parsedAmount }
+            : { player2Balance: (s.player2Balance ?? 0n) + parsedAmount }),
+        }));
+      }
+
+      return res;
+    },
     endAlarm: async () => {
       const res = await transactions.addTransaction(endAlarm(addr));
       return res;

@@ -22,6 +22,9 @@
   import { expoOut } from "svelte/easing";
   import { toast } from "@zerodevx/svelte-toast";
   import DiamondSpinner from "../lib/components/DiamondSpinner.svelte";
+  import { writable } from "svelte/store";
+  import { getCurrentAccount } from "../lib/chainClient";
+  import EthereumIcon from "../assets/ethereum-icon.svelte";
 
   export let alarm: UserAlarm;
 
@@ -29,6 +32,7 @@
     throw new Error("required alarm prop not available");
   }
 
+  $: account = $getCurrentAccount().address;
   $: alarmAddress = $alarm.address;
 
   let initialQuery = false;
@@ -62,6 +66,27 @@
   // Show details by default when alarm is pending
   let showAlarmInfo = $alarm.status === AlarmStatus.INACTIVE;
   $: rotatedDropdown = () => (showAlarmInfo ? "rotate-180" : "");
+
+  let showAddToBalance = false;
+  let addingToBalance = false;
+  const addToBalanceAmount = writable<number>(0);
+
+  const addToBalance = async () => {
+    addingToBalance = true;
+    try {
+      const res = await alarm.addToBalance(account, $addToBalanceAmount);
+      if (res.error) {
+        toast.push("Failed to add funds to alarm balance");
+      } else {
+        toast.push("Added funds to alarm balance!");
+      }
+    } finally {
+      addingToBalance = false;
+      showAddToBalance = false;
+    }
+  };
+
+  $: console.log(addingToBalance);
 </script>
 
 <EndAlarmModal {alarm} />
@@ -82,30 +107,64 @@
         />
       </div>
       <div class="justify-self-end">
-        <Menu class="relative">
+        <Menu class="relative" let:open>
           <MenuButton class="z-50 justify-self-end">
             <SettingsIcon
               klass="m-1 h-[15px] w-[15px] fill-zinc-500 hover:fill-zinc-300 hover:scale-105"
             />
           </MenuButton>
-          <MenuItems
-            class="absolute right-5 top-5 z-50 flex flex-col gap-0 rounded-lg bg-zinc-900 text-xs font-bold"
-          >
-            <MenuItem>
-              <button
-                class="w-full whitespace-nowrap rounded-lg p-2 hover:bg-zinc-700"
-              >
-                Add to Balance
-              </button>
-            </MenuItem>
-            <MenuItem>
-              <button
-                class="w-full whitespace-nowrap rounded-lg p-2 text-red-700 hover:bg-zinc-700"
-                on:click={() => ($showEndAlarmModal = !$showEndAlarmModal)}
-                >End Alarm</button
-              >
-            </MenuItem>
-          </MenuItems>
+          {#if open || showAddToBalance}
+            <MenuItems
+              class="absolute right-5 top-5 z-50 flex flex-col gap-0 rounded-lg bg-zinc-900 text-xs font-bold"
+              static
+            >
+              <MenuItem>
+                {#if !showAddToBalance}
+                  <button
+                    class="w-full whitespace-nowrap rounded-lg p-2 hover:bg-zinc-700"
+                    on:click={() => (showAddToBalance = true)}
+                  >
+                    Add to Balance
+                  </button>
+                {:else}
+                  <div class="flex items-center px-2">
+                    <div>
+                      <input
+                        type="number"
+                        class="bg-highlight-transparent-grey w-[75px] rounded-lg py-[.17em] text-center"
+                        min="0"
+                        step="0.001"
+                        bind:value={$addToBalanceAmount}
+                      />
+                    </div>
+                    <div class="py-3">
+                      <div class="h-3 w-3 fill-zinc-400">
+                        <EthereumIcon />
+                      </div>
+                    </div>
+                    <button
+                      class="w-full whitespace-nowrap rounded-lg p-2"
+                      on:click={addToBalance}
+                      disabled={$addToBalanceAmount === 0}
+                    >
+                      {#if !addingToBalance}
+                        Add
+                      {:else}
+                        <DiamondSpinner size={"30"} color={"white"} />
+                      {/if}
+                    </button>
+                  </div>
+                {/if}
+              </MenuItem>
+              <MenuItem>
+                <button
+                  class="w-full whitespace-nowrap rounded-lg p-2 text-red-700 hover:bg-zinc-700"
+                  on:click={() => ($showEndAlarmModal = !$showEndAlarmModal)}
+                  >End Alarm</button
+                >
+              </MenuItem>
+            </MenuItems>
+          {/if}
         </Menu>
       </div>
     </div>
@@ -183,7 +242,7 @@
   >
     {#if $alarm.status === AlarmStatus.ACTIVE}
       {#if submitPending}
-        <div class="p-2">
+        <div class="p-3">
           <DiamondSpinner size={"30"} color={"white"} />
         </div>
       {:else}
