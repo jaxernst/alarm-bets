@@ -24,10 +24,10 @@
       </button>
     {:else if $networkError === "UNSUPPORTED_NETWORK"}
       <div class="indicator" style="background-color:{indicatorColor}" />
-      <div class="text-sm text-red-600">Wrong Network</div>
+      <div class="px-1 text-sm text-red-500">Wrong Network</div>
     {:else}
       <div class="indicator" style="background-color:{indicatorColor}" />
-      <div class="displayName">
+      <div class="displayName px-1">
         {displayName || ""}
       </div>
     {/if}
