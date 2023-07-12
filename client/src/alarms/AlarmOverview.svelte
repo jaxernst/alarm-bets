@@ -27,7 +27,7 @@
 </script>
 
 <button
-  class="h-[60px] max-w-[230px] rounded-xl p-1 text-left transition hover:bg-zinc-700 {stylePending(
+  class="h-[60px] w-full max-w-[230px] rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
     status
   )} {styleSelected(id)}"
   on:click={() => ($displayedAlarmId = id)}
@@ -36,9 +36,9 @@
     <div class="text-sm font-bold">Alarm ID: {id}</div>
     <div class="text-xs">Waiting on Player 2 to start alarm...</div>
   {:else if status === AlarmStatus.ACTIVE}
-    <div class="grid h-full grid-cols-[63%_1fr] items-start">
+    <div class="grid grid-cols-[63%_1fr]">
       <div
-        class="flex h-full flex-col items-start justify-center overflow-visible px-1"
+        class="flex h-full flex-col items-start justify-center overflow-visible"
       >
         <div class="pt-1" style="font-size: 2.1em; line-height: .85em">
           <ClockDisplay
@@ -46,18 +46,18 @@
             overrideColor={"orange"}
           />
         </div>
-        {#if $userAlarm.timeToNextDeadline}
-          <div class="overflow-visible whitespace-nowrap text-xs">
-            In <span class=""
-              >{formatTime(Number($userAlarm.timeToNextDeadline))}</span
-            >
-          </div>
-        {/if}
       </div>
-      <div class="" style="font-size: .78em; line-height: 1.3em">
+      <div class="pb-[.2em]" style="font-size: .78em; line-height: 1.3em">
         <AlarmActiveDays {daysActive} />
       </div>
     </div>
+    {#if $userAlarm.timeToNextDeadline}
+      <div class="overflow-visible whitespace-nowrap text-xs">
+        In <span class=""
+          >{formatTime(Number($userAlarm.timeToNextDeadline))}</span
+        >
+      </div>
+    {/if}
   {/if}
 </button>
 
