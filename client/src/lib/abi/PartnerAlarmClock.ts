@@ -85,6 +85,19 @@ export default [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+    ],
+    name: "addToBalance",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "uint256",
         name: "",
         type: "uint256",
