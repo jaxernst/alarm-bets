@@ -117,20 +117,19 @@ export const getBetStanding = (
   targetPlayer: EvmAddress
 ) => {
   const alarm = get(alarmStore);
-  if (!alarm.missedAlarmPenalty) return 0;
+  if (!alarm.missedAlarmPenalty) return 0n;
 
-  const zero = BigInt(0);
   let otherPlayer;
-  let urMissedDeadlines: bigint = BigInt(0);
-  let theirMissedDeadlines: bigint = BigInt(0);
+  let urMissedDeadlines: bigint = 0n;
+  let theirMissedDeadlines: bigint = 0n;
   if (targetPlayer === alarm.player1) {
     otherPlayer = alarm.player2;
-    urMissedDeadlines = alarm.player1MissedDeadlines ?? zero;
-    theirMissedDeadlines = alarm.player2MissedDeadlines ?? zero;
+    urMissedDeadlines = alarm.player1MissedDeadlines ?? 0n;
+    theirMissedDeadlines = alarm.player2MissedDeadlines ?? 0n;
   } else if (targetPlayer === alarm.player2) {
     otherPlayer = alarm.player1;
-    urMissedDeadlines = alarm.player2MissedDeadlines ?? zero;
-    theirMissedDeadlines = alarm.player1MissedDeadlines ?? zero;
+    urMissedDeadlines = alarm.player2MissedDeadlines ?? 0n;
+    theirMissedDeadlines = alarm.player1MissedDeadlines ?? 0n;
   } else {
     throw new Error("Invariant error");
   }
