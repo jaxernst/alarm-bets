@@ -30,12 +30,10 @@
 
     document.addEventListener("click", handleFocusIn);
     document.addEventListener("focusin", handleFocusIn);
-    document.addEventListener("touchstart", handleFocusIn);
     return {
       destroy: () => {
         document.removeEventListener("click", handleFocusIn);
         document.removeEventListener("focusin", handleFocusIn);
-        document.removeEventListener("touchstart", handleFocusIn);
       },
     };
   }
