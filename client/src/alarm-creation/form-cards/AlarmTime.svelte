@@ -15,7 +15,7 @@
   <div class="min-w-[140px]">
     <input
       id="select-time"
-      class="bg-transparent text-center outline-none"
+      class=" bg-transparent-grey rounded-lg text-center outline-none"
       type="time"
       bind:value={$alarmTime}
     />
