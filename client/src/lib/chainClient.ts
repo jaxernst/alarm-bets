@@ -17,12 +17,12 @@ import {
   w3mProvider,
 } from "@web3modal/ethereum";
 import type { EvmAddress } from "../types";
-import { baseGoerli, optimismGoerli } from "viem/chains";
+import { optimismGoerli } from "viem/chains";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 
 export type Account = GetAccountResult & { address: EvmAddress };
 
-const supportedChains = [hardhat, baseGoerli, optimismGoerli];
+const supportedChains = [optimismGoerli];
 const projectId = "698bddafdbc932fc6eb19c24ab471c3a";
 
 const { publicClient, webSocketPublicClient } = configureChains(
