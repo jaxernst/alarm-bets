@@ -23,13 +23,14 @@
   });
 
   function activeOnChildFocus(node: HTMLElement) {
-    const handleFocusIn = () =>
-      (active = node.contains(document.activeElement));
+    const handleFocusIn = () => {
+      active = node.contains(document.activeElement);
+    };
 
-    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("click", handleFocusIn);
     return {
       destroy: () => {
-        document.removeEventListener("focusin", handleFocusIn);
+        document.removeEventListener("click", handleFocusIn);
       },
     };
   }
