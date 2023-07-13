@@ -78,7 +78,7 @@ export const createAlarm = derived(
   [bundledParams, isReady, hub],
   ([p, $isReady, $hub]) => {
     return () => {
-      if (!$isReady) {
+      if (!$isReady || !$hub) {
         return console.error("Cannot create alarm: Params invalid");
       }
 
