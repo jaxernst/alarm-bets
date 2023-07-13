@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { doc } from "prettier";
-
   import { activeTab } from "../view";
 
   import { onDestroy } from "svelte";
@@ -28,11 +26,9 @@
     const handleFocusIn = () =>
       (active = node.contains(document.activeElement));
 
-    document.addEventListener("click", handleFocusIn);
     document.addEventListener("focusin", handleFocusIn);
     return {
       destroy: () => {
-        document.removeEventListener("click", handleFocusIn);
         document.removeEventListener("focusin", handleFocusIn);
       },
     };
