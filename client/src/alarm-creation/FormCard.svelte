@@ -22,9 +22,9 @@
     $initialWidth = container.getBoundingClientRect().width;
   });
 
-  function activeOnChildFocus(node: HTMLElement) {
-    const handleFocusIn = () => {
-      active = node.contains(document.activeElement);
+  function activeOnChildClick(node: HTMLElement) {
+    const handleFocusIn = (e: MouseEvent) => {
+      active = node.contains(e.target as Node);
     };
 
     document.addEventListener("click", handleFocusIn);
@@ -46,9 +46,9 @@
 </script>
 
 <button
-  class={`bg-highlight-transparent-grey relative flex h-[65px] flex-col justify-start rounded-xl px-2 transition
+  class={` bg-highlight-transparent-grey relative z-50 flex h-[65px] flex-col justify-start rounded-xl px-2 transition
     ${buttonClasses()} ${active || !inputEmpty ? "" : "pb-2"}`}
-  use:activeOnChildFocus
+  use:activeOnChildClick
   bind:this={container}
 >
   <div class={"text-s text-bold pt-1 text-zinc-500"} style="line-height: 1em">
