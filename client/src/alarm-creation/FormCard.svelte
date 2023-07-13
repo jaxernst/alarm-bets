@@ -27,9 +27,11 @@
       (active = node.contains(document.activeElement));
 
     document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("touchstart", handleFocusIn);
     return {
       destroy: () => {
         document.removeEventListener("focusin", handleFocusIn);
+        document.removeEventListener("touchstart", handleFocusIn);
       },
     };
   }
