@@ -73,7 +73,7 @@
     {#key showAbout}
       <div
         class={`absolute ${
-          showAbout ? "top-0" : "bottom-20"
+          showAbout ? "top-5" : "bottom-20"
         } flex flex-col items-center justify-center`}
         in:receive={{ key: "about" }}
         out:send={{ key: "about" }}
@@ -84,7 +84,7 @@
           in:singleFadeIn={{ delay: 2600, duration: 800 }}
           out:fade
         >
-          <i class="mt-3 text-zinc-400">
+          <i class="text-zinc-400">
             {#if showAbout}
               About the Social Alarm Clock
             {:else}
@@ -115,7 +115,7 @@
     {#if showAbout}
       <div
         transition:slide={pullUpParams}
-        class="overflow-y- absolute bottom-10 my-3 flex max-w-[580px] flex-col gap-6 p-3"
+        class="absolute bottom-10 my-3 flex max-h-[80%] max-w-[580px] flex-col gap-6 overflow-y-auto p-3"
       >
         <div>
           The Social Alarm Clock is a two player onchain betting game that
