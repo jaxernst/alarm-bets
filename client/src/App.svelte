@@ -20,6 +20,7 @@
   import { get } from "svelte/store";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { account } from "./lib/chainClient";
+  import Welcome from "./Welcome.svelte";
 
   $: activeTabStyles = (t: Tab) =>
     t === $activeTab
@@ -38,9 +39,13 @@
   $: if (currentAlarms.length > 0) {
     $displayedAlarmId = get(currentAlarms[0]).id;
   }
+
+  let showWelcome = true;
 </script>
 
 <SvelteToast />
+
+<Welcome />
 
 <div class="h-full">
   <div class="absolute flex w-full justify-center">

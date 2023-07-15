@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "digital-clock";
+  src: url("/fonts/digital-7.ttf");
+}
+
 :root {
   line-height: 1.5;
   font-weight: 400;
