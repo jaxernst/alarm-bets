@@ -83,11 +83,9 @@
           in:singleFadeIn={{ delay: 2600, duration: 800 }}
           out:fade
         >
-          <i class="text-zinc-400">
+          <i class="mt-3 text-zinc-400">
             {#if showAbout}
-              <div class="font-digital mt-4 text-xl text-zinc-100">
-                About the Social Alarm Clock
-              </div>
+              About the Social Alarm Clock
             {:else}
               New here? Read more
             {/if}
@@ -117,7 +115,7 @@
       <div
         in:slide={{ delay: 280, duration: 400, easing: cubicOut }}
         out:slide={{ duration: 300, easing: cubicIn }}
-        class="overflow-y- absolute my-3 flex max-w-[580px] flex-col gap-6 p-3"
+        class="overflow-y- absolute top-10 my-3 flex max-w-[580px] flex-col gap-6 p-3"
       >
         <div>
           The Social Alarm Clock is a two player onchain betting game that
