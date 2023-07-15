@@ -14,7 +14,8 @@
   let typewriterComplete = false;
   let showAbout = false;
 
-  const [send, receive] = crossfade({ duration: 600, easing: cubicInOut });
+  const pullUpParams = { duration: 600, easing: cubicInOut };
+  const [send, receive] = crossfade(pullUpParams);
 
   let singleFadeInComplete = false;
   function singleFadeIn(
@@ -113,22 +114,21 @@
 
     {#if showAbout}
       <div
-        in:slide={{ delay: 280, duration: 400, easing: cubicOut }}
-        out:slide={{ duration: 300, easing: cubicIn }}
-        class="overflow-y- absolute top-10 my-3 flex max-w-[580px] flex-col gap-6 p-3"
+        transition:slide={pullUpParams}
+        class="overflow-y- absolute bottom-10 my-3 flex max-w-[580px] flex-col gap-6 p-3"
       >
         <div>
           The Social Alarm Clock is a two player onchain betting game that
-          rewards waking up early.
+          incentives waking up early.
         </div>
 
         <div>
-          <b>The Jist</b>
+          <b>The Gist</b>
           <p>
             Two players put down money and challenge each other to wake up at a
-            specific time. Failure to wakeup before the alarm time results in a
-            penalty where a portion of your deposit gets transferred to the
-            other player.
+            specific time on a recurring schedule. On these mornings, each
+            player must submit a 'wakeup' confirmation before their alarm time,
+            else they risk losing a portion of your bet to the other player.
           </p>
         </div>
 
