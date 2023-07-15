@@ -85,8 +85,6 @@
       showAddToBalance = false;
     }
   };
-
-  $: console.log(addingToBalance);
 </script>
 
 <EndAlarmModal {alarm} />
