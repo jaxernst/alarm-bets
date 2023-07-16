@@ -11,8 +11,8 @@
   import { flip } from "svelte/animate";
 
   let isOpen = true;
-  let typewriterComplete = false;
-  let showAbout = false;
+  let typewriterComplete = true;
+  let showAbout = true;
 
   const pullUpParams = { duration: 600, easing: cubicInOut };
   const [send, receive] = crossfade(pullUpParams);
@@ -119,11 +119,11 @@
       >
         <div>
           The Social Alarm Clock is a two player onchain betting game that
-          incentives waking up early.
+          incentivizes waking up early.
         </div>
 
         <div>
-          <b>The Gist</b>
+          <b class="text-cyan-500">The Gist</b>
           <p>
             Two players put down money and challenge each other to wake up at a
             specific time on a recurring schedule. On these mornings, each
@@ -133,7 +133,15 @@
         </div>
 
         <div>
-          <b>How to play</b>
+          <b class="text-cyan-500">How to play</b>
+          <div>
+            This is an onchain application and requires a web3 wallet to play!
+          </div>
+          <a href="https://ethereum.org/en/wallets/" class="text-cyan-700"
+            >(What does that mean?)</a
+          >
+        </div>
+        <div>
           <div>
             Before play can begin, you must find a friend or stranger willing to
             enter into an alarm 'wakeup' bet. Next, both players must agree on
@@ -149,18 +157,63 @@
             <li>The penalty for missing a 'wakeup'</li>
             <li>
               The window of time BEFORE the alarm each player will have to
-              confirm their wakeup.
+              confirm their wakeup (submission window).
             </li>
           </ul>
         </div>
 
         <div>
-          Next either player can create the alarm contract, and after the second
-          player joins, the game will begin. The bet continues indefinitely
-          until one player decides to end the game and withdraw their funds.
+          Now one player creates the alarm, then second player joins, and the
+          alarm automatically activates. The alarm will remain active
+          indefinetly, or until either players decides to withdraw.
         </div>
 
-        <div />
+        <div>
+          <b class="text-cyan-500">Confirming Wakeups</b>
+          <div>
+            In order to prove to your partner that you have woken, you simply
+            need to sign a blockchain transaction as an attestation of your
+            wakefulness. (Must be done within the submission window)
+          </div>
+        </div>
+
+        <div>
+          Remember, this is a game to help you and your partner build better
+          sleep habits. If you suspect your partner is falling back asleep after
+          their confirmation or being dishonest about waking up, you can
+          withdraw at any time to find a new partner.
+        </div>
+
+        <div>
+          <b class="text-cyan-500">Important notes</b>
+          <ul class="list-disc pl-4">
+            <li>
+              The Social Alarm Clock is free to play. The smart contracts do not
+              impose any fee or tax.
+            </li>
+            <li>
+              The Social Alarm Clock is open source, and all smart contracts +
+              frontend code can be viewed on <span
+                ><a
+                  href="https://github.com/jaxernst/the-social-alarm-clock"
+                  class="text-cyan-700">Github</a
+                ></span
+              >
+            </li>
+            <li>
+              Though the Social Alarm Clock smart contracts are well tested,
+              there are no gurantees that they are bug free. Only put in what
+              what you are willing to lose.
+            </li>
+            <li>
+              Timezones: Each player must specify their timezone when creating
+              an alarm. Individual player timezones can be offset when creating
+              the alarm, but it is recommended to choose the timezone you expect
+              to play in. The 'alarm' time displayed in the UI will adjust based
+              on the timezone you are physically in.
+            </li>
+          </ul>
+        </div>
       </div>
     {/if}
   {/if}
