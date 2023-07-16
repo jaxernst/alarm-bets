@@ -15,7 +15,7 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
 
-describe("Partner Alarm Clock test", () => {
+describe("Partner Alarm Clock spec", () => {
   let hub: SocialAlarmClockHub;
   let alarm: PartnerAlarmClock;
   let blockTime: number;
@@ -99,7 +99,7 @@ describe("Partner Alarm Clock test", () => {
         INITIAL_DEPOSIT
       );
 
-      await alarm.connect(p2).start({ value: INITIAL_DEPOSIT });
+      await alarm.connect(p2).start(0, { value: INITIAL_DEPOSIT });
 
       const resultP1 = await alarm.timeToNextDeadline(p1.address);
       const resultP2 = await alarm.timeToNextDeadline(p2.address);
@@ -111,6 +111,7 @@ describe("Partner Alarm Clock test", () => {
       const curTime = timeOfDay(blockTime, localOffsetHrs);
       const curDay = dayOfWeek(blockTime, localOffsetHrs);
       const alarmTime = curTime + 60;
+      const offset = localOffsetHrs * HOUR;
       const alarm = await createAlarm(
         hub,
         "PartnerAlarmClock",
@@ -119,13 +120,13 @@ describe("Partner Alarm Clock test", () => {
           alarmdays: [curDay, curDay + 1],
           missedAlarmPenalty: parseEther("0.1"),
           submissionWindow: SUBMISSION_WINDOW,
-          timezoneOffset: localOffsetHrs * HOUR,
+          timezoneOffset: offset,
           otherPlayer: p2.address,
         },
         INITIAL_DEPOSIT
       );
 
-      await alarm.connect(p2).start({ value: INITIAL_DEPOSIT });
+      await alarm.connect(p2).start(offset, { value: INITIAL_DEPOSIT });
 
       const resultP1 = await alarm.timeToNextDeadline(p1.address);
       const resultP2 = await alarm.timeToNextDeadline(p2.address);
@@ -158,7 +159,7 @@ describe("Partner Alarm Clock test", () => {
       await expect(alarm.addToBalance(p1.address, { value: parseEther("0.1") }))
         .to.be.reverted;
 
-      await alarm.connect(p2).start({ value: INITIAL_DEPOSIT });
+      await alarm.connect(p2).start(0, { value: INITIAL_DEPOSIT });
 
       expect(await alarm.getPlayerBalance(p1.address)).to.equal(
         INITIAL_DEPOSIT

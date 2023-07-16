@@ -28,7 +28,6 @@ contract PartnerAlarmClock is BaseCommitment {
     uint public alarmTime;
     uint8[] public alarmActiveDays;
     uint public submissionWindow;
-    int public timezoneOffset;
     uint public betAmount;
     address public player1;
     address public player2;
@@ -42,16 +41,16 @@ contract PartnerAlarmClock is BaseCommitment {
 
         // Initialize to an inactive state, commitment becomes activated once player 2 starts
         status = CommitmentStatus.INACTIVE;
-        name = IMPLEMENTATION_NAME;
         betAmount = msg.value;
         player1 = tx.origin;
+        int p1TimezoneOffset;
 
         (
             alarmTime,
             alarmActiveDays,
             missedAlarmPenalty,
             submissionWindow,
-            timezoneOffset,
+            p1TimezoneOffset,
             player2
         ) = abi.decode(data, (uint, uint8[], uint, uint, int, address));
 
@@ -60,14 +59,7 @@ contract PartnerAlarmClock is BaseCommitment {
             alarmTime,
             alarmActiveDays,
             submissionWindow,
-            timezoneOffset
-        );
-
-        players[player2].schedule = AlarmSchedule.init(
-            alarmTime,
-            alarmActiveDays,
-            submissionWindow,
-            timezoneOffset
+            p1TimezoneOffset
         );
     }
 
@@ -82,14 +74,22 @@ contract PartnerAlarmClock is BaseCommitment {
     /**
      * Only player2 can start the alarm
      */
-    function start() public payable {
+    function start(int p2TimezoneOffset) public payable {
         require(status == CommitmentStatus.INACTIVE, "ALREADY_STARTED");
         require(msg.value >= betAmount, "INSUFFICIENT_FUNDS_SENT");
         require(msg.sender == player2, "ONLY_PLAYER_2_CAN_START");
 
         players[player1].schedule.start();
-        players[player2].schedule.start();
+
         players[player2].depositAmount += msg.value;
+        players[player2].schedule = AlarmSchedule.init(
+            alarmTime,
+            alarmActiveDays,
+            submissionWindow,
+            p2TimezoneOffset
+        );
+
+        players[player2].schedule.start();
 
         deploymentHub.emitUserJoined(
             RegisteredAlarmType.PARTNER_ALARM_CLOCK,
