@@ -44,7 +44,7 @@
   <div class="flex items-center">
     <div
       class={`flex flex-grow items-center gap-2 py-1 ${
-        standing < BigInt(0) ? "text-red-600" : "text-green-500"
+        standing < BigInt(0) ? "text-red-700" : "text-green-600"
       }`}
     >
       {standing > BigInt(0)
