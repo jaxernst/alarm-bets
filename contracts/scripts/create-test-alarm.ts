@@ -7,12 +7,9 @@ import {
   systemTimestamp,
   timeOfDay,
 } from "../test/helpers/time";
-import { encodeCreationParams } from "@scp/sdk";
-import { commitmentTypeVals, solidityInitializationTypes } from "../lib/types";
+import { alarmTypeVals, solidityInitializationTypes } from "../lib/types";
 import { parseEther } from "ethers/lib/utils.js";
 import { waitForBlock, waitForOneBlock } from "../test/helpers/providerUtils";
-import { connectionError } from "../../dapps/pledger/src/lib/stores/dAppReady";
-
 require("dotenv").config();
 
 const HUB_ADDR = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
@@ -22,8 +19,8 @@ async function main() {
   const u1 = new Wallet(process.env.TEST_U1_KEY as string, ethers.provider);
   const u2 = new Wallet(process.env.TEST_U2_KEY as string, ethers.provider);
 
-  const commitment = (
-    await ethers.getContractAt("CommitmentHub", HUB_ADDR)
+  const hub = (
+    await ethers.getContractAt("SocialAlarmClockHub", HUB_ADDR)
   ).connect(u1);
 
   for (let u of [u1, u2]) {
@@ -44,24 +41,26 @@ async function main() {
       dayOfWeek,
       missedAlarmPenalty,
       submissionWindow,
-      -7 * HOUR,
+      -6 * HOUR,
       u2.address,
     ]
   );
 
-  const tx = await commitment.createCommitment(
-    commitmentTypeVals["PartnerAlarmClock"],
+  const tx = await hub.createAlarm(
+    alarmTypeVals["PartnerAlarmClock"],
     encoded,
     { value: missedAlarmPenalty }
   );
 
   const rc = await tx.wait();
 
-  const commitAddr = rc.events?.find((e) => e.event === "CommitmentCreation")
-    ?.args?.commitmentAddr;
+  const commitAddr = rc.events?.find((e) => e.event === "AlarmCreation")?.args
+    ?.alarmAddr;
 
   const commit = await ethers.getContractAt("PartnerAlarmClock", commitAddr);
-  const tx1 = await commit.connect(u2).start({ value: missedAlarmPenalty });
+  const tx1 = await commit
+    .connect(u2)
+    .start(-6 * HOUR, { value: missedAlarmPenalty });
   await tx1.wait();
   await waitForOneBlock();
   console.log(systemTimestamp());
