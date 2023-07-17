@@ -135,11 +135,14 @@
         <div>
           <b class="text-cyan-500">How to play</b>
           <div>
-            This is an onchain application and requires a web3 wallet to play!
+            This is an onchain application and requires a <span
+              ><a
+                href="https://ethereum.org/en/wallets/"
+                class="text-cyan-600 underline underline-offset-1"
+                >web3 wallet</a
+              ></span
+            > to play!
           </div>
-          <a href="https://ethereum.org/en/wallets/" class="text-cyan-700"
-            >(What does that mean?)</a
-          >
         </div>
         <div>
           <div>
@@ -150,7 +153,7 @@
         </div>
 
         <div>
-          <ul class="list-disc pl-4">
+          <ul class="list-disc pl-4 marker:text-cyan-500">
             <li>The alarm time</li>
             <li>The days of the week to enforce it</li>
             <li>The initial value to bet</li>

@@ -194,7 +194,7 @@
     {#if Number($alarm.alarmTime) !== correctedAlarmTime}
       <div class="pb-1 text-center text-xs text-red-700">
         Your current local timezone differs from your preset alarm timezone.
-        (Displaying adjusted alarm time)
+        (Displaying adjusted alarm times)
       </div>
     {/if}
 
