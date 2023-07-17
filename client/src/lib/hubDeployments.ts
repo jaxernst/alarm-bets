@@ -9,5 +9,5 @@ export const hubDeployments: Record<
 > = {
   84531: "0x4a07b0728F9F52a64fD18C00C96a8a2bA5e34311",
   31337: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-  420: "0xaEAeCc278fA22091d1Bd03f7f5f0BD7FE8B86372",
+  420: "0x43c9118ba7B885d39d5d489F1fb5591bc09e6e6a",
 };
