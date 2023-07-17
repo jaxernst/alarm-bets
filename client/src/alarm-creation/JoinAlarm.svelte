@@ -5,13 +5,14 @@
     getAlarmById,
     getAlarmConstants,
     getPlayer,
+    getPlayerTimezone,
     getStatus,
     startAlarm,
   } from "../lib/alarmHelpers";
   import { transactions } from "../lib/transactions";
   import { shorthandAddress, timeString } from "../lib/util";
   import { formatEther } from "viem";
-  import { MINUTE } from "../lib/time";
+  import { MINUTE, localTzOffsetHrs } from "../lib/time";
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
   import AlarmActiveDays from "../lib/components/AlarmActiveDays.svelte";
   import ActionButton from "../lib/styled-components/ActionButton.svelte";
@@ -19,12 +20,11 @@
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import DiamondSpinner from "../lib/components/DiamondSpinner.svelte";
   import { hub } from "../lib/dappStores";
-
-  // TODO: Make sure user can't join an already active alarm
-  // Todo: Make button styling consistent with other pages
+  import { activeTab } from "../view";
 
   let alarmId = "";
   let error: null | string = null;
+  let tzOffset = localTzOffsetHrs();
 
   $: account = $getCurrentAccount().address;
 
@@ -39,12 +39,13 @@
       const otherPlayer = await getPlayer(targetAlarm, 1);
 
       const txResult = await transactions.addTransaction(
-        startAlarm(targetAlarm)
+        startAlarm(targetAlarm, tzOffset)
       );
       if (!txResult.error) {
         toast.push(
           `Successfully joined alarm with ${shorthandAddress(otherPlayer)}!`
         );
+        $activeTab = "alarms";
       } else {
         toast.push("Alarm creation failed with: " + txResult.error.message);
       }
@@ -57,6 +58,7 @@
     | null
     | ({
         player1: EvmAddress;
+        player1Timezone: number;
         player2: EvmAddress;
         status: AlarmStatus;
         id: string;
@@ -74,10 +76,18 @@
     error = null;
     try {
       const alarmAddr = await getAlarmById(alarmId, $hub);
+      const constants = await getAlarmConstants(alarmAddr);
+      console.log(
+        "player1timezone",
+        Number(await getPlayerTimezone(alarmAddr, constants.player1))
+      );
       searchedAlarm = {
-        ...(await getAlarmConstants(alarmAddr)),
-        status: await getStatus(alarmAddr),
+        ...constants,
         id: alarmId,
+        status: await getStatus(alarmAddr),
+        player1Timezone: Number(
+          await getPlayerTimezone(alarmAddr, constants.player1)
+        ),
       };
     } catch {
       error = "No alarm contract found for provided ID";
@@ -97,6 +107,33 @@
     if (searchedAlarm?.player2 !== account) {
       error = "This alarm has not specified you as a partner";
     }
+  };
+
+  $: getReadableOffset = () => {
+    return tzOffset >= 0 ? `+${tzOffset}` : tzOffset;
+  };
+
+  $: getReadableTimezone = () => {
+    let localTimezone;
+    if (tzOffset === -new Date().getTimezoneOffset() / 60) {
+      localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+    return `UTC${getReadableOffset()} (${localTimezone ?? "non-local"}) `;
+  };
+
+  const updateOffset = (increment: number) => {
+    let newVal = tzOffset + increment;
+    if (newVal > 11) {
+      tzOffset = 11;
+    } else if (newVal < -11) {
+      tzOffset = -11;
+    } else {
+      tzOffset = newVal;
+    }
+  };
+
+  const formatTimezone = (offset: number) => {
+    return `UTC${tzOffset >= 0 ? `+${tzOffset}` : tzOffset}`;
   };
 </script>
 
@@ -130,17 +167,33 @@
     <div class="flex flex-grow flex-col">
       <h3 class="mt-1">Alarm #{searchedAlarm.id} Details</h3>
       <div class="flex justify-center">
-        <div class="flex-grow px-2 sm:max-w-[60%]">
-          <div class="flex justify-center py-2">
+        <div class="flex-grow px-2 sm:max-w-[70%]">
+          <div class="flex flex-col items-center justify-center py-2">
+            <div class="pt-1" style="font-size: 2em; line-height: .8em">
+              <ClockDisplay
+                overrideTime={timeString(Number(searchedAlarm.alarmTime))}
+                overrideColor={"orange"}
+              />
+            </div>
             <div>
-              <div class="pt-1" style="font-size: 2em; line-height: .8em">
-                <ClockDisplay
-                  overrideTime={timeString(Number(searchedAlarm.alarmTime))}
-                  overrideColor={"orange"}
-                />
-              </div>
+              <AlarmActiveDays daysActive={searchedAlarm.alarmDays} />
+            </div>
+            <div class="mt-2 flex gap-2">
+              <p class="px-1 text-sm">
+                Your Timezone: {getReadableTimezone()}
+              </p>
               <div>
-                <AlarmActiveDays daysActive={searchedAlarm.alarmDays} />
+                <button
+                  class="bg-highlight-transparent-grey rounded p-1 focus:border active:bg-zinc-400"
+                  style="line-height: .5"
+                  on:click={() => updateOffset(-1)}>-</button
+                >
+                <button
+                  class="bg-highlight-transparent-grey rounded p-1 focus:border focus:border-zinc-300 active:bg-zinc-400
+                "
+                  style="line-height: .5"
+                  on:click={() => updateOffset(1)}>+</button
+                >
               </div>
             </div>
           </div>
@@ -149,6 +202,14 @@
             <span
               ><span class="h-3 w-3 text-cyan-600"
                 >{shorthandAddress(searchedAlarm.player1)}</span
+              ></span
+            >
+          </div>
+          <div class="flex justify-between gap-2">
+            <span class="text-zinc-500">initiating player timezone:</span>
+            <span
+              ><span class="h-3 w-3 text-cyan-600"
+                >{formatTimezone(searchedAlarm.player1Timezone)}</span
               ></span
             >
           </div>
