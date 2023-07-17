@@ -1,4 +1,4 @@
-import { account, network } from "./chainClient";
+import { account, network, supportedChains } from "./chainClient";
 import { derived, writable, type Readable, get } from "svelte/store";
 import {
   getUserAlarmsByType,
@@ -29,6 +29,8 @@ export type AlarmState = {
   player2Balance: bigint | undefined;
   player1Confirmations: bigint | undefined;
   player2Confirmations: bigint | undefined;
+  player1Timezone: bigint | undefined;
+  player2Timezone: bigint | undefined;
 };
 
 type NetworkError = "UNSUPPORTED_NETWORK" | "NO_CHAIN";
@@ -36,19 +38,21 @@ type NetworkError = "UNSUPPORTED_NETWORK" | "NO_CHAIN";
 export const networkError = writable<NetworkError | undefined>();
 
 export const hub = derived(network, ($network) => {
-  if (!$network?.chain?.id) {
+  const chainId = $network?.chain?.id;
+  if (!chainId) {
     networkError.set("NO_CHAIN");
     return undefined;
-  } else if (!($network.chain.id in hubDeployments)) {
+  } else if (
+    !(chainId in hubDeployments) ||
+    !supportedChains.map((c) => c.id).includes(chainId as any)
+  ) {
     networkError.set("UNSUPPORTED_NETWORK");
     return undefined;
   } else {
     networkError.set(undefined);
   }
 
-  return hubDeployments[
-    $network.chain.id as (typeof deploymentChainIds)[number]
-  ];
+  return hubDeployments[chainId as (typeof deploymentChainIds)[number]];
 });
 
 /*
