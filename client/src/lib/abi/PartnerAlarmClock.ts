@@ -308,7 +308,32 @@ export default [
     type: "function",
   },
   {
-    inputs: [],
+    inputs: [
+      {
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+    ],
+    name: "playerTimezone",
+    outputs: [
+      {
+        internalType: "int256",
+        name: "",
+        type: "int256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "int256",
+        name: "p2TimezoneOffset",
+        type: "int256",
+      },
+    ],
     name: "start",
     outputs: [],
     stateMutability: "payable",
@@ -374,19 +399,6 @@ export default [
         internalType: "uint256",
         name: "",
         type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "timezoneOffset",
-    outputs: [
-      {
-        internalType: "int256",
-        name: "",
-        type: "int256",
       },
     ],
     stateMutability: "view",

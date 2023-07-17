@@ -13,7 +13,6 @@ import {ISocialAlarmClockHub} from "./interfaces/ISocialAlarmClockHub.sol";
  * that will transfer funds to the other party.
  */
 contract PartnerAlarmClock is BaseCommitment {
-    string constant IMPLEMENTATION_NAME = "Partner Alarm Clock";
     ISocialAlarmClockHub deploymentHub;
 
     using AlarmSchedule for AlarmSchedule.Schedule;
@@ -129,6 +128,10 @@ contract PartnerAlarmClock is BaseCommitment {
 
     function alarmDays() public view returns (uint8[] memory) {
         return alarmActiveDays;
+    }
+
+    function playerTimezone(address player) public view returns (int) {
+        return players[player].schedule.timezoneOffset;
     }
 
     // Ends the alarm and withdraws funds for both players with penalties/earnings applied
