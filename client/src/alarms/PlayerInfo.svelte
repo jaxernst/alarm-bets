@@ -8,6 +8,7 @@
   import EthSymbol from "../lib/components/EthSymbol.svelte";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import Deadline from "../assets/deadline.svelte";
+  import { HOUR } from "../lib/time";
 
   export let player: 1 | 2;
   export let alarm: UserAlarm;
@@ -25,21 +26,34 @@
 
   let confirmations: bigint | undefined;
   let missedAlarms: bigint | undefined;
+  let timezone: bigint | undefined;
   $: if (player === 1) {
     confirmations = $alarm.player1Confirmations;
     missedAlarms = $alarm.player1MissedDeadlines;
+    timezone = $alarm.player1Timezone;
   } else {
     confirmations = $alarm.player2Confirmations;
     missedAlarms = $alarm.player2MissedDeadlines;
+    timezone = $alarm.player1Timezone;
   }
 
   $: standing = $alarm && getBetStanding(alarm, address);
+
+  const formatTimezone = (tzSecs: number) => {
+    const tz = tzSecs / HOUR;
+    return "utc" + (tz >= 0 ? `+${tz}` : tz);
+  };
 
   const row = "flex w-full items-center justify-between text-xs";
   const icon = "flex h-3 w-3 fill-cyan-600";
 </script>
 
-<span class="font-bold text-zinc-500">{shorthandAddress(address)}</span>
+<div class="flex justify-between gap-1">
+  <div class="font-bold text-zinc-500">{shorthandAddress(address)}</div>
+  <div class="text-xs text-zinc-500">
+    {timezone ? formatTimezone(Number(timezone)) : ""}
+  </div>
+</div>
 <div class="flex flex-grow flex-col items-center justify-evenly gap-1 pb-2">
   <div class="flex items-center">
     <div
