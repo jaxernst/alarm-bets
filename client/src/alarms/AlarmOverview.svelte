@@ -7,6 +7,8 @@
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { displayedAlarmId } from "./stores";
   import { getOtherPlayer, getTimeToNextDeadline } from "../lib/alarmHelpers";
+  import { correctAlarmTime } from "../lib/time";
+  import WarningPopup from "../lib/components/WarningPopup.svelte";
 
   export let userAlarm: UserAlarm;
 
@@ -16,6 +18,22 @@
     $userAlarm.alarmTime,
     $userAlarm.status,
   ];
+
+  let correctedAlarmTime: number = Number(alarmTime);
+  $: if (
+    $userAlarm.alarmTime &&
+    $userAlarm.player1Timezone &&
+    $userAlarm.player2Timezone
+  ) {
+    correctedAlarmTime = correctAlarmTime(
+      Number($userAlarm.alarmTime),
+      Number(
+        $getCurrentAccount().address === $userAlarm.player1
+          ? $userAlarm.player1Timezone
+          : $userAlarm.player2Timezone
+      )
+    );
+  }
 
   const stylePending = (status: AlarmStatus) =>
     status === AlarmStatus.INACTIVE
@@ -40,11 +58,18 @@
       <div
         class="flex h-full flex-col items-start justify-center overflow-visible"
       >
-        <div class="pt-1" style="font-size: 2.1em; line-height: .85em">
+        <div class="relative pt-1" style="font-size: 2.1em; line-height: .85em">
           <ClockDisplay
-            overrideTime={timeString(Number(alarmTime))}
+            overrideTime={timeString(correctedAlarmTime ?? Number(alarmTime))}
             overrideColor={"orange"}
           />
+          {#if correctedAlarmTime !== Number(alarmTime)}
+            <div class="absolute -right-4 -top-1">
+              <WarningPopup
+                message="The timezone set for this alarm is different then your device's local timezone. The displayed alarm time is corrected for your local timezone."
+              />
+            </div>
+          {/if}
         </div>
       </div>
       <div class="pb-[.2em]" style="font-size: .78em; line-height: 1.3em">

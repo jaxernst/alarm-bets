@@ -88,6 +88,8 @@ export const getAlarmState = async (
     p2Confirms,
     p1Balance,
     p2Balance,
+    p1Timezone,
+    p2Timezone,
   ] = await multicall({
     contracts: [
       { ...args, functionName: "timeToNextDeadline", args: [p1] },
@@ -97,6 +99,8 @@ export const getAlarmState = async (
       { ...args, functionName: "numConfirmations", args: [p2] },
       { ...args, functionName: "getPlayerBalance", args: [p1] },
       { ...args, functionName: "getPlayerBalance", args: [p2] },
+      { ...args, functionName: "playerTimezone", args: [p1] },
+      { ...args, functionName: "playerTimezone", args: [p2] },
     ],
     allowFailure: false,
   });
@@ -109,6 +113,8 @@ export const getAlarmState = async (
     player2Confirmations: p2Confirms,
     player1Balance: p1Balance,
     player2Balance: p2Balance,
+    player1Timezone: p1Timezone,
+    player2Timezone: p2Timezone,
   };
 };
 
@@ -222,6 +228,18 @@ export const getBetAmount = async (alarmAddress: EvmAddress) => {
   });
 };
 
+export const getPlayerTimezone = async (
+  alarmAddress: EvmAddress,
+  player: EvmAddress
+) => {
+  return await readContract({
+    address: alarmAddress,
+    abi: PartnerAlarmClock,
+    functionName: "playerTimezone",
+    args: [player],
+  });
+};
+
 export const getStatus = async (alarmAddress: EvmAddress) => {
   return await readContract({
     address: alarmAddress,
@@ -236,6 +254,7 @@ export async function createAlarm<T extends AlarmType>(
   initData: InitializationTypes[T],
   value?: bigint
 ) {
+  console.log(initData);
   const byteData = encodeCreationParams(type, initData);
   const { request } = await prepareWriteContract({
     address: hubAddress,
@@ -248,12 +267,20 @@ export async function createAlarm<T extends AlarmType>(
   return (await writeContract(request)).hash;
 }
 
-export async function startAlarm(alarmAddress: EvmAddress) {
+export async function startAlarm(
+  alarmAddress: EvmAddress,
+  timezoneOffsetHrs: number
+) {
+  if (timezoneOffsetHrs < -12 || timezoneOffsetHrs > 12) {
+    throw new Error("Invalid timezone offset");
+  }
+
   const betAmount = await getBetAmount(alarmAddress);
   const { request } = await prepareWriteContract({
     address: alarmAddress,
     abi: PartnerAlarmClock,
     functionName: "start",
+    args: [BigInt(timezoneOffsetHrs * 60 * 60)],
     value: betAmount,
   });
 

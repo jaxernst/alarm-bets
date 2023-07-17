@@ -11,7 +11,7 @@
 
   import { formatEther } from "viem";
   import { transactions } from "../lib/transactions";
-  import { MINUTE } from "../lib/time";
+  import { MINUTE, correctAlarmTime } from "../lib/time";
   import { submitConfirmation } from "../lib/alarmHelpers";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { formatTime, timeString } from "../lib/util";
@@ -25,6 +25,7 @@
   import { writable } from "svelte/store";
   import { getCurrentAccount } from "../lib/chainClient";
   import EthereumIcon from "../assets/ethereum-icon.svelte";
+  import { alarmTime } from "../alarm-creation/alarmCreation";
 
   export let alarm: UserAlarm;
 
@@ -34,6 +35,18 @@
 
   $: account = $getCurrentAccount().address;
   $: alarmAddress = $alarm.address;
+
+  let correctedAlarmTime: number = Number($alarm.alarmTime);
+  $: if ($alarm.alarmTime && $alarm.player1Timezone && $alarm.player2Timezone) {
+    correctedAlarmTime = correctAlarmTime(
+      Number($alarm.alarmTime),
+      Number(
+        account === $alarm.player1
+          ? $alarm.player1Timezone
+          : $alarm.player2Timezone
+      )
+    );
+  }
 
   let initialQuery = false;
   if (!initialQuery && $alarm.status === AlarmStatus.ACTIVE) {
@@ -93,14 +106,18 @@
   <div class="flex flex-grow flex-col gap-1">
     <div class="custom-grid gap-4">
       <div>
-        <div class=" rounded-lg p-1 text-xs">ID: {$alarm.id}</div>
+        <div class=" whitespace-nowrap rounded-lg p-1 text-xs">
+          ID: {$alarm.id}
+        </div>
       </div>
       <div
         class="justify-self-center py-1"
         style="font-size: 2em; line-height: 1em;"
       >
         <ClockDisplay
-          overrideTime={timeString(Number($alarm.alarmTime))}
+          overrideTime={timeString(
+            correctedAlarmTime ?? Number($alarm.alarmTime)
+          )}
           overrideColor={"zinc-500"}
         />
       </div>
@@ -167,18 +184,23 @@
       </div>
     </div>
     {#if $alarm.status === AlarmStatus.INACTIVE}
-      <div class="-translate-y-1 pb-1 text-center">
-        Alarm request pending...
-      </div>
+      <div class="-translate-y-1 text-center">Alarm request pending...</div>
     {:else if $alarm.status === AlarmStatus.ACTIVE && $alarm.timeToNextDeadline !== undefined}
-      <div class="-translate-y-1 rounded-md pb-1 text-center">
+      <div class="-translate-y-1 rounded-md text-center">
         Next Deadline in {formatTime(Number($alarm.timeToNextDeadline))}...
+      </div>
+    {/if}
+
+    {#if Number($alarm.alarmTime) !== correctedAlarmTime}
+      <div class="pb-1 text-center text-xs text-red-700">
+        Your current local timezone differs from your preset alarm timezone.
+        (Displaying adjusted alarm time)
       </div>
     {/if}
 
     <!--Players Info-->
     <div
-      class={`flex flex-grow justify-center gap-1 text-sm font-bold ${
+      class={`mt-1 flex flex-grow justify-center gap-1 text-sm font-bold ${
         showAlarmInfo && "overflow-y-auto"
       }`}
     >
