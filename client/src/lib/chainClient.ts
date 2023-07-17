@@ -22,7 +22,7 @@ import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 
 export type Account = GetAccountResult & { address: EvmAddress };
 
-const supportedChains = [optimismGoerli];
+export const supportedChains = [optimismGoerli];
 const projectId = "698bddafdbc932fc6eb19c24ab471c3a";
 
 const { publicClient, webSocketPublicClient } = configureChains(
