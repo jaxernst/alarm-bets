@@ -11,8 +11,8 @@
   import { flip } from "svelte/animate";
 
   let isOpen = true;
-  let typewriterComplete = true;
-  let showAbout = true;
+  let typewriterComplete = false;
+  let showAbout = false;
 
   const pullUpParams = { duration: 600, easing: cubicInOut };
   const [send, receive] = crossfade(pullUpParams);
