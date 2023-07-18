@@ -36,10 +36,10 @@
         $timezoneOffsetConfirmed = true;
       }
     };
-    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("click", handleFocusIn);
     return {
       destroy: () => {
-        document.removeEventListener("focusin", handleFocusIn);
+        document.removeEventListener("click", handleFocusIn);
       },
     };
   }
