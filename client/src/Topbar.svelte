@@ -1,8 +1,10 @@
 <script lang="ts">
   import Web3Status from "./Web3Status.svelte";
+  import InfoIcon from "./assets/info-icon.svelte";
   import SunIcon from "./assets/sun-icon.svelte";
   import { account, web3Modal } from "./lib/chainClient";
   import ClockDisplay from "./lib/components/ClockDisplay.svelte";
+  import { showWelcome } from "./view";
 
   let backgroundMode: "day" | "night" = "day";
   const toggleBackgroundMode = () => {
@@ -23,7 +25,11 @@
         </div>
       </div>
     </div>
-    <div class="flex justify-end" />
+    <div class="flex justify-end">
+      <button class="h-5 w-5" on:click={() => ($showWelcome = true)}>
+        <InfoIcon />
+      </button>
+    </div>
   </div>
 </div>
 

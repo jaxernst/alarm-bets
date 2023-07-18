@@ -1,16 +1,14 @@
 <script lang="ts">
   import {
     Dialog,
-    DialogDescription,
     DialogOverlay,
     DialogTitle,
   } from "@rgossiaux/svelte-headlessui";
   import Typewriter from "./lib/components/Typewriter.svelte";
   import { crossfade, fade, slide } from "svelte/transition";
-  import { cubicIn, cubicInOut, cubicOut } from "svelte/easing";
-  import { flip } from "svelte/animate";
+  import { cubicInOut } from "svelte/easing";
+  import { showWelcome } from "./view";
 
-  let isOpen = true;
   let typewriterComplete = false;
   let showAbout = false;
 
@@ -29,8 +27,8 @@
 </script>
 
 <Dialog
-  open={isOpen}
-  on:close={() => (isOpen = false)}
+  open={$showWelcome}
+  on:close={() => ($showWelcome = false)}
   class="fixed left-0 top-0 flex h-screen w-full items-center justify-center"
 >
   <DialogOverlay
@@ -47,7 +45,7 @@
         /></DialogTitle
       >
 
-      <div class="flex min-h-[100px] flex-col justify-between p-2">
+      <div class="flex min-h-[150px] flex-col justify-between p-2">
         {#if typewriterComplete}
           <div class="flex justify-center gap-2 text-zinc-400">
             <div
@@ -63,9 +61,16 @@
               Wake up earlier.
             </div>
           </div>
+          <div in:fade={{ delay: 2600 }} class="flex justify-center">
+            <button
+              on:click={() => ($showWelcome = false)}
+              class="rounded-lg border border-cyan-500 px-4 py-1 font-bold text-zinc-300 transition-all duration-300 ease-in-out ease-in-out hover:scale-105 hover:bg-cyan-500 hover:text-white hover:shadow-md active:bg-cyan-700 active:text-zinc-400"
+            >
+              Enter
+            </button>
+          </div>
         {/if}
       </div>
-      <button />
     </div>
   {/if}
 
@@ -115,7 +120,7 @@
     {#if showAbout}
       <div
         transition:slide={pullUpParams}
-        class="absolute bottom-10 my-3 flex max-h-[80%] max-w-[580px] flex-col gap-6 overflow-y-auto p-3"
+        class="absolute bottom-10 my-3 flex max-h-[80%] max-w-[800px] flex-col gap-6 overflow-y-auto p-3"
       >
         <div>
           The Social Alarm Clock is a two player onchain betting game that
@@ -166,7 +171,7 @@
         </div>
 
         <div>
-          Now one player creates the alarm, then second player joins, and the
+          One player then creates the alarm, the second player joins, and the
           alarm automatically activates. The alarm will remain active
           indefinetly, or until either players decides to withdraw.
         </div>
@@ -189,24 +194,25 @@
 
         <div>
           <b class="text-cyan-500">Important notes</b>
-          <ul class="list-disc pl-4">
+          <ul class="list-disc pl-4 marker:text-cyan-500">
             <li>
               The Social Alarm Clock is free to play. The smart contracts do not
               impose any fee or tax.
             </li>
             <li>
-              The Social Alarm Clock is open source, and all smart contracts +
+              The Social Alarm Clock is open source. All smart contracts +
               frontend code can be viewed on <span
                 ><a
                   href="https://github.com/jaxernst/the-social-alarm-clock"
-                  class="text-cyan-700">Github</a
+                  class="text-cyan-600 underline">Github</a
                 ></span
               >
             </li>
             <li>
               Though the Social Alarm Clock smart contracts are well tested,
-              there are no gurantees that they are bug free. Only put in what
-              what you are willing to lose.
+              there are no gurantees that they are bug free. This is
+              experimental software. Only put in what what you are willing to
+              lose.
             </li>
             <li>
               Timezones: Each player must specify their timezone when creating
