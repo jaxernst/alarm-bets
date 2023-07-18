@@ -1,11 +1,10 @@
 import { derived, get, writable, type Readable } from "svelte/store";
-import { mainnet, polygon, hardhat } from "@wagmi/core/chains";
+import { mainnet, optimismGoerli } from "@wagmi/core/chains";
 import {
   configureChains,
   fetchEnsName,
   type GetNetworkResult,
   type GetAccountResult,
-  switchNetwork,
   createConfig,
   getWalletClient,
   type WalletClient,
@@ -17,12 +16,11 @@ import {
   w3mProvider,
 } from "@web3modal/ethereum";
 import type { EvmAddress } from "../types";
-import { optimismGoerli } from "viem/chains";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 
 export type Account = GetAccountResult & { address: EvmAddress };
 
-export const supportedChains = [optimismGoerli];
+export const supportedChains = [optimismGoerli, mainnet];
 const projectId = "698bddafdbc932fc6eb19c24ab471c3a";
 
 const { publicClient, webSocketPublicClient } = configureChains(
