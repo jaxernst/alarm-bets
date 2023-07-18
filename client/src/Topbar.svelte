@@ -15,7 +15,7 @@
 </script>
 
 <div class="mx-6 mt-4 grid w-full items-center">
-  <div class="grid grid-cols-3 items-center gap-3 rounded-3xl px-4">
+  <div class="grid grid-cols-3 items-center gap-3 rounded-3xl">
     <div class="justify-self-start text-lg font-bold" />
     <!-- Empty div for the first column -->
     <div class="flex items-center justify-center">

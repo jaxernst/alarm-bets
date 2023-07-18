@@ -53,7 +53,11 @@
     <Topbar />
   </div>
 
-  <div class="absolute bottom-2 left-2 text-sm"><Footer /></div>
+  <div
+    class="absolute bottom-2 flex w-full justify-center px-2 text-sm md:justify-start"
+  >
+    <Footer />
+  </div>
 
   <main
     class=" box-border flex min-h-screen items-center justify-center"
