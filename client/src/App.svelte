@@ -21,6 +21,7 @@
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { account } from "./lib/chainClient";
   import Welcome from "./Welcome.svelte";
+  import Footer from "./Footer.svelte";
 
   $: activeTabStyles = (t: Tab) =>
     t === $activeTab
@@ -51,6 +52,8 @@
   <div class="absolute flex w-full justify-center">
     <Topbar />
   </div>
+
+  <div class="absolute bottom-2 left-2 text-sm"><Footer /></div>
 
   <main
     class=" box-border flex min-h-screen items-center justify-center"
