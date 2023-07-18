@@ -36,7 +36,7 @@
   />
 
   {#if !showAbout}
-    <div class="w-full md:w-[500px]" out:fade in:fade={{ delay: 500 }}>
+    <div class="w-full px-2 md:w-[500px]" out:fade in:fade={{ delay: 500 }}>
       <DialogTitle class="font-digital text-center text-4xl md:text-3xl"
         ><Typewriter
           text="Welcome to the Social Alarm Clock."
@@ -81,7 +81,7 @@
     {#key showAbout}
       <div
         class={`absolute ${
-          showAbout ? "top-5" : "bottom-20"
+          showAbout ? "top-5" : " bottom-28"
         } flex flex-col items-center justify-center`}
         in:receive={{ key: "about" }}
         out:send={{ key: "about" }}
@@ -196,7 +196,7 @@
         </div>
 
         <div>
-          <b class="text-cyan-500">Important notes</b>
+          <b class="text-cyan-500">Important Notes</b>
           <ul class="list-disc pl-4 marker:text-cyan-500">
             <li>
               The Social Alarm Clock is free to play. The smart contracts do not
