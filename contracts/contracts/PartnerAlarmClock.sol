@@ -32,6 +32,14 @@ contract PartnerAlarmClock is BaseCommitment {
     address public player2;
     uint public missedAlarmPenalty;
 
+    modifier onlyPlayer() {
+        require(
+            msg.sender == player1 || msg.sender == player2,
+            "ONLY_PLAYER_ACTION"
+        );
+        _;
+    }
+
     function init(
         bytes calldata data
     ) public payable virtual override initializer {
@@ -54,7 +62,7 @@ contract PartnerAlarmClock is BaseCommitment {
         ) = abi.decode(data, (uint, uint8[], uint, uint, int, address));
 
         players[player1].depositAmount = msg.value;
-        players[player1].schedule = AlarmSchedule.init(
+        players[player1].schedule.init(
             alarmTime,
             alarmActiveDays,
             submissionWindow,
@@ -62,16 +70,8 @@ contract PartnerAlarmClock is BaseCommitment {
         );
     }
 
-    modifier onlyPlayer() {
-        require(
-            msg.sender == player1 || msg.sender == player2,
-            "ONLY_PLAYER_ACTION"
-        );
-        _;
-    }
-
-    /**
-     * Only player2 can start the alarm
+    /*
+     * Start and activate the alarm (can only be done by player 2)
      */
     function start(int p2TimezoneOffset) public payable {
         require(status == CommitmentStatus.INACTIVE, "ALREADY_STARTED");
@@ -81,7 +81,7 @@ contract PartnerAlarmClock is BaseCommitment {
         players[player1].schedule.start();
 
         players[player2].depositAmount += msg.value;
-        players[player2].schedule = AlarmSchedule.init(
+        players[player2].schedule.init(
             alarmTime,
             alarmActiveDays,
             submissionWindow,
