@@ -1,11 +1,22 @@
 <script>
   import FormCard from "../FormCard.svelte";
   import EthSymbol from "../../lib/components/EthSymbol.svelte";
-  import { deposit, missedAlarmPenalty } from "../alarmCreation";
+  import {
+    deposit,
+    missedAlarmPenalty,
+    penaltyInputErrorMsg,
+  } from "../alarmCreation";
   import EthereumIcon from "../../assets/ethereum-icon.svelte";
 
   const ethPrice = 1950;
   $: localCurrencyAmount = `($${Math.round(ethPrice * $missedAlarmPenalty)})`;
+
+  $: if ($missedAlarmPenalty && $missedAlarmPenalty >= $deposit) {
+    $penaltyInputErrorMsg =
+      "Missed alarm penalty must be less than initial deposit";
+  } else {
+    $penaltyInputErrorMsg = undefined;
+  }
 </script>
 
 <FormCard
