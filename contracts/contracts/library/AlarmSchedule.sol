@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "hardhat/console.sol";
-
+/**
+ * @notice Enforces and tracks 'confirmations'  made to an alarm-clock style schedule, where confirmations
+ * are only allowed to be submitted within a configurable window around the alarm deadlines.
+ */
 library AlarmSchedule {
     event ScheduleInitialized(uint alarmTime);
 
     struct Schedule {
         // Init vars
         uint alarmTime; // Seconds after midnight the alarm is to be set for
-        uint8[] alarmDays; // Days of the week the alarm is to be set for (1 Sunday)
+        uint8[] alarmDays; // Days of the week the alarm is to be enforced on (1 Sunday - 7 Saturday)
         uint submissionWindow; // Seconds before the deadline that the user can submit a confirmation
         int timezoneOffset; // The user's timezone offset (+/- 12 hrs) from UTC in seconds
         // Schedule state vars
@@ -25,11 +27,12 @@ library AlarmSchedule {
     }
 
     function init(
+        Schedule storage self,
         uint alarmTime,
         uint8[] memory alarmDaysOfWeek,
         uint submissionWindow,
         int timezoneOffset
-    ) internal returns (Schedule memory) {
+    ) internal {
         require(_validateDaysArr(alarmDaysOfWeek), "INVALID_DAYS");
         require(alarmTime < 1 days, "INVALID_ALARM_TIME");
         require(
@@ -39,14 +42,12 @@ library AlarmSchedule {
 
         emit ScheduleInitialized(alarmTime);
 
-        Schedule memory schedule;
-        schedule.alarmTime = alarmTime;
-        schedule.alarmDays = alarmDaysOfWeek;
-        schedule.submissionWindow = submissionWindow;
-        schedule.timezoneOffset = timezoneOffset;
-        schedule.initialized = true;
-        schedule.activationTimestamp = 0;
-        return schedule;
+        self.alarmTime = alarmTime;
+        self.alarmDays = alarmDaysOfWeek;
+        self.submissionWindow = submissionWindow;
+        self.timezoneOffset = timezoneOffset;
+        self.initialized = true;
+        self.activationTimestamp = 0;
     }
 
     function start(Schedule storage self) internal {
@@ -58,6 +59,7 @@ library AlarmSchedule {
         Schedule storage self
     ) internal view started(self) returns (uint confirmations) {
         confirmations = 0;
+        // Count confirmations for each day of the week (Su-Sa)
         for (uint i; i < self.alarmEntries.length; i++) {
             confirmations += self.alarmEntries[i];
         }
@@ -91,9 +93,9 @@ library AlarmSchedule {
 
     /**
      * Determine how many total alarm deadlines have been missed for this schedule.
-     * @notice missed wakeups is a function of the alarm activation time,
-     * the alarm active days, the last wakeup time, an the user's timezone:
-     * missedWakeups = f(activationTime, alarmDays, lastalarmTime, timezoneOffset)
+     * Calculate expected number of wakeups for each alarm day:
+     *   f(timezone, alarmTime, activationTime)
+     * then subtract actual number of wakeups on each alarm day to get numMissedDeadlines
      */
     function missedDeadlines(
         Schedule storage self
@@ -212,48 +214,12 @@ library AlarmSchedule {
         return (_now % 1 days) > self.alarmTime;
     }
 
-    /**
-     * Deactivations are not allowed if the next wakeup day is included in the user's
-     * alarm, and the current time is within x hours before the next wakeup time.
-     * (adjusted for the user's timezone)
-     */
-    function _deactivationAllowed(
-        Schedule storage self
-    ) internal view returns (bool) {
-        return
-            missedDeadlines(self) == 0 &&
-            _enforceNextWakeup(self) &&
-            !inSubmissionWindow(self);
-    }
-
-    function _enforceNextWakeup(
-        Schedule storage self
-    ) internal view returns (bool) {
-        // If the day of the commitment's next deadline is in the activeOnDays array,
-        // return true
-        uint8 nextWakeupDay = _dayOfWeek(_nextDeadlineInterval(self));
-        for (uint i; i < self.alarmDays.length; i++) {
-            if (self.alarmDays[i] == nextWakeupDay) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     // 1 = Sunday, 7 = Saturday
     function _dayOfWeek(
         uint256 timestamp
     ) internal pure returns (uint8 dayOfWeek) {
         uint256 _days = timestamp / 1 days;
         dayOfWeek = uint8(((_days + 4) % 7) + 1);
-    }
-
-    function _daysPassed(
-        uint256 fromTime,
-        uint256 toTime
-    ) internal pure returns (uint256) {
-        if (toTime < fromTime) return 0;
-        return (toTime - fromTime) / 1 days;
     }
 
     /**
