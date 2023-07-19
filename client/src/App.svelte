@@ -54,7 +54,7 @@
   </div>
 
   <div
-    class="absolute bottom-2 flex w-full justify-center px-2 text-sm md:justify-start"
+    class="fixed bottom-2 flex w-full justify-center px-2 text-sm md:justify-start"
   >
     <Footer />
   </div>
