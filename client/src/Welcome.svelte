@@ -81,7 +81,7 @@
     {#key showAbout}
       <div
         class={`absolute ${
-          showAbout ? "top-5" : " bottom-28"
+          showAbout ? "top-3" : " bottom-28"
         } flex flex-col items-center justify-center`}
         in:receive={{ key: "about" }}
         out:send={{ key: "about" }}
