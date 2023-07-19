@@ -2,11 +2,10 @@
   import AlarmActiveDays from "../lib/components/AlarmActiveDays.svelte";
   import { getCurrentAccount } from "../lib/chainClient";
   import ClockDisplay from "../lib/components/ClockDisplay.svelte";
-  import { formatTime, shorthandAddress, timeString } from "../lib/util";
+  import { formatTime, timeString } from "../lib/util";
   import type { UserAlarm } from "../lib/dappStores";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { displayedAlarmId } from "./stores";
-  import { getOtherPlayer, getTimeToNextDeadline } from "../lib/alarmHelpers";
   import { correctAlarmTime } from "../lib/time";
   import WarningPopup from "../lib/components/WarningPopup.svelte";
 
@@ -19,7 +18,7 @@
     $userAlarm.status,
   ];
 
-  let correctedAlarmTime: number = Number(alarmTime);
+  $: correctedAlarmTime = Number(alarmTime);
   $: if (
     $userAlarm.alarmTime &&
     $userAlarm.player1Timezone &&
@@ -60,7 +59,7 @@
       >
         <div class="relative pt-1" style="font-size: 2.1em; line-height: .85em">
           <ClockDisplay
-            overrideTime={timeString(correctedAlarmTime ?? Number(alarmTime))}
+            overrideTime={timeString(correctedAlarmTime)}
             overrideColor={"orange"}
           />
           {#if correctedAlarmTime !== Number(alarmTime)}
