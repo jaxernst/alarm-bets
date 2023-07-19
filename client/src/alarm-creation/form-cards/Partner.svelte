@@ -18,14 +18,13 @@
     let resolvedAddress: string | undefined = undefined;
     if (isEns) {
       try {
-        console.log("fetch ens");
-        const res = await fetchEnsAddress({
-          name: debouncedInput!,
-          chainId: 1,
-        });
-        if (res) resolvedAddress = res;
+        resolvedAddress =
+          (await fetchEnsAddress({
+            name: input,
+            chainId: 1,
+          })) ?? "";
       } catch (err) {
-        console.log("failed to fetch ens");
+        console.log("failed to fetch ens", err);
         inputValid = false;
         $playerInputErrorMsg = "Could not find ENS address";
         return;
