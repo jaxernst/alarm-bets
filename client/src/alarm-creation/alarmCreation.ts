@@ -32,6 +32,13 @@ export const timezoneOffset = writable<number>(
   -new Date().getTimezoneOffset() / 60
 );
 
+export const playerInputErrorMsg = writable<string | undefined>(undefined);
+export const penaltyInputErrorMsg = writable<string | undefined>(undefined);
+export const creationErrorMsg = derived(
+  [playerInputErrorMsg, penaltyInputErrorMsg],
+  ([$playerError, $penaltyError]) => $playerError || $penaltyError
+);
+
 const bundledParams = derived(
   [
     account,

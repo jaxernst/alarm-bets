@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createAlarm, isReady } from "./alarmCreation";
+  import { createAlarm, creationErrorMsg, isReady } from "./alarmCreation";
 
   import { transactions } from "../lib/transactions";
   import { toast } from "@zerodevx/svelte-toast";
@@ -56,7 +56,12 @@
     </div>
   </div>
 
-  <div class="self-end">
+  <div class="flex justify-between pl-3">
+    <div>
+      {#if $creationErrorMsg}
+        <i class="text-xs text-red-700">{$creationErrorMsg}</i>
+      {/if}
+    </div>
     <ActionButton onClick={create} isReady={!!$isReady}>
       {#if creationPending}
         <div class="p-1">
