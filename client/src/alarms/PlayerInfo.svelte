@@ -50,7 +50,7 @@
 
 <div class="flex justify-between gap-1">
   <div class="font-bold text-zinc-500">{shorthandAddress(address)}</div>
-  <div class="text-xs text-zinc-500">
+  <div class="text-[10px] text-zinc-500">
     {timezone ? formatTimezone(Number(timezone)) : ""}
   </div>
 </div>
