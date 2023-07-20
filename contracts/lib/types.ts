@@ -31,8 +31,9 @@ export type InitializationTypes = {
     alarmDays: BigNumberish;
     missedAlarmPenalty: BigNumberish;
     submissionWindow: BigNumberish;
-    timezoneOffset: BigNumberish;
-    otherPlayer: string;
+    player1TimezoneOffset: BigNumberish;
+    player1: string;
+    player2: string;
   };
 };
 
@@ -42,8 +43,9 @@ export const InitializationKeyOrder = {
     "alarmDays",
     "missedAlarmPenalty",
     "submissionWindow",
-    "timezoneOffset",
-    "otherPlayer",
+    "player1TimezoneOffset",
+    "player1",
+    "player2",
   ],
 };
 
@@ -55,6 +57,7 @@ export const solidityInitializationTypes = {
     "uint256",
     "int256",
     "address",
+    "address",
   ],
 };
 
@@ -64,8 +67,9 @@ export const solidityNamedInitTypes = {
     "uint8[] alarmDays",
     "uint256 missedAlarmPenalty",
     "uint256 submissionWindow",
-    "int256 timezoneOffset",
-    "address otherPlayer",
+    "int256 player1TimezoneOffset",
+    "address player1",
+    "address player2",
   ] as const,
 };
 

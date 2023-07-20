@@ -11,23 +11,25 @@ import { ZERO_ADDRESS } from "./helpers/constants";
 import { deploy, deployTyped } from "./helpers/deploy";
 import { waitAll, repeat } from "./helpers/util";
 
-const partnerAlarmDefault = (otherPlayer: string) => ({
+const partnerAlarmDefault = (p1: string, p2: string) => ({
   alarmTime: 1,
-  alarmdays: [1, 2, 3, 4, 5, 6, 7],
+  alarmDays: [1, 2, 3, 4, 5, 6, 7],
   submissionWindow: 30,
   missedAlarmPenalty: 0,
-  timezoneOffset: 0,
-  otherPlayer,
+  player1TimezoneOffset: 0,
+  player1: p1,
+  player2: p2,
 });
 
 describe("SocialAlarmClockHub", () => {
   let commitmentHub: SocialAlarmClockHub;
   let alarm: PartnerAlarmClock;
   let owner: SignerWithAddress;
-  let rando: SignerWithAddress;
+  let rando1: SignerWithAddress;
+  let rando2: SignerWithAddress;
 
   before(async () => {
-    [owner, rando] = await ethers.getSigners();
+    [owner, rando1, rando2] = await ethers.getSigners();
   });
 
   beforeEach(async () => {
@@ -41,7 +43,7 @@ describe("SocialAlarmClockHub", () => {
     it("Cannot create an alarm without a registered template contract", async () => {
       const initData = encodeCreationParams(
         "PartnerAlarmClock",
-        partnerAlarmDefault(rando.address)
+        partnerAlarmDefault(rando1.address, rando2.address)
       );
 
       await expect(
@@ -67,9 +69,10 @@ describe("SocialAlarmClockHub", () => {
     it("Only allows templates to be registered by the owner", async () => {
       await expect(
         commitmentHub
-          .connect(rando)
+          .connect(rando1)
           .registerAlarmType(alarmTypeVals["PartnerAlarmClock"], alarm.address)
       ).to.be.revertedWith("Ownable: caller is not the owner");
+
       await expect(
         commitmentHub.registerAlarmType(
           alarmTypeVals["PartnerAlarmClock"],
@@ -83,11 +86,11 @@ describe("SocialAlarmClockHub", () => {
         alarmTypeVals["PartnerAlarmClock"],
         alarm.address
       );
-      const commitment2 = await deploy("PartnerAlarmClock");
+      const alarm2 = await deploy("PartnerAlarmClock");
       await expect(
         commitmentHub.registerAlarmType(
           alarmTypeVals["PartnerAlarmClock"],
-          commitment2.address
+          alarm2.address
         )
       ).to.be.revertedWith("TYPE_REGISTERED");
     });
@@ -98,12 +101,11 @@ describe("SocialAlarmClockHub", () => {
 
     // Register alarm types to be tested
     beforeEach(async () => {
-      const alarm = await deploy("PartnerAlarmClock");
       await registerNewType(commitmentHub, "PartnerAlarmClock");
 
       baseInitData = encodeCreationParams(
         "PartnerAlarmClock",
-        partnerAlarmDefault(rando.address)
+        partnerAlarmDefault(rando1.address, rando2.address)
       );
     });
 
