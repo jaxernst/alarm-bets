@@ -94,7 +94,7 @@ export const createAlarm = derived(
         "PartnerAlarmClock",
         {
           alarmTime: timeStringToSeconds(p.alarmTime),
-          alarmdays: p.alarmDays.sort(),
+          alarmDays: p.alarmDays.sort(),
           missedAlarmPenalty: parseEther(`${p.missedAlarmPenalty}`),
           submissionWindow: p.submissionWindow,
           timezoneOffset: p.timezoneOffset * 60 * 60,
