@@ -7,11 +7,14 @@ import {BaseCommitment} from "./BaseCommitment.sol";
 import {ISocialAlarmClockHub} from "./interfaces/ISocialAlarmClockHub.sol";
 import "./types.sol";
 
-import "hardhat/console.sol";
+/**
+ * @notice The Hub and the Factory are derived from their implementations in the Social Commitment
+ * Protocol repository and adpated to be used only for the Social Alarm Clock
+ */
 
 /**
- * @notice The Hub and the Factory are dervied from their implementations in the social commitment
- * protocol repository and adpated to be used only for the Social Alarm Clock
+ * @notice The AlarmFactory is responsible for creating new alarms from pre-registered alarm contract
+ * templates. The factory is used to deploy new alarms as minimal proxies to reduce alarm creation costs
  */
 contract AlarmFactory is Ownable {
     mapping(RegisteredAlarmType => address) public alarmTypeRegistry;
@@ -36,8 +39,6 @@ contract AlarmFactory is Ownable {
  * @notice Manage the process of creating new alarms and tracking currently deployed alarms.
  * The hub stores deployed alarm references and contains events for frontends to index and track
  * users alarms
- *
- * Alarm contracts are deployed as Minimal Proxies (clones), to reduce alarm creation costs.
  */
 contract SocialAlarmClockHub is AlarmFactory, ISocialAlarmClockHub {
     uint public nextAlarmId = 1;
