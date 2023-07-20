@@ -20,11 +20,11 @@ import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 
 export type Account = GetAccountResult & { address: EvmAddress };
 
-export const supportedChains = [optimismGoerli, mainnet];
+export const supportedChains = [optimismGoerli];
 const projectId = "698bddafdbc932fc6eb19c24ab471c3a";
 
 const { publicClient, webSocketPublicClient } = configureChains(
-  supportedChains,
+  [...supportedChains, mainnet], // Add mainnet for ens fetching
   [
     w3mProvider({ projectId }),
     alchemyProvider({ apiKey: "_k4Jxl6GexIvooQrdgnxZj9OFj8pGWrw" }),

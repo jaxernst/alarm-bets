@@ -1,6 +1,7 @@
 import { baseGoerli, hardhat, optimismGoerli } from "viem/chains";
 import type { EvmAddress } from "../types";
 
+export type DeploymentChain = (typeof deploymentChains)[number];
 export const deploymentChains = [baseGoerli, hardhat, optimismGoerli] as const;
 export const deploymentChainIds = deploymentChains.map((c) => c.id);
 export const hubDeployments: Record<
