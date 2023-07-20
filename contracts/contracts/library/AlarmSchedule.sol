@@ -36,7 +36,9 @@ library AlarmSchedule {
         require(_validateDaysArr(alarmDaysOfWeek), "INVALID_DAYS");
         require(alarmTime < 1 days, "INVALID_ALARM_TIME");
         require(
-            -43200 < timezoneOffset && timezoneOffset < 43200,
+            -43200 < timezoneOffset &&
+                timezoneOffset < 43200 &&
+                timezoneOffset % 1 hours == 0,
             "INVALID_TIMEZONE_OFFSET"
         );
 
