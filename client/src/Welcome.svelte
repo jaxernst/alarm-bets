@@ -8,6 +8,8 @@
   import { crossfade, fade, slide } from "svelte/transition";
   import { cubicInOut } from "svelte/easing";
   import { showWelcome } from "./view";
+  import { deploymentChains, hubDeployments } from "./lib/hubDeployments";
+  import { optimismGoerli } from "@wagmi/core/dist/chains";
 
   let typewriterComplete = false;
   let showAbout = false;
@@ -130,6 +132,10 @@
           incentivizes waking up early.
         </div>
 
+        <div class="text-cyan-500">
+          Live on Optimism and Optimism Goerli Testnet!
+        </div>
+
         <div>
           <b class="text-cyan-500">The Gist</b>
           <p>
@@ -196,12 +202,34 @@
         </div>
 
         <div>
-          <b class="text-cyan-500">Important Notes</b>
-          <ul class="list-disc pl-4 marker:text-cyan-500">
+          <b class="text-cyan-500">Gameplay Notes</b>
+          <ul class="flex list-disc flex-col gap-3 pl-4 marker:text-cyan-500">
             <li>
               The Social Alarm Clock is free to play. The smart contracts do not
               impose any fee or tax.
             </li>
+            <li>
+              The Social Alarm Clock can be played with fake money on the
+              Optimism Goerli test network. To do so, you must add the Optimism
+              Goerli to your wallet and get testnet funds. Reach out to (<a
+                class="text-cyan-600 underline"
+                target="_blank"
+                href="https://jaxer.eth.co">jaxer.eth</a
+              > for testnet funds)
+            </li>
+            <li>
+              Timezones: Each player must specify their timezone when creating
+              an alarm. Individual player timezones can be offset when creating
+              the alarm, but it is recommended to choose the timezone you expect
+              to play in. The 'alarm' time displayed in the UI will adjust based
+              on the timezone you are physically in.
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <b class="text-cyan-500">Open Source</b>
+          <ul class="flex list-disc flex-col gap-3 pl-4 marker:text-cyan-500">
             <li>
               The Social Alarm Clock is open source. All smart contracts +
               frontend code can be viewed on <span
@@ -211,18 +239,12 @@
                 ></span
               >
             </li>
+            <li>Optimism Goerli Contracts: {hubDeployments[420]} (hub) |</li>
             <li>
               Though the Social Alarm Clock smart contracts are well tested,
               there are no gurantees that they are bug free. This is
               experimental software. Only put in what what you are willing to
               lose.
-            </li>
-            <li>
-              Timezones: Each player must specify their timezone when creating
-              an alarm. Individual player timezones can be offset when creating
-              the alarm, but it is recommended to choose the timezone you expect
-              to play in. The 'alarm' time displayed in the UI will adjust based
-              on the timezone you are physically in.
             </li>
           </ul>
         </div>
