@@ -3,6 +3,7 @@ import {
   type PartnerAlarmClock,
   PartnerAlarmClock__factory,
 } from "../typechain-types";
+import { missedAlarmPenalty } from "../../client/src/alarm-creation/alarmCreation";
 
 export type DayOfWeek = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
@@ -27,12 +28,23 @@ export const alarmFactories = {
 export type InitializationTypes = {
   PartnerAlarmClock: {
     alarmTime: BigNumberish;
-    alarmdays: BigNumberish;
-    submissionWindow: BigNumberish;
+    alarmDays: BigNumberish;
     missedAlarmPenalty: BigNumberish;
+    submissionWindow: BigNumberish;
     timezoneOffset: BigNumberish;
     otherPlayer: string;
   };
+};
+
+export const InitializationKeyOrder = {
+  PartnerAlarmClock: [
+    "alarmTime",
+    "alarmDays",
+    "missedAlarmPenalty",
+    "submissionWindow",
+    "timezoneOffset",
+    "otherPlayer",
+  ],
 };
 
 export const solidityInitializationTypes = {
@@ -49,9 +61,9 @@ export const solidityInitializationTypes = {
 export const solidityNamedInitTypes = {
   PartnerAlarmClock: [
     "uint256 alarmTime",
-    "uint8[] alarmdays",
-    "uint256 submissionWindow",
+    "uint8[] alarmDays",
     "uint256 missedAlarmPenalty",
+    "uint256 submissionWindow",
     "int256 timezoneOffset",
     "address otherPlayer",
   ] as const,

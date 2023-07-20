@@ -8,6 +8,7 @@ import {
   InitializationTypes,
   alarmFactories,
   solidityInitializationTypes,
+  InitializationKeyOrder,
 } from "./types";
 
 export async function createAlarm<T extends AlarmType>(
@@ -23,12 +24,18 @@ export async function createAlarm<T extends AlarmType>(
     await registerNewType(hub, name);
   }
 
+  if (!creationParamsOrderValid(name, initData)) {
+    throw new Error("Invalid creations param key order");
+  }
+
   const byteData = encodeCreationParams(name, initData);
   const rc = await (
     await hub.createAlarm(alarmTypeVals[name], byteData, {
       value: value ? value : 0,
     })
   ).wait();
+
+  console.log();
 
   if (!rc.events) throw Error("No events found in tx");
 
@@ -40,6 +47,15 @@ export async function createAlarm<T extends AlarmType>(
   }
 
   return (alarmFactories[name] as any).connect(alarmAddr!, hub.signer);
+}
+
+function creationParamsOrderValid<T extends AlarmType>(
+  name: T,
+  initData: InitializationTypes[T]
+) {
+  return InitializationKeyOrder[name].every(
+    (expectedKey, i) => Object.keys(initData)[i] === expectedKey
+  );
 }
 
 export function encodeCreationParams<T extends AlarmType>(
