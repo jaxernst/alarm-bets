@@ -47,9 +47,9 @@ contract PartnerAlarmClock is BaseCommitment {
         deploymentHub = ISocialAlarmClockHub(msg.sender);
 
         // Initialize to an inactive state, commitment becomes activated once player 2 starts
+        // Note: Alarm should never return to the INACTIVE state after starting
         status = CommitmentStatus.INACTIVE;
         betAmount = msg.value;
-        player1 = tx.origin;
         int p1TimezoneOffset;
 
         (
@@ -58,8 +58,15 @@ contract PartnerAlarmClock is BaseCommitment {
             missedAlarmPenalty,
             submissionWindow,
             p1TimezoneOffset,
+            player1,
             player2
-        ) = abi.decode(data, (uint, uint8[], uint, uint, int, address));
+        ) = abi.decode(
+            data,
+            (uint, uint8[], uint, uint, int, address, address)
+        );
+
+        require(player1 != player2, "NON_UNIQUE_PLAYERS");
+        require(submissionWindow < 1 days, "INVALID_SUBMISSION_WINDOW");
 
         players[player1].depositAmount = msg.value;
         players[player1].schedule.init(
