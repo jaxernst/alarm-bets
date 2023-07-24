@@ -1,6 +1,5 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
-import { deploy, deployTyped, makeDeploymentFixture } from "../helpers/deploy";
+import { deployTyped } from "../helpers/deploy";
 import {
   DAY,
   HOUR,
@@ -8,7 +7,6 @@ import {
   WEEK,
   currentTimestamp,
   dayOfWeek,
-  systemTimestamp,
   timeOfDay,
 } from "../helpers/time";
 import { advanceTime } from "../helpers/providerUtils";
@@ -63,7 +61,7 @@ describe("Alarm Schedule Test", () => {
       await (
         await schedule.init(
           curTimeOfDay + 60,
-          [weekDay, (weekDay % 7) + 1],
+          [weekDay, (weekDay % 7) + 1].sort(),
           30,
           0
         )
@@ -81,7 +79,7 @@ describe("Alarm Schedule Test", () => {
       await (
         await schedule.init(
           curTimeOfDay + 60,
-          [weekDay, (weekDay % 7) + 1],
+          [weekDay, (weekDay % 7) + 1].sort(),
           60,
           0
         )
@@ -101,7 +99,7 @@ describe("Alarm Schedule Test", () => {
       await (
         await schedule.init(
           curTimeOfDay - missedBySeconds,
-          [weekDay, (weekDay % 7) + 1],
+          [weekDay, (weekDay % 7) + 1].sort(),
           60,
           0
         )
