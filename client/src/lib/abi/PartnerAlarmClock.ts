@@ -161,25 +161,6 @@ export default [
         type: "address",
       },
     ],
-    name: "getPenaltyAmount",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "player",
-        type: "address",
-      },
-    ],
     name: "getPlayerBalance",
     outputs: [
       {
