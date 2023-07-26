@@ -40,6 +40,14 @@ contract PartnerAlarmClock is BaseCommitment {
         _;
     }
 
+    modifier onlyPlayerArg(address player) {
+        require(
+            player == player1 || player == player2,
+            "INVALID_PLAYER_SPECIFIED"
+        );
+        _;
+    }
+
     function init(
         bytes calldata data
     ) public payable virtual override initializer {
@@ -106,9 +114,8 @@ contract PartnerAlarmClock is BaseCommitment {
         emit CommitmentInitialized("Alarm Bet Started");
     }
 
-    function addToBalance(address player) public payable onlyPlayer {
+    function addToBalance(address player) public payable onlyPlayerArg(player) {
         require(status == CommitmentStatus.ACTIVE, "NOT_ACTIVE");
-        require(player == player1 || player == player2, "INVALID_PLAYER");
         players[msg.sender].depositAmount += msg.value;
     }
 
@@ -121,7 +128,9 @@ contract PartnerAlarmClock is BaseCommitment {
         emit ConfirmationSubmitted(msg.sender);
     }
 
-    function missedDeadlines(address player) public view returns (uint) {
+    function missedDeadlines(
+        address player
+    ) public view onlyPlayerArg(player) returns (uint) {
         return players[player].schedule.missedDeadlines();
     }
 
@@ -143,39 +152,59 @@ contract PartnerAlarmClock is BaseCommitment {
 
     // Ends the alarm and withdraws funds for both players with penalties/earnings applied
     function withdraw() public onlyPlayer {
-        address otherPlayer = msg.sender == player1 ? player2 : player1;
-
-        uint senderPenalty = 0;
-        uint otherPlayerPenalty = 0;
-        if (status == CommitmentStatus.ACTIVE) {
-            senderPenalty = getPenaltyAmount(msg.sender);
-            otherPlayerPenalty = getPenaltyAmount(otherPlayer);
+        if (status == CommitmentStatus.INACTIVE) {
+            uint transferAmount = players[msg.sender].depositAmount;
+            players[msg.sender].depositAmount = 0;
+            payable(msg.sender).transfer(transferAmount);
+            return;
+        } else if (status != CommitmentStatus.ACTIVE) {
+            revert("UNEXPECTED_STATUS_ON_WITHDRAW");
         }
 
-        uint otherPlayerWithdrawAmount = players[otherPlayer].depositAmount +
-            senderPenalty -
-            otherPlayerPenalty;
+        // In the ACTIVE state, both player's balances are returned (with any penalties applied)
+        // In any other state (INACTIVE, CANCELLED), it will return the
+        address otherPlayer = msg.sender == player1 ? player2 : player1;
+
+        // Get balances with penalties applied
+        uint senderBalance = getPlayerBalance(msg.sender);
+        uint otherPlayerBalance = getPlayerBalance(
+            msg.sender == player1 ? player2 : player1
+        );
 
         players[msg.sender].depositAmount = 0;
         players[otherPlayer].depositAmount = 0;
-
-        payable(otherPlayer).transfer(otherPlayerWithdrawAmount);
-        payable(msg.sender).transfer(address(this).balance);
+        payable(otherPlayer).transfer(otherPlayerBalance);
+        payable(msg.sender).transfer(senderBalance);
 
         emit StatusChanged(status, CommitmentStatus.CANCELLED);
         status = CommitmentStatus.CANCELLED;
     }
 
-    function getPlayerBalance(address player) public view returns (uint) {
-        return players[player].depositAmount - getPenaltyAmount(player);
-    }
+    function getPlayerBalance(
+        address player
+    ) public view onlyPlayerArg(player) returns (uint) {
+        uint targetPlayerMissedDeadlines = missedDeadlines(player);
+        uint otherPlayerMissedDeadlines = missedDeadlines(
+            player == player1 ? player2 : player1
+        );
 
-    function getPenaltyAmount(address player) public view returns (uint) {
-        uint numMissedDeadlines = players[player].schedule.missedDeadlines();
-        uint penaltyVal = numMissedDeadlines * missedAlarmPenalty;
-        if (penaltyVal > players[player].depositAmount) {
-            return players[player].depositAmount;
+        uint depositAmount = players[player].depositAmount;
+        if (targetPlayerMissedDeadlines == otherPlayerMissedDeadlines) {
+            // Players tied -> no penalty applied
+            return depositAmount;
+        } else if (targetPlayerMissedDeadlines > otherPlayerMissedDeadlines) {
+            // Target player has missed more than other -> apply penalty
+            uint penalty = (targetPlayerMissedDeadlines -
+                otherPlayerMissedDeadlines) * missedAlarmPenalty;
+            if (penalty >= depositAmount) {
+                return 0;
+            }
+            return depositAmount - penalty;
+        } else {
+            // Target player has missed less deadlines than other -> apply reward
+            uint reward = (otherPlayerMissedDeadlines -
+                targetPlayerMissedDeadlines) * missedAlarmPenalty;
+            return depositAmount + reward;
         }
-        return penaltyVal;
     }
 }
