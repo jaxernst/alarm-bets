@@ -1,12 +1,10 @@
 <script lang="ts">
   import "./app.css";
 
-  import ClockDisplay from "./lib/components/ClockDisplay.svelte";
   import Web3Status from "./Web3Status.svelte";
   import NewAlarm from "./alarm-creation/NewAlarm.svelte";
   import AlarmsSidebar from "./alarms/AlarmsSidebar.svelte";
   import AlarmDetail from "./alarms/AlarmDetail.svelte";
-  import SunIcon from "./assets/sun-icon.svelte";
 
   import { SvelteToast } from "@zerodevx/svelte-toast";
   import { fade, blur } from "svelte/transition";
