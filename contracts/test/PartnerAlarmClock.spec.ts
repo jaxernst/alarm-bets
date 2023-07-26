@@ -8,6 +8,7 @@ import {
   DAY,
   HOUR,
   MINUTE,
+  SECOND,
   WEEK,
   currentTimestamp,
   dayOfWeek,
@@ -15,7 +16,7 @@ import {
 } from "./helpers/time";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber, BigNumberish, getDefaultProvider } from "ethers";
 import { AlarmStatus, alarmTypeVals } from "../lib/types";
 import { ZERO_ADDRESS } from "./helpers/constants";
 
@@ -279,7 +280,7 @@ describe("Partner Alarm Clock spec", () => {
       );
 
       // Second Case: single day alarm spanning 3 weeks:
-      // p1 makes all alarms, p2 only makes it once
+      // p1 makes all alarms, p2 only makes it once, p1 adds to their balance midway through
       blockTime = (await currentTimestamp()).toNumber();
       p1Alarm = await initAlarm({
         alarmTime: timeOfDay(blockTime + 30),
@@ -294,26 +295,30 @@ describe("Partner Alarm Clock spec", () => {
 
       await advanceTime(1 * WEEK);
       await p1Alarm.submitConfirmation();
+
+      // Now, player 1 adds to alarm balance (done to show this can be done without affecting penalties)
+      const P1_ADDITIONAL_VAL = parseEther("2.1");
+      await p1Alarm.addToBalance(p1.address, { value: P1_ADDITIONAL_VAL });
+
       await advanceTime(1 * MINUTE);
       expect(await p1Alarm.missedDeadlines(p1.address)).to.eq(0);
       expect(await p1Alarm.missedDeadlines(p2.address)).to.eq(1);
-      await advanceTime(1 * WEEK);
 
+      await advanceTime(1 * WEEK);
       expect(await p1Alarm.missedDeadlines(p1.address)).to.eq(1);
       expect(await p1Alarm.missedDeadlines(p2.address)).to.eq(2);
 
-      // P1 has made one more than p2, so should be up by DEF_PENALTY * 1
-      const expP1Balance = DEF_INITIAL_DEPOSIT.add(DEF_PENALTY);
+      // P1 has made one more confirmation than p2, so should be up by DEF_PENALTY * 1
+      const expP1Balance =
+        DEF_INITIAL_DEPOSIT.add(P1_ADDITIONAL_VAL).add(DEF_PENALTY);
       const expP2Balance = DEF_INITIAL_DEPOSIT.sub(DEF_PENALTY);
-      expect(await p1Alarm.getPenaltyAmount(p1.address)).to.eq(DEF_PENALTY);
-      expect(await p1Alarm.getPenaltyAmount(p2.address)).to.eq(DEF_PENALTY);
-      expect(await p2Alarm.getPlayerBalance(p1.address)).to.eql(expP1Balance);
-      expect(await p2Alarm.getPlayerBalance(p2.address)).to.eql(expP2Balance);
+      expect(await p2Alarm.getPlayerBalance(p1.address)).to.eq(expP1Balance);
+      expect(await p2Alarm.getPlayerBalance(p2.address)).to.eq(expP2Balance);
 
-      /* await expect(p2Alarm.withdraw()).to.changeEtherBalances(
+      await expect(p2Alarm.withdraw()).to.changeEtherBalances(
         [p1.address, p2.address],
         [expP1Balance, expP2Balance]
-      ); */
+      );
     });
   });
 
@@ -325,9 +330,46 @@ describe("Partner Alarm Clock spec", () => {
         DEF_INITIAL_DEPOSIT
       );
     });
-    it(
-      "When any player withdraws (ends the alarm), both player's funds are returned to them"
-    );
+    it("When any player withdraws (ends the alarm), both player's funds are returned to them", async () => {
+      const blockTime = (await currentTimestamp()).toNumber();
+      const alarm = await initAlarm({ alarmTime: timeOfDay(blockTime + 20) });
+      await alarm.connect(p2).start(0, { value: DEF_INITIAL_DEPOSIT });
+
+      for (let i = 0; i < 10; i++) {
+        await alarm.submitConfirmation();
+        await alarm.connect(p2).submitConfirmation();
+        await advanceTime(1 * DAY - 2);
+      }
+
+      await expect(alarm.withdraw()).to.changeEtherBalances(
+        [p1.address, p2.address],
+        [DEF_INITIAL_DEPOSIT, DEF_INITIAL_DEPOSIT]
+      );
+    });
+    it("Leaves the contract with 0 balance when either player withdraws", async () => {
+      const blockTime = (await currentTimestamp()).toNumber();
+      const alarm = await initAlarm({ alarmTime: timeOfDay(blockTime + 20) });
+      await alarm.connect(p2).start(0, { value: DEF_INITIAL_DEPOSIT });
+
+      for (let i = 0; i < 20; i++) {
+        let advanceTimeCorrection = 0;
+        // Randomly submit confirmations for p1 or p2
+        if (Math.random() > 0.5) {
+          await alarm.submitConfirmation();
+          advanceTimeCorrection++;
+        }
+        if (Math.random() > 0.5) {
+          await alarm.connect(p2).submitConfirmation();
+          advanceTimeCorrection++;
+        }
+
+        await advanceTime(1 * DAY - advanceTimeCorrection);
+      }
+
+      await alarm.withdraw();
+      expect(await ethers.provider.getBalance(alarm.address)).to.eq(0);
+    });
+
     it("Either player can add to their balance when the alarm is active", async () => {
       const alarm = await initAlarm({});
       await expect(alarm.addToBalance(p1.address, { value: parseEther("0.1") }))
