@@ -35,8 +35,6 @@ export async function createAlarm<T extends AlarmType>(
     })
   ).wait();
 
-  console.log();
-
   if (!rc.events) throw Error("No events found in tx");
 
   let alarmAddr: string;
