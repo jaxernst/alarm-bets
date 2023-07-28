@@ -9,7 +9,6 @@
   import { cubicInOut } from "svelte/easing";
   import { showWelcome } from "./view";
   import { deploymentChains, hubDeployments } from "./lib/hubDeployments";
-  import { optimismGoerli } from "@wagmi/core/dist/chains";
 
   let typewriterComplete = false;
   let showAbout = false;
