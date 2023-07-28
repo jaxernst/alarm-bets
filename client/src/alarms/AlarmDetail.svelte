@@ -98,6 +98,8 @@
       showAddToBalance = false;
     }
   };
+
+  let deviceTimezone = new Date().getTimezoneOffset() / -60;
 </script>
 
 <EndAlarmModal {alarm} />
@@ -192,9 +194,11 @@
     {/if}
 
     {#if Number($alarm.alarmTime) !== correctedAlarmTime}
-      <div class="pb-1 text-center text-xs text-red-700">
-        Your current local timezone differs from your preset alarm timezone.
-        (Displaying adjusted alarm times)
+      <div class="pb-1 text-center text-xs text-red-600">
+        ! Your device timezone ({`UTC${
+          deviceTimezone < 0 ? deviceTimezone : "+" + deviceTimezone
+        }`}) differs from your preset alarm timezone. (Displaying adjusted alarm
+        times)
       </div>
     {/if}
 
