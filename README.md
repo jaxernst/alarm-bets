@@ -1,6 +1,8 @@
 # The Social Alarm Clock 
 An onchain 2-player productivity game built to help players wake up earlier...
 
+Demo: social-alarm.xyz
+
 ## The Game: Overview
 The game mechanics are quite simple and play out like so:
 
