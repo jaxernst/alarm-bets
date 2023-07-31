@@ -10,7 +10,7 @@ Demo: [social-alarm.xyz](https://social-alarm.xyz/)
 
   Run interface/frontend: (from root)
   `cd client`
-  `yarn run dev`
+  `yarn dev`
 
 ## The Game: Overview
 The game mechanics are quite simple and play out like so:
