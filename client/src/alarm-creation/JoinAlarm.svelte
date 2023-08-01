@@ -77,10 +77,6 @@
     try {
       const alarmAddr = await getAlarmById(alarmId, $hub);
       const constants = await getAlarmConstants(alarmAddr);
-      console.log(
-        "player1timezone",
-        Number(await getPlayerTimezone(alarmAddr, constants.player1))
-      );
       searchedAlarm = {
         ...constants,
         id: alarmId,

@@ -44,7 +44,7 @@
 </script>
 
 <button
-  class="h-[60px] w-full max-w-[230px] rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
+  class="h-[60px] max-w-[225px] rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
     status
   )} {styleSelected(id)}"
   on:click={() => ($displayedAlarmId = id)}
