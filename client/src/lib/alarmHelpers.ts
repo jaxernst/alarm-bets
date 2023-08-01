@@ -1,10 +1,4 @@
-import {
-  getAbiItem,
-  encodeAbiParameters,
-  parseAbiParameters,
-  type GetFunctionArgs,
-  type ReadContractParameters,
-} from "viem";
+import { getAbiItem, encodeAbiParameters, parseAbiParameters } from "viem";
 import {
   getPublicClient,
   prepareWriteContract,
@@ -340,6 +334,9 @@ export type AlarmBaseInfo = {
   status: AlarmStatus;
 };
 
+/**
+ * Get user alarms by type along with their current status
+ */
 export async function getUserAlarmsByType<T extends AlarmType>(
   hubAddress: EvmAddress,
   userAddress: EvmAddress,
@@ -355,6 +352,9 @@ export async function getUserAlarmsByType<T extends AlarmType>(
 
   if (!creationEvents) return;
 
+  /**
+   * Get alarm indentification info
+   */
   const alarms: Omit<AlarmBaseInfo, "status">[] = [];
   for (const { args, blockNumber } of [...creationEvents, ...joinEvents]) {
     if (!args.id || !args.alarmAddr || !args.user || !blockNumber) {
@@ -368,7 +368,9 @@ export async function getUserAlarmsByType<T extends AlarmType>(
     });
   }
 
-  // Factor out the status queries someday
+  /**
+   * Batch query alarm statuses
+   */
   const statusQueryRes = await multicall({
     contracts: alarms.map(({ contractAddress }) => ({
       address: contractAddress,
