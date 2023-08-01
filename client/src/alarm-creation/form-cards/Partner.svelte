@@ -1,15 +1,10 @@
 <script lang="ts">
   import { isAddress } from "viem";
   import FormCard from "../FormCard.svelte";
-  import {
-    creationErrorMsg,
-    otherPlayer,
-    playerInputErrorMsg,
-  } from "../alarmCreation";
+  import { otherPlayer, playerInputErrorMsg } from "../alarmCreation";
   import { getCurrentAccount } from "../../lib/chainClient";
   import { fetchEnsAddress } from "@wagmi/core";
 
-  let debouncedInput: string | undefined;
   let inputValid: boolean;
 
   $: checkInput = async (input: string) => {
@@ -41,6 +36,7 @@
       $playerInputErrorMsg = "Other player cannot be yourself";
     } else {
       inputValid = true;
+      $otherPlayer = resolvedAddress;
     }
   };
 
@@ -52,6 +48,9 @@
       checkInput(val);
     }, 600);
   });
+
+  let otherPlayerInput = "";
+  $: $otherPlayer = otherPlayerInput;
 </script>
 
 <FormCard
@@ -65,6 +64,6 @@
     class="w-min bg-transparent text-center outline-none"
     type="text"
     placeholder="Enter address or ENS"
-    bind:value={$otherPlayer}
+    bind:value={otherPlayerInput}
   />
 </FormCard>
