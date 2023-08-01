@@ -1,11 +1,15 @@
-<script>
+<script lang="ts">
   import FormCard from "../FormCard.svelte";
-  import EthSymbol from "../../lib/components/EthSymbol.svelte";
   import { deposit } from "../alarmCreation";
   import EthereumIcon from "../../assets/ethereum-icon.svelte";
+  import { getEtherPrice } from "../../lib/util";
 
-  const ethPrice = 1950;
-  $: localCurrencyAmount = `($${Math.round(ethPrice * $deposit)})`;
+  let ethPrice: number;
+  getEtherPrice().then((res) => (ethPrice = res));
+
+  $: localCurrencyAmount = ethPrice
+    ? `($${(ethPrice * $deposit).toFixed(2)})`
+    : "$x.xxd";
 </script>
 
 <FormCard

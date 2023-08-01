@@ -51,3 +51,10 @@ export function formatTime(timeInSeconds: number) {
     }`;
   }
 }
+
+export async function getEtherPrice() {
+  const res = await fetch(
+    "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD"
+  );
+  return Number((await res.json())["USD"]);
+}
