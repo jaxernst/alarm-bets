@@ -33,11 +33,17 @@
     throw new Error("required alarm prop not available");
   }
 
+  let deviceTimezone = new Date().getTimezoneOffset() / -60;
+
   $: account = $getCurrentAccount().address;
   $: alarmAddress = $alarm.address;
 
-  let correctedAlarmTime: number = Number($alarm.alarmTime);
-  $: if ($alarm.alarmTime && $alarm.player1Timezone && $alarm.player2Timezone) {
+  $: correctedAlarmTime = Number($alarm.alarmTime);
+  $: if (
+    $alarm.alarmTime &&
+    $alarm.player1Timezone &&
+    ($alarm.player2 === account ? $alarm.player2Timezone : true)
+  ) {
     correctedAlarmTime = correctAlarmTime(
       Number($alarm.alarmTime),
       Number(
@@ -98,8 +104,6 @@
       showAddToBalance = false;
     }
   };
-
-  let deviceTimezone = new Date().getTimezoneOffset() / -60;
 </script>
 
 <EndAlarmModal {alarm} />
