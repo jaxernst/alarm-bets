@@ -3,6 +3,15 @@ An onchain 2-player productivity game built to help players wake up earlier...
 
 Demo: [social-alarm.xyz](https://social-alarm.xyz/)
 
+# Quickstart
+  Test contracts: (from root)
+  `cd contracts`
+  `yarn test`
+
+  Run interface/frontend: (from root)
+  `cd client`
+  `yarn dev`
+
 ## The Game: Overview
 The game mechanics are quite simple and play out like so:
 
@@ -20,7 +29,8 @@ While this 'naive' approach will be used at the start, future versions of the So
 
 
 # Contracts
-The Social Alarm Clock contains a set of simple Solidity smart contracts that facilliate and alarm clock style enforcement schedule, where 'confirmations' must be submitted according to the schedule
+The Social Alarm Clock contains a set of simple Solidity smart contracts that facilliate and alarm clock style enforcement schedule, where'confirmations' must be submitted according to the schedule
+
 
 # Client
 The frontend is a svelte app that tracks your alarms and allows you to submit wakeup confirmations. The web app works standalone and does not require and centralized infrastructure to use. 
