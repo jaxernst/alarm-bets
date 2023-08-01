@@ -85,7 +85,7 @@ export const createAlarm = derived(
   [bundledParams, isReady, hub],
   ([p, $isReady, $hub]) => {
     return () => {
-      if (!$isReady || !$hub) {
+      if (!$isReady || !$hub || !p.account?.address) {
         return console.error("Cannot create alarm: Params invalid");
       }
 
@@ -97,8 +97,9 @@ export const createAlarm = derived(
           alarmDays: p.alarmDays.sort(),
           missedAlarmPenalty: parseEther(`${p.missedAlarmPenalty}`),
           submissionWindow: p.submissionWindow,
-          timezoneOffset: p.timezoneOffset * 60 * 60,
-          otherPlayer: p.otherPlayer,
+          player1TimezoneOffset: p.timezoneOffset * 60 * 60,
+          player1: p.account.address,
+          player2: p.otherPlayer,
         },
         parseEther(`${p.deposit}`)
       );
