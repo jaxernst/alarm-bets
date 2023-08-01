@@ -34,7 +34,7 @@
   } else {
     confirmations = $alarm.player2Confirmations;
     missedAlarms = $alarm.player2MissedDeadlines;
-    timezone = $alarm.player1Timezone;
+    timezone = $alarm.player2Timezone;
   }
 
   $: standing = $alarm && getBetStanding(alarm, address);
