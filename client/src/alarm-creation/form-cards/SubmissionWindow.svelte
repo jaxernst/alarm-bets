@@ -1,5 +1,4 @@
 <script lang="ts">
-  import ToggleLetter from "../../lib/components/ToggleLetter.svelte";
   import FormCard from "../FormCard.svelte";
   import { submissionWindow } from "../alarmCreation";
 
