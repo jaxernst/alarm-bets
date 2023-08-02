@@ -16,11 +16,11 @@ Set yarn version with:
 
 `cd contracts`
 
-Install deps
+Install deps:
 
 `yarn install`
 
-Compile ABI and typechain
+Compile ABI and typechain:
 
 `yarn hardhat compile`
 
@@ -30,11 +30,15 @@ Test:
 
 ## Client
 
-1. `cd contracts`
+`cd client`
 
-2. `yarn install`
+Install Deps:
 
-3. `yarn dev`
+`yarn install`
+
+Run:
+
+`yarn dev`
 
 ## The Game: Overview
 
