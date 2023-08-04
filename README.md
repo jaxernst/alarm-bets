@@ -6,39 +6,39 @@ Demo: [social-alarm.xyz](https://social-alarm.xyz/)
 
 # Quickstart
 
-Packages are managed with `yarn`
+Packages are managed with `yarn`. Before installing, ensure the correct version is set with `yarn set version berry`.
 
-Set yarn version with:
+Install monorepo dependencies:
 
-`yarn set version berry`
+```
+yarn install
+```
 
 ## Contracts
 
 `cd contracts`
 
-Install deps:
+Compile contracts, ABI, and typechain types:
 
-`yarn install`
+```
+yarn hardhat compile
+```
 
-Compile ABI and typechain:
+Test Contracts:
 
-`yarn hardhat compile`
+```
+yarn test
+```
 
-Test:
-
-`yarn test`
-
-## Client
+## Client (Frontend)
 
 `cd client`
 
-Install Deps:
+Run in dev:
 
-`yarn install`
-
-Run:
-
-`yarn dev`
+```
+yarn dev
+```
 
 ## The Game: Overview
 
