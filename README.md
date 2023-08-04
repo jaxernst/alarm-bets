@@ -49,7 +49,7 @@ FUND_WALLET_2=<wallet address>
 yarn deploy-local
 ```
 
-3) Run the interface: `yarn client`
+3) In a new shell window, run the interface: `yarn client`
 
 4) Add the hardhat network (Chain Id: 31337) to you browser wallet if not already added. (Metamask Note: If you see 'nonce too high' error, go to settings and click 'reset activity tab data')
 
