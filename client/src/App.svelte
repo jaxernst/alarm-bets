@@ -38,8 +38,6 @@
   $: if (currentAlarms.length > 0) {
     $displayedAlarmId = get(currentAlarms[0]).id;
   }
-
-  let showWelcome = true;
 </script>
 
 <SvelteToast />

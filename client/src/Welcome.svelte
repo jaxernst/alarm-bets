@@ -7,11 +7,24 @@
   import Typewriter from "./lib/components/Typewriter.svelte";
   import { crossfade, fade, slide } from "svelte/transition";
   import { cubicInOut } from "svelte/easing";
-  import { showWelcome } from "./view";
+  import { showWelcome, welcomeHasBeenViewed } from "./view";
   import { hubDeployments, partnerAlarmClockContractTemplates } from "./lib/hubDeployments";
+    import { onMount } from "svelte";
 
   let typewriterComplete = false;
   let showAbout = false;
+
+  // Show the about section by default after showing the welcome for the first time
+  showWelcome.subscribe((show) => {
+    if (show && $welcomeHasBeenViewed) {
+      showAbout = true;
+      typewriterComplete = true;
+    }
+  });
+
+  onMount(() => {
+    $welcomeHasBeenViewed = true
+  })
 
   const pullUpParams = { duration: 600, easing: cubicInOut };
   const [send, receive] = crossfade(pullUpParams);
