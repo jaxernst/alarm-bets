@@ -35,22 +35,26 @@ task("automine", "Turn automine off or on")
     }
   );
 
+let networks = { hardhat: {} };
+
+const deployNetworks = {
+  lattice: {
+    url: "http://localhost:8545",
+    accounts: [process.env.TEST_U1_KEY ?? ""],
+  },
+  "base-goerli": {
+    url: "https://goerli.base.org",
+    accounts: [process.env.TEST_U1_KEY ?? ""],
+  },
+  "optimism-goerli": {
+    url: "https://opt-goerli.g.alchemy.com/v2/_k4Jxl6GexIvooQrdgnxZj9OFj8pGWrw",
+    accounts: [process.env.TEST_U1_KEY ?? ""],
+  },
+};
+
 const config: HardhatUserConfig = {
   solidity: "0.8.9",
-  networks: {
-    lattice: {
-      url: "http://localhost:8545",
-      accounts: [process.env.TEST_U1_KEY ?? ""],
-    },
-    "base-goerli": {
-      url: "https://goerli.base.org",
-      accounts: [process.env.TEST_U1_KEY ?? ""],
-    },
-    "optimism-goerli": {
-      url: "https://opt-goerli.g.alchemy.com/v2/_k4Jxl6GexIvooQrdgnxZj9OFj8pGWrw",
-      accounts: [process.env.TEST_U1_KEY ?? ""],
-    },
-  },
+  networks: process.env.TEST_U1_KEY ? deployNetworks : networks,
   abiExporter: [
     {
       runOnCompile: false,
