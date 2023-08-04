@@ -77,12 +77,13 @@ function MakeUserAlarmsRecord() {
   const userAlarms = writable<Record<number, UserAlarm>>({});
 
   const addAlarm = async (
+    user: EvmAddress,
     alarmAddr: EvmAddress,
     id: number,
     creationBlock: number,
     initialStatus: AlarmStatus
   ) => {
-    const alarm = await UserAlarmStore({
+    const alarm = await UserAlarmStore(user, {
       contractAddress: alarmAddr,
       id,
       creationBlock,
@@ -106,7 +107,7 @@ function MakeUserAlarmsRecord() {
       ) {
         continue;
       }
-      currentAlarms[Number(id)] = await UserAlarmStore(alarm);
+      currentAlarms[Number(id)] = await UserAlarmStore($user, alarm);
       userAlarms.set(currentAlarms);
     }
   });
@@ -148,6 +149,7 @@ function MakeUserAlarmsRecord() {
             if (!log.args.alarmAddr || !log.args.id)
               throw Error("Creation event invalid");
             addAlarm(
+              $user,
               log.args.alarmAddr,
               Number(log.args.id),
               Number(log.blockNumber),
@@ -172,6 +174,7 @@ function MakeUserAlarmsRecord() {
             if (!log.args.alarmAddr || !log.args.id)
               throw Error("Creation event invalid");
             addAlarm(
+              $user,
               log.args.alarmAddr,
               Number(log.args.id),
               Number(log.blockNumber),
@@ -219,7 +222,7 @@ export const userAlarms = MakeUserAlarmsRecord();
  * Store that exposes alarm actions, sets listeners to re-query when deadlines are passed,
  * and caches alarm data
  */
-async function UserAlarmStore(alarm: AlarmBaseInfo) {
+async function UserAlarmStore(user: EvmAddress, alarm: AlarmBaseInfo) {
   const addr = alarm.contractAddress;
 
   const constants = writable({
@@ -246,7 +249,7 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
       if (_alarmState.status === AlarmStatus.ACTIVE) {
         _alarmState = {
           ..._alarmState,
-          ...(await getAlarmState(addr, p1, p2)),
+          ...(await getAlarmState(addr, user, p1, p2)),
         };
       }
 
@@ -256,13 +259,6 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
         ...s,
         ..._alarmState,
       }));
-    };
-  }) as Readable<() => Promise<void>>;
-
-  const syncTimeToDeadline = derived(constants, ({ player1 }) => {
-    return async () => {
-      const timeToNextDeadline = await getTimeToNextDeadline(addr, player1);
-      alarmState.update((s) => ({ ...s, timeToNextDeadline }));
     };
   }) as Readable<() => Promise<void>>;
 
@@ -279,12 +275,17 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
 
   // Manage count down timers on alarm state
   const countdownInterval = 1; // Update countdown every second
+
   let interval: ReturnType<typeof setInterval>;
   let reinitializingState = false;
-  alarmState.subscribe((s) => {
-    if (!s) return;
+
+  alarmState.subscribe((state) => {
+    if (!state) {
+      console.error("Invariant error: alarm state should never be undefined");
+      return
+    }
     // Set interval when there's no interval set, alarm is active, and there's a time value to decrement
-    if (!interval && s.status === AlarmStatus.ACTIVE && s.timeToNextDeadline) {
+    if (!interval && state.status === AlarmStatus.ACTIVE && state.timeToNextDeadline) {
       interval = setInterval(
         () => timeToDeadlineUpdater(countdownInterval),
         countdownInterval * 1000
@@ -292,8 +293,8 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
     }
     // Re-query for alarm state once deadline has passed
     if (
-      s.timeToNextDeadline !== undefined &&
-      s.timeToNextDeadline <= 0 &&
+      state.timeToNextDeadline !== undefined &&
+      state.timeToNextDeadline <= 0 &&
       !reinitializingState
     ) {
       console.log("getting new alarm state");
@@ -301,7 +302,7 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
       get(initAlarmState)().finally(() => (reinitializingState = false));
     }
     // Clear interval for inactive alarms
-    if (s.status !== AlarmStatus.ACTIVE) clearInterval(interval);
+    if (state.status !== AlarmStatus.ACTIVE) clearInterval(interval);
   });
 
   // Add status change listener
@@ -321,7 +322,7 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
     }
   );
 
-  // Add confirmation listener
+  // Listen for confirmation events and update alarm state
   watchContractEvent(
     {
       address: addr,
@@ -329,7 +330,6 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
       eventName: "ConfirmationSubmitted",
     },
     ([log]) => {
-      console.log("Confirmation submitted", log.args);
       let newConfirmationCount: Partial<AlarmState>;
       alarmState.update((s) => {
         if (log.args.from === get(constants).player1) {
@@ -341,7 +341,6 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
             player2Confirmations: (s.player2Confirmations ?? 0n) + 1n,
           };
         }
-        console.log("new confirmation count", newConfirmationCount);
         return { ...s, ...newConfirmationCount };
       });
     }
@@ -388,8 +387,8 @@ async function UserAlarmStore(alarm: AlarmBaseInfo) {
       return res;
     },
     syncTimeToDeadline: async () => {
-      const p1 = get(constants).player1;
-      const timeToNextDeadline = await getTimeToNextDeadline(addr, p1);
+      const [p1, p2] = [get(constants).player1, get(constants).player2] ;
+      const timeToNextDeadline = await getTimeToNextDeadline(addr, p1 === user ? p1 : p2);
       alarmState.update((s) => ({ ...s, timeToNextDeadline }));
     },
   };

@@ -69,6 +69,7 @@ export const getAlarmConstants = async (alarmAddress: EvmAddress) => {
 
 export const getAlarmState = async (
   alarmAddress: EvmAddress,
+  targetPlayer: EvmAddress,
   p1: EvmAddress,
   p2: EvmAddress
 ) => {
@@ -86,7 +87,7 @@ export const getAlarmState = async (
     p2Timezone,
   ] = await multicall({
     contracts: [
-      { ...args, functionName: "timeToNextDeadline", args: [p1] },
+      { ...args, functionName: "timeToNextDeadline", args: [targetPlayer === p1 ? p1 : p2] },
       { ...args, functionName: "missedDeadlines", args: [p1] },
       { ...args, functionName: "missedDeadlines", args: [p2] },
       { ...args, functionName: "numConfirmations", args: [p1] },
