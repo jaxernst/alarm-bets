@@ -8,7 +8,7 @@
   import { crossfade, fade, slide } from "svelte/transition";
   import { cubicInOut } from "svelte/easing";
   import { showWelcome } from "./view";
-  import { deploymentChains, hubDeployments } from "./lib/hubDeployments";
+  import { hubDeployments, partnerAlarmClockContractTemplates } from "./lib/hubDeployments";
 
   let typewriterComplete = false;
   let showAbout = false;
@@ -131,10 +131,6 @@
           incentivizes waking up early.
         </div>
 
-        <div class="text-cyan-500">
-          Live on Optimism and Optimism Goerli Testnet!
-        </div>
-
         <div>
           <b class="text-cyan-500">The Gist</b>
           <p>
@@ -227,7 +223,7 @@
         </div>
 
         <div>
-          <b class="text-cyan-500">Open Source</b>
+          <b class="text-cyan-500">Open Source + Smart Contract</b>
           <ul class="flex list-disc flex-col gap-3 pl-4 marker:text-cyan-500">
             <li>
               The Social Alarm Clock is open source. All smart contracts +
@@ -238,7 +234,15 @@
                 ></span
               >
             </li>
-            <li>Optimism Goerli Contracts: {hubDeployments[420]} (hub) |</li>
+            <li>Optimism Goerli Contracts: 
+                <ul class="indent-4">
+                  <li>
+                    Hub Contract: <span class="text-cyan-500">{hubDeployments[420]}</span>
+                  </li>
+                  <li>
+                    Partner Alarm Contract: <span class="text-cyan-500">{partnerAlarmClockContractTemplates[420]}</span>
+                  </li>
+                </ul>
             <li>
               Though the Social Alarm Clock smart contracts are well tested,
               there are no gurantees that they are bug free. This is
