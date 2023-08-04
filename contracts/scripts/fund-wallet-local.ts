@@ -1,4 +1,4 @@
-import { parseEther } from "ethers/lib/utils";
+import { isAddress, parseEther } from "ethers/lib/utils";
 import hre, { ethers } from "hardhat";
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -8,17 +8,24 @@ const VAL = parseEther("1");
 async function main() {
   if (hre.network.name !== "localhost") throw Error(`Localhost not selected`);
 
-  if (!process.env.TEST_WALLET) {
-    throw Error(".env must have TEST_WALLET to send funds to");
+  if (!process.env.FUND_WALLET_1 || !process.env.FUND_WALLET_2) {
+    console.error("*** .env must have FUND_WALLET_(1 and 2) addresses to send funds to ***");
+    return
   }
+
+  if (![process.env.FUND_WALLET_1, process.env.FUND_WALLET_2].every((addr) => isAddress(addr ?? ""))) {
+    console.error("*** FUND_WALLET_(1 and 2) must be valid addresses ***");
+    return
+  }
+
   const [signer] = await ethers.getSigners();
-  signer.sendTransaction({
-    to: process.env.TEST_WALLET,
+  await signer.sendTransaction({
+    to: process.env.FUND_WALLET_1,
     value: VAL,
   });
 
-  signer.sendTransaction({
-    to: "0x9B8DB9bffcCd1F2Cc5044d67a1b9C68dD6Deff6a",
+  await signer.sendTransaction({
+    to: process.env.FUND_WALLET_2,
     value: VAL,
   });
 }

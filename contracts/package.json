@@ -16,7 +16,7 @@
     "typechain": "^8.1.0"
   },
   "scripts": {
-    "test": "yarn hardhat test",
+    "test": "yarn hardhat compile && yarn hardhat test",
     "deploy-local": "hardhat node & (sleep 1.5 && hardhat run scripts/deploy.ts --network localhost && yarn fund-wallet-local && hh automine --off --interval 1000 --network localhost)",
     "fund-wallet-local": "hardhat run scripts/fund-wallet-local.ts --network localhost"
   },
