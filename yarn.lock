@@ -1193,16 +1193,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/jazzicon@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@metamask/jazzicon@npm:2.0.0"
-  dependencies:
-    color: ^0.11.3
-    mersenne-twister: ^1.1.0
-  checksum: 0b5add49e8d28270e4f8ca6159aa4ea0848f70cbb1cb217de2b0c13799a45fb27b8a6f0b3f72b6a76cbb55446764f79daf71e7d2a830a14b8e5e54d5e57bf7d1
-  languageName: node
-  linkType: hard
-
 "@metamask/safe-event-emitter@npm:2.0.0, @metamask/safe-event-emitter@npm:^2.0.0":
   version: 2.0.0
   resolution: "@metamask/safe-event-emitter@npm:2.0.0"
@@ -1750,7 +1740,6 @@ __metadata:
     svelte: ^3.58.0
     svelte-check: ^2.10.3
     svelte-preprocess: latest
-    svelte-web3: ^4.0.1
     tailwindcss: latest
     tslib: ^2.5.0
     typescript: ^4.9.3
@@ -3783,13 +3772,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clone@npm:^1.0.2":
-  version: 1.0.4
-  resolution: "clone@npm:1.0.4"
-  checksum: d06418b7335897209e77bdd430d04f882189582e67bd1f75a04565f3f07f5b3f119a9d670c943b6697d0afb100f03b866b3b8a1f91d4d02d72c4ecf2bb64b5dd
-  languageName: node
-  linkType: hard
-
 "clsx@npm:^1.1.0":
   version: 1.2.1
   resolution: "clsx@npm:1.2.1"
@@ -3797,7 +3779,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"color-convert@npm:^1.3.0, color-convert@npm:^1.9.0":
+"color-convert@npm:^1.9.0":
   version: 1.9.3
   resolution: "color-convert@npm:1.9.3"
   dependencies:
@@ -3822,19 +3804,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"color-name@npm:^1.0.0, color-name@npm:~1.1.4":
+"color-name@npm:~1.1.4":
   version: 1.1.4
   resolution: "color-name@npm:1.1.4"
   checksum: b0445859521eb4021cd0fb0cc1a75cecf67fceecae89b63f62b201cca8d345baf8b952c966862a9d9a2632987d4f6581f0ec8d957dfacece86f0a7919316f610
-  languageName: node
-  linkType: hard
-
-"color-string@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "color-string@npm:0.3.0"
-  dependencies:
-    color-name: ^1.0.0
-  checksum: cc65013a94d399ddcb81b3b4b6e0d2166cbaa77311260ff6271f215a286d3db58ab3a217bdb175f8b9dd95f9ea7ac94f71a595af6bcd3b6a02fea6e75ddaf5fb
   languageName: node
   linkType: hard
 
@@ -3844,17 +3817,6 @@ __metadata:
   bin:
     color-support: bin.js
   checksum: 9b7356817670b9a13a26ca5af1c21615463b500783b739b7634a0c2047c16cef4b2865d7576875c31c3cddf9dd621fa19285e628f20198b233a5cfdda6d0793b
-  languageName: node
-  linkType: hard
-
-"color@npm:^0.11.3":
-  version: 0.11.4
-  resolution: "color@npm:0.11.4"
-  dependencies:
-    clone: ^1.0.2
-    color-convert: ^1.3.0
-    color-string: ^0.3.0
-  checksum: a6f624fd159e9311a6c1c86ac05b5b550c98e2d1e5646e032b8481e5e113127c06a84678b91c89c96b11b58c1c723dd9766b1b02cb2d441c6212a0f7cb3dad73
   languageName: node
   linkType: hard
 
@@ -4450,15 +4412,6 @@ __metadata:
   dependencies:
     fast-safe-stringify: ^2.0.6
   checksum: 5fa31d1a10fdb340733b9a55e38e7687222c501052ca20743cef4d0c911a9bbcc0cad54aa6bf3e4b428604c071ff519803060e1cbc79ddb7c9257c11d407d32a
-  languageName: node
-  linkType: hard
-
-"ethereum-blockies-base64@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "ethereum-blockies-base64@npm:1.0.2"
-  dependencies:
-    pnglib: 0.0.1
-  checksum: 326cb27f36c03c8857853dfaa024a4ab3c09ea90989579a84dd138a12930773bbf0d89cbac951a844e28d32a5b540d82ac6fcafad2d06219b9acd0ee68054bfc
   languageName: node
   linkType: hard
 
@@ -5985,13 +5938,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mersenne-twister@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "mersenne-twister@npm:1.1.0"
-  checksum: 7de1940ded117f2aad9320ae4d21d647b0ecf0667abbadcfe6a2835c669feb674ef46cb7a72da7af69a56d8b19e50e95e2fb7ef6d780efab7a6acd4d87f4cb2d
-  languageName: node
-  linkType: hard
-
 "micromatch@npm:^4.0.4, micromatch@npm:^4.0.5":
   version: 4.0.5
   resolution: "micromatch@npm:4.0.5"
@@ -6693,13 +6639,6 @@ __metadata:
   version: 5.0.0
   resolution: "pngjs@npm:5.0.0"
   checksum: 04e912cc45fb9601564e2284efaf0c5d20d131d9b596244f8a6789fc6cdb6b18d2975a6bbf7a001858d7e159d5c5c5dd7b11592e97629b7137f7f5cef05904c8
-  languageName: node
-  linkType: hard
-
-"pnglib@npm:0.0.1":
-  version: 0.0.1
-  resolution: "pnglib@npm:0.0.1"
-  checksum: 48b5ef961a257f7653e6bc4d03aac1a817e4590d048cddee4f09a63cb3ed4ac120d15470725d4e37e087d57b231915d0563b16e596dd88d69a72ed669746c2bd
   languageName: node
   linkType: hard
 
@@ -7857,26 +7796,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svelte-proxied-store@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "svelte-proxied-store@npm:2.0.3"
-  checksum: 8d4f9f3f0e5e1fe932b132ca9f0ecf8103d5cbedcb0e62db70ac945310769d1ce02021d96ea82eb84ab67f909e37014eb8ccc7ccf10ea7a3b687ccf10f29443a
-  languageName: node
-  linkType: hard
-
-"svelte-web3@npm:^4.0.1":
-  version: 4.2.1
-  resolution: "svelte-web3@npm:4.2.1"
-  dependencies:
-    "@metamask/jazzicon": ^2.0.0
-    ethereum-blockies-base64: ^1.0.2
-    svelte: ^3.0.0
-    svelte-proxied-store: ^2.0.3
-  checksum: 653d1c53b0b30d38d89d3ee8e3ddf4dc6e1004ffec8e449f861dd8946bcadfd6b33ded63843a92181cfac73901f661615e1e103efb4fe7ba72c18988574b7ed9
-  languageName: node
-  linkType: hard
-
-"svelte@npm:^3.0.0, svelte@npm:^3.58.0":
+"svelte@npm:^3.58.0":
   version: 3.59.2
   resolution: "svelte@npm:3.59.2"
   checksum: 3e9d770292ab5a0061ff2d3a6f77b323014399de7458371ab507465f9860d04d0c8c7a50239d15c78b920cd42065953e3c4a36abb69a2285c52c825017621444
