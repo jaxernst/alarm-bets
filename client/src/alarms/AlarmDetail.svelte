@@ -61,16 +61,17 @@
   }
 
   let submitPending = false;
+  let confirmationSubmitted = false;
   const submitConfirmationTransaction = async () => {
     if (submitPending) return;
     submitPending = true;
-
     try {
       const txResult = await transactions.addTransaction(
         submitConfirmation(alarmAddress)
       );
       if (!txResult.error) {
         toast.push("You woke up on time!");
+        confirmationSubmitted = true;
       } else {
         toast.push(
           "Confirmation failed. Were you too late? Here's the error: " +
@@ -276,8 +277,8 @@
       {:else}
         <button
           class="shadow-l p-2 text-sm font-bold text-green-600 transition hover:scale-105 disabled:text-green-900"
-          disabled={($alarm.timeToNextDeadline ?? 0) > $alarm.submissionWindow}
-          on:click={submitConfirmationTransaction}>Confirm Wakeup</button
+          disabled={($alarm.timeToNextDeadline ?? 0) > $alarm.submissionWindow || confirmationSubmitted}
+          on:click={submitConfirmationTransaction}>{confirmationSubmitted ? "Wakeup Submitted" : "Confirm Wakeup"}</button
         >
       {/if}
     {/if}
