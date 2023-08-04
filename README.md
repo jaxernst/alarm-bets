@@ -6,7 +6,7 @@ Demo: [social-alarm.xyz](https://social-alarm.xyz/)
 
 # Quickstart
 
-Packages are managed with `yarn`. Before installing, ensure the correct version is set with `yarn set version berry`.
+Packages are managed with `yarn`. (To avoid installation errorsensure the correct version is set with `yarn set version berry`).
 
 Install monorepo dependencies:
 
@@ -16,31 +16,48 @@ yarn install
 
 ## Contracts
 
-`cd contracts`
-
-Compile contracts, ABI, and typechain types:
+Run smart contract test suite:
 
 ```
-yarn hardhat compile
+yarn test-contracts
 ```
 
-Test Contracts:
+Deploy contracts to a local node:
 
 ```
-yarn test
+yarn deploy-local
 ```
 
-## Client (Frontend)
-
-`cd client`
-
-Run in dev:
+## Client
+The client is configured to target deployed contracts on various networks (including testnets). To run the client locally:
 
 ```
-yarn dev
+yarn client
 ```
 
-## The Game: Overview
+### Running against a local testnet
+The interface can be run against a local hardhat deployment, but this takes a few additional steps to setup. 
+
+1) (Optional) If you want to test with in-browser wallet accounts, these accounts can be funded with local testnet funds by creating a .env file under `contracts` and including two wallet addresses to fund:
+```
+FUND_WALLET_1=<wallet address>
+FUND_WALLET_2=<wallet address>
+```
+
+2) Spin up the hardhat node and send funds the wallets:
+```
+yarn deploy-local
+```
+
+3) Run the interface: `yarn client`
+
+4) Add the hardhat network (Chain Id: 31337) to you browser wallet if not already added. (Metamask Note: If you see 'nonce too high' error, go to settings and click 'reset activity tab data')
+
+5) Connect wallet and create test alarms locally
+
+<br />
+
+# The Game: Overview
 
 The game mechanics are quite simple and play out like so:
 
