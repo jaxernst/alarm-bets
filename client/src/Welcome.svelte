@@ -250,10 +250,10 @@
             <li>Optimism Goerli Contracts: 
                 <ul class="indent-4">
                   <li>
-                    Hub Contract: <span class="text-cyan-500">{hubDeployments[420]}</span>
+                    Hub Contract: <div class="text-cyan-500 break-words overflow-x-visible text-xs sm:text-sm">{hubDeployments[420]}</div>
                   </li>
                   <li>
-                    Partner Alarm Contract: <span class="text-cyan-500">{partnerAlarmClockContractTemplates[420]}</span>
+                    Partner Alarm Contract: <div class="text-cyan-500 overflow-x-auto text-xs sm:text-sm">{partnerAlarmClockContractTemplates[420]}</div>
                   </li>
                 </ul>
             <li>
