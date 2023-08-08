@@ -4,6 +4,7 @@ import {
   DAY,
   HOUR,
   MINUTE,
+  SECOND,
   WEEK,
   currentTimestamp,
   dayOfWeek,
@@ -11,6 +12,7 @@ import {
 } from "../helpers/time";
 import { advanceTime } from "../helpers/providerUtils";
 import { AlarmScheduleMock } from "../../typechain-types";
+import { getRandomDays } from "../helpers/random";
 
 describe("Alarm Schedule Test", () => {
   let schedule: AlarmScheduleMock;
@@ -169,26 +171,40 @@ describe("Alarm Schedule Test", () => {
           ` (offset: ${offset}hrs)`,
         async () => {}
       );
-      it("Returns the expected number of missed deadlines after several weeks", async () => {
-        const alarmDays = [1, 3, 4, 5, 7];
-        const curTimeOfDay = timeOfDay(blockTime, offset);
-        await schedule.init(curTimeOfDay - 60, alarmDays, 60, offset * HOUR);
-        expect(await schedule.missedDeadlines()).to.equal(0);
 
-        let curDay = dayOfWeek(blockTime, offset);
-        let expectedDeadlines = 0;
+      /**
+       * Repeat this test case several times with an alarm on random days
+       */
+      for (let _ in [...Array(4)]) {
+        const alarmDays = getRandomDays();
 
-        for (let _ in Array(55)) {
-          curDay = (curDay % 7) + 1;
-          await advanceTime(1 * DAY);
+        it(`Returns the expected number of missed deadlines after several weeks. Days: ${alarmDays} TZ: ${offset}hrs`, async () => {
+          const curTimeOfDay = timeOfDay(blockTime, offset);
+          await schedule.init(curTimeOfDay + 60, alarmDays, 60, offset * HOUR);
+          expect(await schedule.missedDeadlines()).to.equal(0);
 
-          if (alarmDays.includes(curDay)) {
-            expectedDeadlines++;
+          let expectedDeadlines = 0;
+
+          for (let _ in [...Array(45)]) {
+            let curDay = dayOfWeek(blockTime, offset);
+            curDay = (curDay % 7) + 1;
+
+            if (alarmDays.includes(curDay)) {
+              // Random chance to submit the alarm on time
+              if (Math.random() > 0.5) {
+                await schedule.recordEntry();
+                await advanceTime(1 * DAY - 1 * SECOND);
+              } else {
+                // Expect a missed deadline if the alarm was missed
+                expectedDeadlines++;
+                await advanceTime(1 * DAY);
+              }
+            }
           }
-        }
 
-        expect(await schedule.missedDeadlines()).to.equal(expectedDeadlines);
-      });
+          expect(await schedule.missedDeadlines()).to.equal(expectedDeadlines);
+        });
+      }
     }
   });
 
