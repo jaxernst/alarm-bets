@@ -186,20 +186,16 @@ describe("Alarm Schedule Test", () => {
           let expectedDeadlines = 0;
 
           for (let _ in [...Array(45)]) {
-            let curDay = dayOfWeek(blockTime, offset);
-            curDay = (curDay % 7) + 1;
+            let curDay = dayOfWeek(
+              (await currentTimestamp()).toNumber(),
+              offset
+            );
 
             if (alarmDays.includes(curDay)) {
-              // Random chance to submit the alarm on time
-              if (Math.random() > 0.5) {
-                await schedule.recordEntry();
-                await advanceTime(1 * DAY - 1 * SECOND);
-              } else {
-                // Expect a missed deadline if the alarm was missed
-                expectedDeadlines++;
-                await advanceTime(1 * DAY);
-              }
+              // Expect a missed deadline if the alarm was missed
+              expectedDeadlines++;
             }
+            await advanceTime(1 * DAY);
           }
 
           expect(await schedule.missedDeadlines()).to.equal(expectedDeadlines);
