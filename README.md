@@ -1,6 +1,6 @@
 # The Social Alarm Clock
 
-An onchain 2-player productivity game built to help players wake up earlier...
+An onchain 2-player betting game built to incentivize waking up early...
 
 Demo: [social-alarm.xyz](https://social-alarm.xyz/)
 
@@ -29,6 +29,7 @@ yarn deploy-local
 ```
 
 ## Client
+
 The client is configured to target deployed contracts on various networks (including testnets). To run the client locally:
 
 ```
@@ -36,24 +37,27 @@ yarn client
 ```
 
 ### Running against a local testnet
-The interface can be run against a local hardhat deployment, but this takes a few additional steps to setup. 
 
-1) (Optional) If you want to test with in-browser wallet accounts, these accounts can be funded with local testnet funds by creating a .env file under `contracts` and including two wallet addresses to fund:
+The interface can be run against a local hardhat deployment, but this takes a few additional steps to setup.
+
+1. (Optional) If you want to test with in-browser wallet accounts, these accounts can be funded with local testnet funds by creating a .env file under `contracts` and including two wallet addresses to fund:
+
 ```
 FUND_WALLET_1=<wallet address>
 FUND_WALLET_2=<wallet address>
 ```
 
-2) Spin up the hardhat node and send funds the wallets:
+2. Spin up the hardhat node and send funds the wallets:
+
 ```
 yarn deploy-local
 ```
 
-3) In a new shell window, run the interface: `yarn client`
+3. In a new shell window, run the interface: `yarn client`
 
-4) Add the hardhat network (Chain Id: 31337) to you browser wallet if not already added. (Metamask Note: If you see 'nonce too high' error, go to settings and click 'reset activity tab data')
+4. Add the hardhat network (Chain Id: 31337) to you browser wallet if not already added. (Metamask Note: If you see 'nonce too high' error, go to settings and click 'reset activity tab data')
 
-5) Connect wallet and create test alarms locally
+5. Connect wallet and create test alarms locally
 
 <br />
 
