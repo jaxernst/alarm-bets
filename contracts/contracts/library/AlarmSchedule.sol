@@ -120,6 +120,9 @@ library AlarmSchedule {
         // the amount of weeks elasped.
         uint minConfirmations = daysPassed / 7;
 
+        /**
+         * Suspected bug in this logic, needs review
+         */
         for (uint i; i < self.alarmDays.length; i++) {
             uint8 checkDay = self.alarmDays[i];
             uint expectedConfirmationsOnThisDay = minConfirmations;
