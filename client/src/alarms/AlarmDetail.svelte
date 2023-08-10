@@ -37,8 +37,8 @@
 
   $: account = $getCurrentAccount().address;
   $: alarmAddress = $alarm.address;
-
   $: correctedAlarmTime = Number($alarm.alarmTime);
+
   $: if (
     $alarm.alarmTime &&
     $alarm.player1Timezone &&
@@ -277,8 +277,12 @@
       {:else}
         <button
           class="shadow-l p-2 text-sm font-bold text-green-600 transition hover:scale-105 disabled:text-green-900"
-          disabled={($alarm.timeToNextDeadline ?? 0) > $alarm.submissionWindow || confirmationSubmitted}
-          on:click={submitConfirmationTransaction}>{confirmationSubmitted ? "Wakeup Submitted" : "Confirm Wakeup"}</button
+          disabled={($alarm.timeToNextDeadline ?? 0) >
+            $alarm.submissionWindow || confirmationSubmitted}
+          on:click={submitConfirmationTransaction}
+          >{confirmationSubmitted
+            ? "Wakeup Submitted"
+            : "Confirm Wakeup"}</button
         >
       {/if}
     {/if}
