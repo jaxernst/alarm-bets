@@ -18,7 +18,7 @@ library AlarmSchedule {
         uint activationTimestamp;
         uint lastEntryTime;
         bool initialized;
-        uint32[7] alarmEntries;
+        uint alarmEntries;
     }
 
     modifier started(Schedule storage self) {
@@ -59,12 +59,8 @@ library AlarmSchedule {
 
     function entries(
         Schedule storage self
-    ) internal view started(self) returns (uint confirmations) {
-        confirmations = 0;
-        // Count confirmations for each day of the week (Su-Sa)
-        for (uint i; i < self.alarmEntries.length; i++) {
-            confirmations += self.alarmEntries[i];
-        }
+    ) internal view started(self) returns (uint) {
+        return self.alarmEntries;
     }
 
     function recordEntry(Schedule storage self) internal started(self) {
@@ -76,10 +72,7 @@ library AlarmSchedule {
         );
         require(inSubmissionWindow(self), "NOT_IN_SUBMISSION_WINDOW");
         self.lastEntryTime = block.timestamp;
-        uint8 localDay = _dayOfWeek(
-            _offsetTimestamp(block.timestamp, self.timezoneOffset)
-        );
-        self.alarmEntries[localDay - 1]++;
+        self.alarmEntries++;
     }
 
     function inSubmissionWindow(
@@ -95,54 +88,56 @@ library AlarmSchedule {
 
     /**
      * Determine how many total alarm deadlines have been missed for this schedule.
-     * Calculate expected number of wakeups for each alarm day:
-     *   f(timezone, alarmTime, activationTime)
-     * then subtract actual number of wakeups on each alarm day to get numMissedDeadlines
+     * We do this by calculating the number of whole weeks which have passed since
+     * activation, then figuring out how many additional (remainder) alarms days to add,
+     * and comparing that with the total entry count.
      */
     function missedDeadlines(
         Schedule storage self
     ) internal view started(self) returns (uint numMissedDeadlines) {
         if (block.timestamp < self.activationTimestamp) return 0;
 
-        // The current day of week is taken from the last deadline time (timezone adjusted)
-        uint256 curDay = _dayOfWeek(
-            _offsetTimestamp(block.timestamp, self.timezoneOffset)
+        // Reference amount of time passed from the last deadline timestamp
+        uint256 lastDeadline = _lastDeadlineInterval(self);
+
+        uint256 daysPassed = (lastDeadline - self.activationTimestamp) / 1 days;
+        uint weeksPassed = daysPassed / 7;
+        uint remainderDays = daysPassed % 7;
+
+        // Get expected entries for full weeks passed
+        uint expectedEntriesForFullWeeks = weeksPassed * self.alarmDays.length;
+
+        // Figure out additional expected entries for remainder days based on which
+        // of those remainder days are alarm days
+
+        uint8 startDayOfWeek = _dayOfWeek(
+            _offsetTimestamp(
+                lastDeadline - (remainderDays * 1 days),
+                self.timezoneOffset
+            )
+        );
+        uint8 endDayOfWeek = _dayOfWeek(
+            _offsetTimestamp(lastDeadline, self.timezoneOffset)
         );
 
-        uint8 activationDay = _dayOfWeek(
-            _offsetTimestamp(self.activationTimestamp, self.timezoneOffset)
-        );
-
-        uint256 daysPassed = (block.timestamp - self.activationTimestamp) /
-            1 days;
-
-        // The expected amount of confirmations for any given alarm day is at least
-        // the amount of weeks elasped.
-        uint minConfirmations = daysPassed / 7;
-
-        /**
-         * Suspected bug in this logic, needs review
-         */
-        for (uint i; i < self.alarmDays.length; i++) {
-            uint8 checkDay = self.alarmDays[i];
-            uint expectedConfirmationsOnThisDay = minConfirmations;
-            uint actualConfirmationsOnThisDay = uint(
-                self.alarmEntries[checkDay - 1]
-            );
-
-            if (activationDay <= checkDay && checkDay < curDay) {
-                expectedConfirmationsOnThisDay++;
-            }
-            if (checkDay == curDay && _deadlinePassedToday(self)) {
-                expectedConfirmationsOnThisDay++;
-            }
-
-            if (expectedConfirmationsOnThisDay > actualConfirmationsOnThisDay) {
-                numMissedDeadlines +=
-                    expectedConfirmationsOnThisDay -
-                    actualConfirmationsOnThisDay;
+        uint8 alarmsInRemainderDays = 0;
+        for (uint j = 0; j < self.alarmDays.length; j++) {
+            // I'm sorry you have to read this
+            if (
+                (self.alarmDays[j] >= startDayOfWeek &&
+                    self.alarmDays[j] <= endDayOfWeek) ||
+                (startDayOfWeek > endDayOfWeek &&
+                    (self.alarmDays[j] >= startDayOfWeek ||
+                        self.alarmDays[j] <= endDayOfWeek))
+            ) {
+                alarmsInRemainderDays++;
             }
         }
+
+        uint expectedEntries = expectedEntriesForFullWeeks +
+            alarmsInRemainderDays;
+
+        return expectedEntries - self.alarmEntries;
     }
 
     function timeToNextDeadline(

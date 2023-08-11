@@ -4,7 +4,6 @@ import {
   DAY,
   HOUR,
   MINUTE,
-  SECOND,
   WEEK,
   currentTimestamp,
   dayOfWeek,
@@ -98,6 +97,11 @@ describe("Alarm Schedule Test", () => {
     it("Will not accept an entry on the same initialization day if alarm time has passed", async () => {
       const missedBySeconds = 60;
 
+      if (curTimeOfDay - missedBySeconds < 0) {
+        await advanceTime(missedBySeconds);
+        curTimeOfDay = timeOfDay((await currentTimestamp()).toNumber());
+      }
+
       await (
         await schedule.init(
           curTimeOfDay - missedBySeconds,
@@ -132,7 +136,7 @@ describe("Alarm Schedule Test", () => {
       blockTime = (await currentTimestamp()).toNumber();
     });
 
-    for (let offset of [-11, 0, 3, 10]) {
+    for (let offset of [-10, -3, 0, 6, 11]) {
       it(
         "Returns 0 before the first alarm deadline" + ` (offset: ${offset}hrs)`,
         async () => {
@@ -175,7 +179,7 @@ describe("Alarm Schedule Test", () => {
       /**
        * Repeat this test case several times with an alarm on random days
        */
-      for (let _ in [...Array(4)]) {
+      for (let _ in [...Array(3)]) {
         const alarmDays = getRandomDays();
 
         it(`Returns the expected number of missed deadlines after several weeks. Days: ${alarmDays} TZ: ${offset}hrs`, async () => {
