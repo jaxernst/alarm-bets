@@ -97,10 +97,10 @@ library AlarmSchedule {
     ) internal view started(self) returns (uint numMissedDeadlines) {
         if (block.timestamp < self.activationTimestamp) return 0;
 
-        // Reference amount of time passed from the last deadline timestamp
+        // Days passed is referenced from the last deadline timestamp
         uint256 lastDeadline = _lastDeadlineInterval(self);
-
         uint256 daysPassed = (lastDeadline - self.activationTimestamp) / 1 days;
+
         uint weeksPassed = daysPassed / 7;
         uint remainderDays = daysPassed % 7;
 
