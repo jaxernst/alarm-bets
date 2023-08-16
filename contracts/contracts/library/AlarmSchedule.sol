@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 /**
- * @notice Enforces and tracks 'confirmations'  made to an alarm-clock style schedule, where confirmations
+ * @notice Enforces and tracks 'confirmations' made to an alarm-clock style schedule, where confirmations
  * are only allowed to be submitted within a configurable window around the alarm deadlines.
  */
 library AlarmSchedule {
