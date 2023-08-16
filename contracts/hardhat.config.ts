@@ -35,8 +35,6 @@ task("automine", "Turn automine off or on")
     }
   );
 
-let networks = { hardhat: {} };
-
 const deployNetworks = {
   lattice: {
     url: "http://localhost:8545",
@@ -54,7 +52,9 @@ const deployNetworks = {
 
 const config: HardhatUserConfig = {
   solidity: "0.8.9",
-  networks: process.env.TEST_U1_KEY ? deployNetworks : networks,
+  networks: {
+    ...(process.env.TEST_U1_KEY ? deployNetworks : {}),
+  },
   abiExporter: [
     {
       runOnCompile: false,
