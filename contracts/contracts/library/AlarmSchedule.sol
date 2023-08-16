@@ -155,7 +155,6 @@ library AlarmSchedule {
             _offsetTimestamp(referenceTimestamp, self.timezoneOffset)
         );
 
-        // Get next alarm day
         uint8 nextDay = _nextAlarmDay(self, curDay);
 
         uint8 daysAway;
