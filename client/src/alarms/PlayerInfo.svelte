@@ -5,7 +5,6 @@
   import type { UserAlarm } from "../lib/dappStores";
   import { shorthandAddress } from "../lib/util";
   import { getBetStanding } from "../lib/alarmHelpers";
-  import EthSymbol from "../lib/components/EthSymbol.svelte";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import Deadline from "../assets/deadline.svelte";
   import { HOUR } from "../lib/time";
