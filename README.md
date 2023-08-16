@@ -6,7 +6,7 @@ Demo: [social-alarm.xyz](https://social-alarm.xyz/)
 
 # Quickstart
 
-Packages are managed with `yarn`. (To avoid installation errorsensure the correct version is set with `yarn set version berry`).
+Packages are managed with `yarn`. (To avoid installation errors ensure the correct version is set with `yarn set version berry`).
 
 Install monorepo dependencies:
 
