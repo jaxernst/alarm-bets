@@ -15,8 +15,12 @@ interface ICommitment {
     function name() external view returns (string memory);
 
     function owner() external view returns (address);
+}
 
-    function submitConfirmationWithProof(string memory) external;
-
+interface IConfirmationSubmitter is ICommitment {
     function submitConfirmation() external;
+}
+
+interface IProoveableConfirmationSubmitter {
+    function submitConfirmationWithProof(string memory) external;
 }

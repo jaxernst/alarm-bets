@@ -26,11 +26,6 @@ contract BaseCommitment is ICommitment {
         _;
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "ONLY_OWNER");
-        _;
-    }
-
     function init(bytes calldata data) public payable virtual initializer {
         string memory description;
         (name, description) = abi.decode(data, (string, string));
@@ -38,20 +33,17 @@ contract BaseCommitment is ICommitment {
         emit CommitmentInitialized(description);
     }
 
-    function submitConfirmationWithProof(
-        string memory proofUri
-    ) public virtual override onlyOwner {
+    function _submitConfirmationWithProof(string memory proofUri) internal {
         emit ProofSubmitted(proofUri, ++nextProofId);
-        submitConfirmation();
+        _submitConfirmation();
     }
 
-    /**
-     * @notice The base commitment will change its status to complete upon confirmation
-     * but derived commitments to not have to abide by this state change
-     */
-    function submitConfirmation() public virtual override onlyOwner {
+    function _submitConfirmation() internal {
         emit ConfirmationSubmitted(msg.sender);
-        emit StatusChanged(status, CommitmentStatus.COMPLETE);
-        status = CommitmentStatus.COMPLETE;
+    }
+
+    function _updateStatus(CommitmentStatus newStatus) internal {
+        emit StatusChanged(status, newStatus);
+        status = newStatus;
     }
 }
