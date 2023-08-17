@@ -176,7 +176,7 @@
             </div>
             <div class="mt-2 flex gap-2">
               <p class="px-1 text-sm">
-                Your Timezone: {getReadableTimezone()}
+                Play with Timezone: {getReadableTimezone()}
               </p>
               <div>
                 <button
