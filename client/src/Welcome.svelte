@@ -8,8 +8,11 @@
   import { crossfade, fade, slide } from "svelte/transition";
   import { cubicInOut } from "svelte/easing";
   import { showWelcome, welcomeHasBeenViewed } from "./view";
-  import { hubDeployments, partnerAlarmClockContractTemplates } from "./lib/hubDeployments";
-    import { onMount } from "svelte";
+  import {
+    hubDeployments,
+    partnerAlarmClockContractTemplates,
+  } from "./lib/hubDeployments";
+  import { onMount } from "svelte";
 
   let typewriterComplete = false;
   let showAbout = false;
@@ -23,8 +26,8 @@
   });
 
   onMount(() => {
-    $welcomeHasBeenViewed = true
-  })
+    $welcomeHasBeenViewed = true;
+  });
 
   const pullUpParams = { duration: 600, easing: cubicInOut };
   const [send, receive] = crossfade(pullUpParams);
@@ -149,7 +152,7 @@
           <p>
             Two players put down money and challenge each other to wake up at a
             specific time on a recurring schedule. On these mornings, each
-            player must submit a 'wakeup' confirmation before their alarm time,
+            player must submit a 'wakeup' confirmation BEFORE their alarm time,
             else they risk losing a portion of your bet to the other player.
           </p>
         </div>
@@ -161,7 +164,7 @@
               ><a
                 href="https://ethereum.org/en/wallets/"
                 class="text-cyan-600 underline underline-offset-1"
-                >web3 wallet</a
+                target="_blank">web3 wallet</a
               ></span
             > to play!
           </div>
@@ -188,9 +191,16 @@
         </div>
 
         <div>
-          One player then creates the alarm, the second player joins, and the
-          alarm automatically activates. The alarm will remain active
-          indefinetly, or until either players decides to withdraw.
+          After the terms are agreed upon, choose a player to create the alarm
+          (via the 'New' tab). After this player creates the alarm, they must
+          provide their partner with the alarm ID. Once player 2 has this ID,
+          they can join the alarm via the 'Join' tab.
+        </div>
+
+        <div>
+          Once both players have joined, the alarm is active and the game
+          begins. The alarm will remain active indefinetly, or until either
+          players decides to withdraw.
         </div>
 
         <div>
@@ -217,8 +227,12 @@
               impose any fee or tax.
             </li>
             <li>
+              Either player can end their alarm at any time. Ending the alarm
+              will return both players remaining balance to their wallet.
+            </li>
+            <li>
               The Social Alarm Clock can be played with fake money on the
-              Optimism Goerli test network. To do so, you must add the Optimism
+              Optimism Goerli test network. To do so, you must add Optimism
               Goerli to your wallet and get testnet funds. Reach out to (<a
                 class="text-cyan-600 underline"
                 target="_blank"
@@ -247,22 +261,32 @@
                 ></span
               >
             </li>
-            <li>Optimism Goerli Contracts: 
-                <ul class="indent-4">
-                  <li>
-                    Hub Contract: <div class="text-cyan-500 break-words overflow-x-visible text-xs sm:text-sm">{hubDeployments[420]}</div>
-                  </li>
-                  <li>
-                    Partner Alarm Contract: <div class="text-cyan-500 overflow-x-auto text-xs sm:text-sm">{partnerAlarmClockContractTemplates[420]}</div>
-                  </li>
-                </ul>
             <li>
-              Though the Social Alarm Clock smart contracts are well tested,
-              there are no gurantees that they are bug free. This is
-              experimental software. Only put in what what you are willing to
-              lose.
+              Optimism Goerli Contracts:
+              <ul class="indent-4">
+                <li>
+                  Hub Contract: <div
+                    class="overflow-x-visible break-words text-xs text-cyan-500 sm:text-sm"
+                  >
+                    {hubDeployments[420]}
+                  </div>
+                </li>
+                <li>
+                  Partner Alarm Contract: <div
+                    class="overflow-x-auto text-xs text-cyan-500 sm:text-sm"
+                  >
+                    {partnerAlarmClockContractTemplates[420]}
+                  </div>
+                </li>
+              </ul>
             </li>
           </ul>
+        </div>
+        <div class="text-yellow-500">
+          ** Warning and Disclaimer **: Though the Social Alarm Clock smart
+          contracts are well tested, there are no gurantees that they are bug
+          free. This is experimental software. Only put in what what you are
+          willing to lose.
         </div>
       </div>
     {/if}
