@@ -73,10 +73,7 @@
         toast.push("You woke up on time!");
         confirmationSubmitted = true;
       } else {
-        toast.push(
-          "Confirmation failed. Were you too late? Here's the error: " +
-            txResult.error.message
-        );
+        toast.push("Confirmation failed. Were you too late?");
       }
     } finally {
       submitPending = false;
