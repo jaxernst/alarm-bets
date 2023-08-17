@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "./BaseCommitment.sol";
 import "./library/AlarmSchedule.sol";
 import {ISocialAlarmClockHub} from "./interfaces/ISocialAlarmClockHub.sol";
+import {IConfirmationSubmitter, ICommitment} from "./interfaces/ICommitment.sol";
 
 /**
  * The partner alarm clock is a commitment contract that allows two people to set an 'alarm'
@@ -12,7 +13,7 @@ import {ISocialAlarmClockHub} from "./interfaces/ISocialAlarmClockHub.sol";
  * confirmation transaction before the alarm time. Failure to do so can result in a penalty
  * that will transfer funds to the other party.
  */
-contract PartnerAlarmClock is BaseCommitment {
+contract PartnerAlarmClock is BaseCommitment, IConfirmationSubmitter {
     ISocialAlarmClockHub deploymentHub;
 
     using AlarmSchedule for AlarmSchedule.Schedule;
@@ -123,9 +124,9 @@ contract PartnerAlarmClock is BaseCommitment {
      * Allow either player to 'confirm' a wakeup. Wakeups must be submitted within
      * the submission window on an alarm day for the entry to be recorded
      */
-    function submitConfirmation() public override onlyPlayer {
+    function submitConfirmation() external override onlyPlayer {
         players[msg.sender].schedule.recordEntry();
-        emit ConfirmationSubmitted(msg.sender);
+        _submitConfirmation();
     }
 
     function missedDeadlines(
@@ -150,9 +151,10 @@ contract PartnerAlarmClock is BaseCommitment {
         return players[player].schedule.timezoneOffset;
     }
 
-    // Ends the alarm and withdraws funds for both players with penalties/earnings applied
+    // Ends the alarm and withdraw funds for both players with penalties/earnings applied
     function withdraw() public onlyPlayer {
         if (status == CommitmentStatus.INACTIVE) {
+            _updateStatus(CommitmentStatus.CANCELLED);
             uint transferAmount = players[msg.sender].depositAmount;
             players[msg.sender].depositAmount = 0;
             payable(msg.sender).transfer(transferAmount);
@@ -171,13 +173,12 @@ contract PartnerAlarmClock is BaseCommitment {
             msg.sender == player1 ? player2 : player1
         );
 
+        _updateStatus(CommitmentStatus.CANCELLED);
+
         players[msg.sender].depositAmount = 0;
         players[otherPlayer].depositAmount = 0;
         payable(otherPlayer).transfer(otherPlayerBalance);
         payable(msg.sender).transfer(senderBalance);
-
-        emit StatusChanged(status, CommitmentStatus.CANCELLED);
-        status = CommitmentStatus.CANCELLED;
     }
 
     function getPlayerBalance(
