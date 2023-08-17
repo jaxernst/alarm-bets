@@ -1,6 +1,6 @@
 import { waitForTransaction, type Hash } from "@wagmi/core";
 import { derived, writable } from "svelte/store";
-import type { TransactionReceipt } from "viem";
+import { BaseError, type TransactionReceipt } from "viem";
 
 type AddTxResult =
   | {
@@ -48,9 +48,13 @@ function MakeTransactionStore() {
         contractTransactionReceipts.update((txs) => [...txs, rc]);
       } catch (err) {
         txPending.set(false);
-        console.log(err);
+        if (err instanceof BaseError && err.shortMessage) {
+          return {
+            error: err.shortMessage,
+          };
+        }
         return {
-          error: err,
+          error: "Unknown error occurred",
         };
       }
 
