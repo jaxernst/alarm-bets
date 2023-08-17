@@ -323,6 +323,18 @@ describe("Partner Alarm Clock spec", () => {
   });
 
   describe("Alarm Management", () => {
+    it("Changes the status to CANCELLED when either player withdraws", async () => {
+      const alarm = await initAlarm({});
+      expect(await alarm.status()).to.eq(AlarmStatus.INACTIVE);
+      await alarm.withdraw();
+      expect(await alarm.status()).to.eq(AlarmStatus.CANCELLED);
+
+      const alarm2 = await initAlarm({});
+      await alarm2.connect(p2).start(0, { value: DEF_INITIAL_DEPOSIT });
+      expect(await alarm2.status()).to.eq(AlarmStatus.ACTIVE);
+      await alarm2.withdraw();
+      expect(await alarm2.status()).to.eq(AlarmStatus.CANCELLED);
+    });
     it("Allows player1 to withdraw (cancel request) before the alarm is started", async () => {
       const alarm = await initAlarm({});
       await expect(alarm.withdraw()).to.changeEtherBalance(
