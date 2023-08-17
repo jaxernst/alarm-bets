@@ -135,10 +135,10 @@ library AlarmSchedule {
             }
         }
 
-        uint expectedEntries = expectedEntriesForFullWeeks +
+        uint totalExpectedEntries = expectedEntriesForFullWeeks +
             alarmsInRemainderDays;
 
-        return expectedEntries - self.alarmEntries;
+        return totalExpectedEntries - self.alarmEntries;
     }
 
     function timeToNextDeadline(
