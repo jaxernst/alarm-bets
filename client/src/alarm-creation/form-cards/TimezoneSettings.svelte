@@ -28,44 +28,30 @@
     }
     return `UTC${getReadableOffset()} (${localTimezone ?? "non-local"}) `;
   };
-
-  // User has to focus (click) on the timezone form card to confirm the timezone
-  function recordFocus(node: HTMLElement) {
-    const handleFocusIn = () => {
-      if (node.contains(document.activeElement)) {
-        $timezoneOffsetConfirmed = true;
-      }
-    };
-    document.addEventListener("click", handleFocusIn);
-    return {
-      destroy: () => {
-        document.removeEventListener("click", handleFocusIn);
-      },
-    };
-  }
 </script>
 
-<div use:recordFocus>
-  <FormCard
-    itemNumber={6}
-    emptyHeader="confirm timezone"
-    filledHeader="Timezone Offset"
-    inputEmpty={!$timezoneOffsetConfirmed}
-    inputValid={true}
-  >
-    <div class="flex gap-1">
-      <button
-        class="bg-highlight-transparent-grey rounded p-1 focus:border active:bg-zinc-400"
-        style="line-height: .5"
-        on:click={() => updateOffset(-1)}>-</button
-      >
-      <button
-        class="bg-highlight-transparent-grey rounded p-1 focus:border focus:border-zinc-300 active:bg-zinc-400
+<FormCard
+  itemNumber={6}
+  emptyHeader="confirm timezone"
+  filledHeader="Timezone Offset"
+  inputEmpty={!$timezoneOffsetConfirmed}
+  inputValid={true}
+  onCardFocus={() => ($timezoneOffsetConfirmed = true)}
+>
+  <div class="flex items-center gap-1">
+    <button
+      class="bg-highlight-transparent-grey rounded p-1 focus:border active:bg-zinc-400"
+      style="line-height: .5"
+      on:click={() => updateOffset(-1)}>-</button
+    >
+    <button
+      class="bg-highlight-transparent-grey rounded p-1 focus:border focus:border-zinc-300 active:bg-zinc-400
     "
-        style="line-height: .5"
-        on:click={() => updateOffset(1)}>+</button
-      >
-      <p class="px-1 text-sm">Timezone: {getReadableTimezone()}</p>
-    </div>
-  </FormCard>
-</div>
+      style="line-height: .5"
+      on:click={() => updateOffset(1)}>+</button
+    >
+    <p class="whitespace-nowrap px-1 text-sm">
+      Timezone: {getReadableTimezone()}
+    </p>
+  </div>
+</FormCard>

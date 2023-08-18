@@ -9,6 +9,7 @@
   export let emptyHeader: string;
   export let filledHeader: string;
   export let itemNumber: number;
+  export let onCardFocus: () => void;
 
   let active = false;
   let container: HTMLElement;
@@ -20,6 +21,7 @@
   function activeOnChildClick(node: HTMLElement) {
     const handleFocusIn = (e: MouseEvent) => {
       active = node.contains(e.target as Node);
+      onCardFocus();
     };
 
     document.addEventListener("click", handleFocusIn);
@@ -41,12 +43,15 @@
 </script>
 
 <button
-  class={`bg-highlight-transparent-grey relative z-50 flex h-[65px] flex-col justify-start rounded-xl px-2 transition 
+  class={`bg-highlight-transparent-grey relative flex h-[65px] w-full flex-col items-center justify-start rounded-xl px-2 transition sm:w-min 
     ${buttonClasses()} ${active || !inputEmpty ? "" : "pb-2"}`}
   use:activeOnChildClick
   bind:this={container}
 >
-  <div class={"text-s text-bold pt-1 text-zinc-500"} style="line-height: 1em">
+  <div
+    class={"text-s text-bold self-start pt-1 text-zinc-500"}
+    style="line-height: .7em"
+  >
     {itemNumber}
     {#if active || !inputEmpty}
       <span transition:fade>{active || !inputEmpty ? filledHeader : ""}</span>
@@ -54,7 +59,10 @@
   </div>
   <div class="grid flex-grow items-center">
     {#if active || !inputEmpty}
-      <div class="col-start-1 row-start-1 self-center px-1" transition:scale>
+      <div
+        class="col-start-1 row-start-1 flex justify-center self-center px-1"
+        transition:scale
+      >
         <slot />
       </div>
     {:else}
