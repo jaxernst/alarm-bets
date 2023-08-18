@@ -45,23 +45,17 @@
 
 <Welcome />
 
-<div class="h-full">
-  <div class="absolute flex w-full justify-center">
+<div class="flex h-screen flex-col">
+  <div class="flex w-full justify-center">
     <Topbar />
   </div>
 
-  <div
-    class="fixed bottom-2 flex w-full justify-center px-2 text-sm md:justify-start"
-  >
-    <Footer />
-  </div>
-
   <main
-    class=" box-border flex min-h-screen items-center justify-center"
+    class="flex flex-grow items-center justify-center"
     in:fade={{ duration: 500, delay: 500 }}
   >
     <div
-      class="bg-trans main-container-shadow flex max-h-[85%] min-h-[340px] w-[620px] flex-col gap-2 rounded-3xl p-3 text-zinc-400 shadow-neutral-500 md:scale-125"
+      class="bg-trans main-container-shadow flex min-h-[60vh] w-[620px] flex-col gap-2 rounded-3xl p-3 text-zinc-400 shadow-neutral-500 sm:min-h-[340px] md:scale-125"
     >
       <!-- Main content header -->
       <div class="flex justify-between align-middle">
@@ -128,6 +122,10 @@
       </div>
     </div>
   </main>
+
+  <div class="flex w-full justify-start px-2 text-sm">
+    <Footer />
+  </div>
 </div>
 
 <style>

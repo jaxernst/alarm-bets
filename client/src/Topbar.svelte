@@ -11,7 +11,7 @@
   };
 </script>
 
-<div class="mx-6 mt-4 grid w-full items-center">
+<div class="mx-6 mt-2 grid w-full items-center sm:mt-4">
   <div class="grid grid-cols-3 items-center gap-3 rounded-3xl">
     <div class="justify-self-start text-lg font-bold" />
     <!-- Empty div for the first column -->
@@ -23,9 +23,12 @@
       </div>
     </div>
     <div class="flex justify-end">
-      <button class="h-5 w-5" on:click={() => { 
-        $showWelcome = true
-      }}>
+      <button
+        class="h-5 w-5"
+        on:click={() => {
+          $showWelcome = true;
+        }}
+      >
         <InfoIcon />
       </button>
     </div>

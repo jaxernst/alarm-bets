@@ -48,8 +48,10 @@
 
 <div class="flex h-full flex-col">
   <h3 class="px-2 py-0">Create a new Alarm Contract</h3>
-  <div class="flex-grow">
-    <div class="flex flex-wrap gap-2 overflow-x-auto px-3 py-2 text-zinc-300">
+  <div class="flex-grow px-3 py-2">
+    <div
+      class="flex max-h-[65vh] flex-wrap gap-2 overflow-y-auto text-zinc-300"
+    >
       {#each cards as card}
         <svelte:component this={card} />
       {/each}
