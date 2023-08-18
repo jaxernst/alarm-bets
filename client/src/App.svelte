@@ -20,6 +20,7 @@
   import { account } from "./lib/chainClient";
   import Welcome from "./Welcome.svelte";
   import Footer from "./Footer.svelte";
+  import { onMount } from "svelte";
 
   $: activeTabStyles = (t: Tab) =>
     t === $activeTab
@@ -38,6 +39,11 @@
   $: if (currentAlarms.length > 0) {
     $displayedAlarmId = get(currentAlarms[0]).id;
   }
+
+  window.addEventListener("resize", () => {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty("--vh", `${vh}px`);
+  });
 </script>
 
 <SvelteToast />

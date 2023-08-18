@@ -14,6 +14,7 @@
   color-scheme: light dark;
   color: rgb(203, 203, 203);
 
+  font-family: jura, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -24,14 +25,17 @@
   --bg-color2: rgb(50, 50, 50);
 
   --button-highlight1: rgb(27, 27, 28);
-  font-family: jura, sans-serif;
+  --vh: 100vh;
 }
 
-html {
-  background: url("assets/black-waves.png");
+html,
+body {
+  height: 100%; /* make sure they fill the viewport */
+  margin: 0; /* remove default margins */
+  overflow: hidden; /* prevent scrolling */
+}
 
-  background-color: rgb(53, 53, 53, 0.8);
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
+body {
+  background: url("assets/black-waves.png") center/cover no-repeat fixed; /* your background styles */
+  background-color: rgba(53, 53, 53, 0.8); /* added 'a' for alpha */
 }
