@@ -25,13 +25,12 @@
   --bg-color2: rgb(50, 50, 50);
 
   --button-highlight1: rgb(27, 27, 28);
-  --vh: 100vh;
 }
 
 html {
-  height: 120%;
-  background: url("assets/black-waves.png") center/cover no-repeat fixed;
-  background-color: rgba(53, 53, 53, 0.8);
+  height: 100%;
+  background-color: rgb(77, 0, 135);
+  background: url("assets/black-waves.png") center/cover no-repeat;
 }
 body {
   margin: 0;
