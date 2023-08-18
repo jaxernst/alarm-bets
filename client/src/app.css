@@ -12,7 +12,6 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgb(203, 203, 203);
 
   font-family: jura, sans-serif;
   font-synthesis: none;
@@ -25,16 +24,16 @@
   --bg-color2: rgb(50, 50, 50);
 
   --button-highlight1: rgb(27, 27, 28);
-  background-color: rgb(30, 30, 30);
 }
 
 html {
   height: 100%;
   background-color: rgb(30, 30, 30);
+  background: url("assets/black-waves.png") center/cover no-repeat;
 }
 body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background-color: #1e1e1e;
+  background-color: rgb(30, 30, 30);
 }
