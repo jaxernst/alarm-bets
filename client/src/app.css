@@ -29,13 +29,11 @@
 
 html {
   height: 100%;
-  background-color: rgb(77, 0, 135);
+  background-color: rgb(30, 30, 30);
   background: url("assets/black-waves.png") center/cover no-repeat;
 }
 body {
   margin: 0;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
   height: 100%;
   overflow: hidden;
 }
