@@ -28,8 +28,9 @@
 }
 
 body {
-  background-image: url("assets/purple-gradient.svg");
-  background-color: rgb(53, 53, 53);
+  background: url("assets/black-waves.png");
+
+  background-color: rgb(53, 53, 53, 0.8);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
