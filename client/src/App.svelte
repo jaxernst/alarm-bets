@@ -55,9 +55,7 @@
     <Topbar />
   </div>
 
-  <div
-    class="fixed bottom-2 flex w-full justify-center px-2 text-sm md:justify-start"
-  >
+  <div class="fixed bottom-2 flex w-full justify-start px-2 text-sm">
     <Footer />
   </div>
 

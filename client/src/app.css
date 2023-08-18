@@ -30,12 +30,14 @@
 
 html,
 body {
-  height: 100%; /* make sure they fill the viewport */
-  margin: 0; /* remove default margins */
-  overflow: hidden; /* prevent scrolling */
-}
-
-body {
-  background: url("assets/black-waves.png") center/cover no-repeat fixed; /* your background styles */
-  background-color: rgba(53, 53, 53, 0.8); /* added 'a' for alpha */
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  overflow: hidden;
+  background: url("assets/black-waves.png") center/cover no-repeat fixed;
+  background-color: rgba(53, 53, 53, 0.8);
 }
