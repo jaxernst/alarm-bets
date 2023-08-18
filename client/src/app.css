@@ -30,17 +30,10 @@
 html {
   height: 100%;
   background-color: rgb(30, 30, 30);
-  background: url("assets/black-waves.png") center/cover no-repeat;
 }
 body {
   margin: 0;
   height: 100%;
   overflow: hidden;
   background-color: rgb(30, 30, 30);
-}
-
-html,
-body {
-  width: 100vw;
-  height: 100vh;
 }
