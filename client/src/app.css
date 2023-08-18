@@ -27,7 +27,7 @@
   font-family: jura, sans-serif;
 }
 
-body {
+html {
   background: url("assets/black-waves.png");
 
   background-color: rgb(53, 53, 53, 0.8);

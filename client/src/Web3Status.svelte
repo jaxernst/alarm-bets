@@ -17,7 +17,7 @@
   <button class="flex items-center" on:click={() => $web3Modal.openModal()}>
     {#if !$account || !$account.isConnected}
       <button
-        class=" rounded-2xl bg-local px-2 py-1 text-cyan-500 transition-colors duration-200 hover:text-cyan-300"
+        class="rounded-2xl bg-local px-2 py-1 text-cyan-500 transition-colors duration-200 hover:text-cyan-300"
         on:click={() => $web3Modal.openModal()}
       >
         Connect Wallet

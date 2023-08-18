@@ -56,7 +56,7 @@
     <div class="w-full px-2 md:w-[500px]" out:fade in:fade={{ delay: 500 }}>
       <DialogTitle class="font-digital text-center text-4xl md:text-3xl"
         ><Typewriter
-          text="Welcome to the Social Alarm Clock."
+          text="Welcome to Alarm Bets."
           speed={typewriterComplete ? 0 : 35}
           onComplete={() => (typewriterComplete = true)}
         /></DialogTitle

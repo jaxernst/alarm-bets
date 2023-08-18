@@ -79,15 +79,15 @@
           >
         </div>
         <div class="flex gap-2">
-          <div class="flex items-center gap-1 px-2">
-            <div class="h-[18px] w-[18px] stroke-cyan-500">
-              <AlarmClockSymbol />
+          {#if $account?.isConnected}<div class="flex items-center gap-1 px-2">
+              <div class="h-[18px] w-[18px] stroke-cyan-500">
+                <AlarmClockSymbol />
+              </div>
+              <div>{Object.keys($userAlarms).length}</div>
             </div>
-            <div>{Object.keys($userAlarms).length}</div>
-          </div>
-          {#if $account}
-            <Web3Status />
           {/if}
+
+          <Web3Status />
         </div>
       </div>
 

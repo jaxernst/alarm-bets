@@ -12,8 +12,8 @@ export default defineConfig({
         enabled: true,
       },
       manifest: {
-        name: "",
-        short_name: "",
+        name: "Alarm Bets",
+        short_name: "Bets",
         icons: [
           {
             src: "/android-chrome-192x192.png",
