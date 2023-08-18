@@ -25,6 +25,7 @@
   --bg-color2: rgb(50, 50, 50);
 
   --button-highlight1: rgb(27, 27, 28);
+  background-color: rgb(30, 30, 30);
 }
 
 html {
@@ -35,5 +36,5 @@ body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background-color: rgb(30, 30, 30);
+  background-color: #1e1e1e;
 }
