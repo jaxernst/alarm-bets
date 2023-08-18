@@ -39,11 +39,6 @@
   $: if (currentAlarms.length > 0) {
     $displayedAlarmId = get(currentAlarms[0]).id;
   }
-
-  window.addEventListener("resize", () => {
-    let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty("--vh", `${vh}px`);
-  });
 </script>
 
 <SvelteToast />
@@ -55,7 +50,9 @@
     <Topbar />
   </div>
 
-  <div class="fixed bottom-2 flex w-full justify-start px-2 text-sm">
+  <div
+    class="fixed bottom-2 flex w-full justify-center px-2 text-sm md:justify-start"
+  >
     <Footer />
   </div>
 

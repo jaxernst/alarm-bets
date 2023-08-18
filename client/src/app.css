@@ -28,16 +28,15 @@
   --vh: 100vh;
 }
 
-html,
-body {
+html {
   height: 100%;
-  margin: 0;
-  padding: 0;
-  padding-top: env(safe-area-inset-top);
-  padding-right: env(safe-area-inset-right);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  overflow: hidden;
   background: url("assets/black-waves.png") center/cover no-repeat fixed;
   background-color: rgba(53, 53, 53, 0.8);
+}
+body {
+  margin: 0;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  height: 100%;
+  overflow: hidden;
 }
