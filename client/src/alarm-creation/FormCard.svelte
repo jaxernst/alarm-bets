@@ -21,7 +21,7 @@
   function activeOnChildClick(node: HTMLElement) {
     const handleFocusIn = (e: MouseEvent) => {
       active = node.contains(e.target as Node);
-      onCardFocus();
+      active && onCardFocus();
     };
 
     document.addEventListener("click", handleFocusIn);
