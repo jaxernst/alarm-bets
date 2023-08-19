@@ -111,7 +111,7 @@
         >
           <i class="font-bold text-zinc-300">
             {#if showAbout}
-              About the Social Alarm Clock
+              About Alarm Bets
             {:else}
               New here? Read more
             {/if}
@@ -143,8 +143,8 @@
         class="absolute bottom-10 my-3 flex max-h-[80%] max-w-[800px] flex-col gap-6 overflow-y-auto p-3"
       >
         <div>
-          The Social Alarm Clock is a two player onchain betting game that
-          incentivizes waking up early.
+          Alarm Bets is a two player onchain betting game that incentivizes
+          waking up early.
         </div>
 
         <div>
@@ -223,17 +223,17 @@
           <b class="text-cyan-500">Gameplay Notes</b>
           <ul class="flex list-disc flex-col gap-3 pl-4 marker:text-cyan-500">
             <li>
-              The Social Alarm Clock is free to play. The smart contracts do not
-              impose any fee or tax.
+              Alarm Bets is free to play. The smart contracts do not impose any
+              fee or tax.
             </li>
             <li>
               Either player can end their alarm at any time. Ending the alarm
               will return both players remaining balance to their wallet.
             </li>
             <li>
-              The Social Alarm Clock can be played with fake money on the
-              Optimism Goerli test network. To do so, you must add Optimism
-              Goerli to your wallet and get testnet funds. Reach out to (<a
+              Alarm Bets can be played with fake money on the Optimism Goerli
+              test network. To do so, you must add Optimism Goerli to your
+              wallet and get testnet funds. Reach out to (<a
                 class="text-cyan-600 underline"
                 target="_blank"
                 href="https://jaxer.eth.co">jaxer.eth</a
@@ -253,8 +253,8 @@
           <b class="text-cyan-500">Open Source + Smart Contract</b>
           <ul class="flex list-disc flex-col gap-3 pl-4 marker:text-cyan-500">
             <li>
-              The Social Alarm Clock is open source. All smart contracts +
-              frontend code can be viewed on <span
+              Alarm Bets is open source. All smart contracts + frontend code can
+              be viewed on <span
                 ><a
                   href="https://github.com/jaxernst/the-social-alarm-clock"
                   class="text-cyan-600 underline">Github</a
@@ -283,10 +283,9 @@
           </ul>
         </div>
         <div class="text-yellow-500">
-          ** Warning and Disclaimer **: Though the Social Alarm Clock smart
-          contracts are well tested, there are no gurantees that they are bug
-          free. This is experimental software. Only put in what what you are
-          willing to lose.
+          ** Warning and Disclaimer **: Though Alarm Bets smart contracts are
+          well tested, there are no gurantees that they are bug free. This is
+          experimental software. Only put in what what you are willing to lose.
         </div>
       </div>
     {/if}

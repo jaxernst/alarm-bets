@@ -115,8 +115,8 @@
         </div>
       </div>
       <div
-        class="justify-self-center py-1"
-        style="font-size: 2em; line-height: 1em;"
+        class="mt-2 justify-self-center py-1 text-[2.5em] sm:mt-0 sm:text-[2em]"
+        style="line-height: 1em;"
       >
         <ClockDisplay
           overrideTime={timeString(

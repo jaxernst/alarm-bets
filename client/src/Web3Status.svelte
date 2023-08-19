@@ -27,7 +27,7 @@
       <div class="px-1 text-sm text-red-500">Wrong Network</div>
     {:else}
       <div class="indicator" style="background-color:{indicatorColor}" />
-      <div class="displayName px-1">
+      <div class="displayName px-1 text-sm font-bold">
         {displayName || ""}
       </div>
     {/if}
@@ -44,7 +44,6 @@
   }
 
   .displayName {
-    font-size: smaller;
     color: rgb(201, 145, 34);
   }
 
