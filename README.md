@@ -1,4 +1,4 @@
-# The Social Alarm Clock
+# The Social Alarm Clock (Alarm Bets)
 
 An onchain 2-player betting game built to incentivize waking up early...
 
