@@ -1,7 +1,7 @@
 <script>
 </script>
 
-<div class="flex items-center gap-3 p-2">
+<div class="hidden items-center gap-3 p-2 sm:flex">
   <div>
     By
     <a

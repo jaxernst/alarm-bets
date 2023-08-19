@@ -45,85 +45,81 @@
 
 <Welcome />
 
-<div class="flex h-screen flex-col">
+<div class="flex h-screen flex-col justify-between gap-2">
   <div class="flex w-full justify-center">
     <Topbar />
   </div>
 
-  <main
-    class="flex flex-grow items-center justify-center"
+  <div
+    class="bg-trans main-container-shadow flex min-h-[574px] min-w-full flex-col gap-2 self-center rounded-3xl p-3 text-zinc-400 shadow-neutral-500 sm:min-h-[340px] sm:w-[620px] sm:min-w-0 md:scale-125"
     in:fade={{ duration: 500, delay: 500 }}
   >
-    <div
-      class="bg-trans main-container-shadow flex min-h-[60vh] w-[620px] flex-col gap-2 rounded-3xl p-3 text-zinc-400 shadow-neutral-500 sm:min-h-[340px] md:scale-125"
-    >
-      <!-- Main content header -->
-      <div class="flex justify-between align-middle">
-        <div class="flex gap-4 rounded-xl px-2">
-          <button
-            class={activeTabStyles("alarms")}
-            on:click={() => activeTab.set("alarms")}>Alarms</button
-          >
-          <button
-            class={activeTabStyles("new")}
-            on:click={() => activeTab.set("new")}>New</button
-          >
-          <button
-            class={activeTabStyles("join")}
-            on:click={() => activeTab.set("join")}>Join</button
-          >
-        </div>
-        <div class="flex gap-2">
-          {#if $account?.isConnected}<div class="flex items-center gap-1 px-2">
-              <div class="h-[18px] w-[18px] stroke-cyan-500">
-                <AlarmClockSymbol />
-              </div>
-              <div>{Object.keys($userAlarms).length}</div>
-            </div>
-          {/if}
-
-          <Web3Status />
-        </div>
+    <!-- Main content header -->
+    <div class="flex justify-between align-middle">
+      <div class="flex gap-4 rounded-xl px-2">
+        <button
+          class={activeTabStyles("alarms")}
+          on:click={() => activeTab.set("alarms")}>Alarms</button
+        >
+        <button
+          class={activeTabStyles("new")}
+          on:click={() => activeTab.set("new")}>New</button
+        >
+        <button
+          class={activeTabStyles("join")}
+          on:click={() => activeTab.set("join")}>Join</button
+        >
       </div>
-
-      <!-- Main content -->
-      <div class="relative grid flex-grow pt-1">
-        {#if $activeTab === "alarms"}
-          <div transition:blur class="col-start-1 row-start-1 flex flex-col">
-            {#if currentAlarms.length === 0}
-              <div
-                class="flex-grow rounded-2xl p-2 align-middle tracking-tight text-zinc-400"
-              >
-                You have no active alarms. Create a new alarm or join an
-                existing one.
-              </div>
-            {:else}
-              <div
-                class="grid flex-grow grid-cols-1 gap-3 self-stretch text-zinc-400 sm:grid-cols-[1fr_60%]"
-              >
-                <AlarmsSidebar />
-                <div class="row-start-1 rounded-2xl sm:col-start-2">
-                  {#if $displayedAlarmId}
-                    <AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
-                  {/if}
-                </div>
-              </div>
-            {/if}
-          </div>
-        {:else if $activeTab === "new"}
-          <div transition:blur class="col-start-1 row-start-1">
-            <NewAlarm />
-          </div>
-        {:else if $activeTab === "join"}
-          <div transition:blur class="col-start-1 row-start-1">
-            <JoinAlarm />
+      <div class="flex gap-2">
+        {#if $account?.isConnected}<div class="flex items-center gap-1 px-2">
+            <div class="h-[18px] w-[18px] stroke-cyan-500">
+              <AlarmClockSymbol />
+            </div>
+            <div>{Object.keys($userAlarms).length}</div>
           </div>
         {/if}
+
+        <Web3Status />
       </div>
     </div>
-  </main>
 
-  <div class="flex w-full justify-start px-2 text-sm">
+    <!-- Main content -->
+    <div class="relative grid">
+      {#if $activeTab === "alarms"}
+        <div transition:blur class="col-start-1 row-start-1 flex flex-col">
+          {#if currentAlarms.length === 0}
+            <div
+              class=" rounded-2xl p-2 align-middle tracking-tight text-zinc-400"
+            >
+              You have no active alarms. Create a new alarm or join an existing
+              one.
+            </div>
+          {:else}
+            <div
+              class="grid grid-cols-1 gap-3 self-stretch text-zinc-400 sm:grid-cols-[1fr_60%]"
+            >
+              <AlarmsSidebar />
+              <div class="row-start-1 rounded-2xl sm:col-start-2">
+                {#if $displayedAlarmId}
+                  <AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
+                {/if}
+              </div>
+            </div>
+          {/if}
+        </div>
+      {:else if $activeTab === "new"}
+        <div transition:blur class="col-start-1 row-start-1 max-h-[510px]">
+          <NewAlarm />
+        </div>
+      {:else if $activeTab === "join"}
+        <div transition:blur class="col-start-1 row-start-1">
+          <JoinAlarm />
+        </div>
+      {/if}
+    </div>
+  </div>
+
+  <div class="text-s flex min-h-[25px] w-full justify-start px-2">
     <Footer />
   </div>
 </div>
