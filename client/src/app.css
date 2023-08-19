@@ -26,18 +26,18 @@
   --button-highlight1: rgb(27, 27, 28);
 }
 
-html,
-body {
+body,
+html {
   position: fixed;
+  height: 100%;
+  width: 100%;
+  margin: 0;
 }
 
 html {
-  height: 100%;
   background-color: rgb(30, 30, 30);
   background: url("assets/black-waves.png") center/cover no-repeat;
 }
 body {
-  margin: 0;
-  height: 100%;
   overflow: hidden;
 }

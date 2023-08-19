@@ -8,9 +8,6 @@ export default defineConfig({
     svelte(),
     VitePWA({
       registerType: "autoUpdate",
-      devOptions: {
-        enabled: true,
-      },
       manifest: {
         name: "Alarm Bets",
         short_name: "Alarm Bets",
