@@ -8,11 +8,13 @@
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import Deadline from "../assets/deadline.svelte";
   import { HOUR } from "../lib/time";
+  import { getCurrentAccount } from "../lib/chainClient";
 
   export let player: 1 | 2;
   export let alarm: UserAlarm;
 
   $: address = player === 1 ? $alarm.player1 : $alarm.player2;
+  $: isMe = address === $getCurrentAccount().address;
 
   let balance: bigint;
   $: if ($alarm.status === AlarmStatus.INACTIVE) {
@@ -48,7 +50,9 @@
 </script>
 
 <div class="flex justify-between gap-1">
-  <div class="font-bold text-zinc-500">{shorthandAddress(address)}</div>
+  <div class={`${isMe ? "orange-text" : "text-zinc-400"}`}>
+    {shorthandAddress(address)}
+  </div>
   <div class="text-[10px] text-zinc-500">
     {timezone ? formatTimezone(Number(timezone)) : ""}
   </div>
@@ -56,7 +60,7 @@
 <div class="flex flex-grow flex-col items-center justify-evenly gap-1 pb-2">
   <div class="flex items-center">
     <div
-      class={`flex flex-grow items-center gap-2 py-1 ${
+      class={`flex flex-grow items-center gap-2 py-1 text-lg ${
         standing < BigInt(0) ? "text-red-700" : "text-green-600"
       }`}
     >
@@ -100,3 +104,9 @@
     </div>
   </div>
 </div>
+
+<style>
+  .orange-text {
+    color: rgb(201, 145, 34);
+  }
+</style>

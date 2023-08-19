@@ -64,7 +64,7 @@
 
       <div class="flex min-h-[120px] flex-col justify-between p-2">
         {#if typewriterComplete}
-          <div class="flex justify-center gap-2 text-zinc-400">
+          <div class="flex justify-center gap-2 text-zinc-300">
             <div
               in:fade={{
                 delay: 500,
@@ -84,7 +84,7 @@
           >
             <button
               on:click={() => ($showWelcome = false)}
-              class="rounded-lg border border-cyan-500 px-4 py-1 font-bold text-zinc-300 transition-all duration-300 ease-in-out ease-in-out hover:scale-105 hover:bg-cyan-500 hover:text-white hover:shadow-md active:bg-cyan-700 active:text-zinc-400"
+              class="rounded-lg border border-cyan-500 px-4 py-1 font-bold text-zinc-300 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-cyan-500 hover:text-white hover:shadow-md active:bg-cyan-700 active:text-zinc-400"
             >
               Enter
             </button>
@@ -109,7 +109,7 @@
           in:singleFadeIn={{ delay: 2600, duration: 800 }}
           out:fade
         >
-          <i class="text-zinc-400">
+          <i class="font-bold text-zinc-300">
             {#if showAbout}
               About the Social Alarm Clock
             {:else}

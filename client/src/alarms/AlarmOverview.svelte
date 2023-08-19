@@ -36,7 +36,7 @@
 
   const stylePending = (status: AlarmStatus) =>
     status === AlarmStatus.INACTIVE
-      ? "border border-dashed border-zinc-600 my-[1px]"
+      ? "border border-dashed border-zinc-500 my-[1px] text-cyan-500"
       : "";
 
   $: styleSelected = (alarmId: number) =>
@@ -44,14 +44,16 @@
 </script>
 
 <button
-  class="h-[60px] w-full max-w-[225px] rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
+  class="h-[60px] w-full rounded-xl px-2 py-1 text-left transition hover:bg-zinc-700 {stylePending(
     status
   )} {styleSelected(id)}"
   on:click={() => ($displayedAlarmId = id)}
 >
   {#if status === AlarmStatus.INACTIVE}
     <div class="text-sm font-bold">Alarm ID: {id}</div>
-    <div class="text-xs">Waiting on Player 2 to start alarm...</div>
+    <div class="text-xs text-zinc-300">
+      Waiting on Player 2 to start alarm...
+    </div>
   {:else if status === AlarmStatus.ACTIVE}
     <div class="grid grid-cols-[63%_1fr]">
       <div

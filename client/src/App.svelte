@@ -51,7 +51,7 @@
   </div>
 
   <div
-    class="bg-trans main-container-shadow flex min-h-[574px] min-w-full flex-col gap-2 self-center rounded-3xl p-3 text-zinc-400 shadow-neutral-500 sm:min-h-[340px] sm:w-[620px] sm:min-w-0 md:scale-125"
+    class="bg-trans main-container-shadow flex min-h-[574px] min-w-full flex-col gap-2 self-center rounded-3xl p-3 text-zinc-300 shadow-neutral-500 sm:min-h-[340px] sm:w-[620px] sm:min-w-0 md:scale-125"
     in:fade={{ duration: 500, delay: 500 }}
   >
     <!-- Main content header -->
@@ -84,26 +84,27 @@
     </div>
 
     <!-- Main content -->
-    <div class="relative grid">
+    <div class="relative grid h-full overflow-hidden">
       {#if $activeTab === "alarms"}
-        <div transition:blur class="col-start-1 row-start-1 flex flex-col">
+        <div
+          transition:blur
+          class="col-start-1 row-start-1 h-full overflow-hidden"
+        >
           {#if currentAlarms.length === 0}
-            <div
-              class=" rounded-2xl p-2 align-middle tracking-tight text-zinc-400"
-            >
+            <div class=" rounded-2xl p-2 align-middle tracking-tight">
               You have no active alarms. Create a new alarm or join an existing
               one.
             </div>
           {:else}
             <div
-              class="grid grid-cols-1 gap-3 self-stretch text-zinc-400 sm:grid-cols-[1fr_60%]"
+              class="flex h-full flex-col gap-2 self-stretch overflow-hidden sm:grid sm:grid-cols-[1fr_60%]"
             >
-              <AlarmsSidebar />
               <div class="row-start-1 rounded-2xl sm:col-start-2">
                 {#if $displayedAlarmId}
                   <AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
                 {/if}
               </div>
+              <AlarmsSidebar />
             </div>
           {/if}
         </div>

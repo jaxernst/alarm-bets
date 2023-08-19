@@ -221,7 +221,7 @@
     <!--Alarm Info-->
     <div class="bg-transparent-grey rounded-lg p-2 text-sm">
       <button class="w-full" on:click={() => (showAlarmInfo = !showAlarmInfo)}>
-        <div class="flex justify-between">
+        <div class="flex justify-between font-bold text-zinc-400">
           <div>Alarm Info</div>
           <div
             class={`text-[8px] ${rotatedDropdown()} transition duration-100`}
@@ -233,7 +233,7 @@
       {#if showAlarmInfo}
         <div transition:slide={{ easing: expoOut, duration: 600 }}>
           <div class="flex justify-between gap-2">
-            <span class="text-zinc-500">submission window:</span>
+            <span class="text-zinc-400">submission window:</span>
             <span
               ><span class="h-3 w-3 text-cyan-600"
                 >{Number($alarm.submissionWindow) / MINUTE}</span
@@ -242,7 +242,7 @@
           </div>
 
           <div class="flex justify-between gap-2">
-            <span class="text-zinc-500">missed alarm penalty:</span>
+            <span class="text-zinc-400">missed alarm penalty:</span>
             <span
               ><span class="h-3 w-3 text-cyan-600"
                 >{formatEther($alarm.missedAlarmPenalty)}</span
@@ -250,7 +250,7 @@
             >
           </div>
           <div class="flex justify-between gap-2">
-            <span class="text-zinc-500">initial deposit:</span>
+            <span class="text-zinc-400">initial deposit:</span>
             <span
               ><span class="h-3 w-3 text-cyan-600"
                 >{formatEther($alarm.betAmount)}</span
@@ -262,11 +262,11 @@
     </div>
   </div>
 
-  <!--Bottom Buttons-->
-  <div
-    class="bg-highlight-transparent-grey mt-1 flex justify-center rounded-lg"
-  >
-    {#if $alarm.status === AlarmStatus.ACTIVE}
+  <!--Bottom Button-->
+  {#if $alarm.status === AlarmStatus.ACTIVE}
+    <div
+      class="bg-highlight-transparent-grey mt-1 flex justify-center rounded-lg"
+    >
       {#if submitPending}
         <div class="p-3">
           <DiamondSpinner size={"30"} color={"white"} />
@@ -282,8 +282,8 @@
             : "Confirm Wakeup"}</button
         >
       {/if}
-    {/if}
-  </div>
+    </div>
+  {/if}
 </div>
 
 <style>

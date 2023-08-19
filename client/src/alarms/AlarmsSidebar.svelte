@@ -57,15 +57,16 @@
   onDestroy(unsubAllTimeToNextDeadlineListeners);
 </script>
 
-<div class="max-h-[320px] overflow-y-auto">
-  <div class="bg-transparent-grey flex flex-col rounded-xl">
-    {#each sortedAlarms as userAlarm (get(userAlarm).id)}
-      <div animate:flip={{ duration: 500 }}>
-        {#if get(userAlarm).status !== AlarmStatus.CANCELLED}
-          <!-- use the flip function to animate the list reordering -->
-          <AlarmOverview {userAlarm} />
-        {/if}
-      </div>
-    {/each}
-  </div>
+<div class="text-sm sm:hidden">Your Alarms</div>
+<div
+  class="bg-transparent-grey flex max-h-[320px] flex-col overflow-y-auto rounded-xl"
+>
+  {#each sortedAlarms as userAlarm}
+    <div class="w-full">
+      {#if get(userAlarm).status !== AlarmStatus.CANCELLED}
+        <!-- use the flip function to animate the list reordering -->
+        <AlarmOverview {userAlarm} />
+      {/if}
+    </div>
+  {/each}
 </div>
