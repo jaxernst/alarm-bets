@@ -31,7 +31,7 @@
 </script>
 
 <FormCard
-  itemNumber={6}
+  itemNumber={7}
   emptyHeader="confirm timezone"
   filledHeader="Timezone Offset"
   inputEmpty={!$timezoneOffsetConfirmed}
