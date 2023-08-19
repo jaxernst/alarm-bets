@@ -13,7 +13,7 @@ export default defineConfig({
       },
       manifest: {
         name: "Alarm Bets",
-        short_name: "Bets",
+        short_name: "Alarm Bets",
         icons: [
           {
             src: "/android-chrome-192x192.png",
@@ -26,8 +26,8 @@ export default defineConfig({
             type: "image/png",
           },
         ],
-        theme_color: "#6e6e77",
-        background_color: "#06b6d4",
+        theme_color: "#252525",
+        background_color: "#252525",
         display: "standalone",
       },
     }),
