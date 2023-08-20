@@ -44,6 +44,11 @@ const deployNetworks = {
     url: "https://goerli.base.org",
     accounts: [process.env.TEST_U1_KEY ?? ""],
   },
+  "base-mainnet": {
+    url: "https://mainnet.base.org",
+    accounts: [process.env.TEST_U1_KEY as string],
+    gasPrice: 1000000000,
+  },
   "optimism-goerli": {
     url: "https://opt-goerli.g.alchemy.com/v2/_k4Jxl6GexIvooQrdgnxZj9OFj8pGWrw",
     accounts: [process.env.TEST_U1_KEY ?? ""],

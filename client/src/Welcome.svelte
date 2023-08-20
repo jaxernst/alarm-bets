@@ -280,6 +280,25 @@
                 </li>
               </ul>
             </li>
+            <li>
+              Base Mainnet Contracts:
+              <ul class="indent-4">
+                <li>
+                  Hub Contract: <div
+                    class="overflow-x-visible break-words text-xs text-cyan-500 sm:text-sm"
+                  >
+                    {hubDeployments[8453]}
+                  </div>
+                </li>
+                <li>
+                  Partner Alarm Contract: <div
+                    class="overflow-x-auto text-xs text-cyan-500 sm:text-sm"
+                  >
+                    {partnerAlarmClockContractTemplates[8453]}
+                  </div>
+                </li>
+              </ul>
+            </li>
           </ul>
         </div>
         <div class="text-yellow-500">
