@@ -44,9 +44,12 @@
   <div class="clock-text">
     {time}
   </div>
-  <div class="clock-text background">
-    {backgroundText()}
-  </div>
+  <!--
+
+    <div class="clock-text background">
+      {backgroundText()}
+    </div>
+  -->
 </div>
 
 <style>
