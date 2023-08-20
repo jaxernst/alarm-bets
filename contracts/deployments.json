@@ -6,5 +6,9 @@
   "base-mainnet": {
     "SocialAlarmClockHub": "0x61d68465f88b9DE628D5d0Cbac12A5B8c5E4E236",
     "PartnerAlarmClock": "0xEAf85983c5C39DC7cEaCfBcE5B0D9874EeaF86c4"
+  },
+  "op-mainnet": {
+    "SocialAlarmClockHub": "0x61d68465f88b9DE628D5d0Cbac12A5B8c5E4E236",
+    "PartnerAlarmClock": "0xEAf85983c5C39DC7cEaCfBcE5B0D9874EeaF86c4"
   }
 }
