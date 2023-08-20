@@ -13,7 +13,9 @@
 
 <div class="mx-6 mt-2 grid w-full items-center sm:mt-4">
   <div class="grid grid-cols-3 items-center gap-3 rounded-3xl">
-    <div class="justify-self-start text-sm font-bold" />
+    <div class="font-digital justify-self-start font-bold">
+      {"["}beta{"]"}
+    </div>
     <!-- Empty div for the first column -->
     <div class="flex items-center justify-center">
       <div class="top-clock-bg rounded-2xl">
