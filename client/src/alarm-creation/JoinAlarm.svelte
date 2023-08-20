@@ -160,12 +160,12 @@
   {/if}
 
   {#if !error && searchedAlarm && !searching}
-    <div class="flex flex-grow flex-col">
-      <h3 class="mt-1">Alarm #{searchedAlarm.id} Details</h3>
+    <div class="flex flex-grow flex-col justify-between">
+      <h3 class="mt-1 text-zinc-400">Alarm #{searchedAlarm.id} Details</h3>
       <div class="flex justify-center">
         <div class="flex-grow px-2 sm:max-w-[70%]">
           <div class="flex flex-col items-center justify-center py-2">
-            <div class="pt-1" style="font-size: 2em; line-height: .8em">
+            <div class=" text-[2.5em] sm:pt-1" style="line-height: .8em">
               <ClockDisplay
                 overrideTime={timeString(Number(searchedAlarm.alarmTime))}
                 overrideColor={"orange"}
@@ -174,11 +174,14 @@
             <div>
               <AlarmActiveDays daysActive={searchedAlarm.alarmDays} />
             </div>
-            <div class="mt-2 flex gap-2">
-              <p class="px-1 text-sm">
-                Play with Timezone: {getReadableTimezone()}
-              </p>
-              <div>
+            <div class="flex w-full justify-between gap-2 pt-2">
+              <div class="px-1 text-sm">
+                <div>Play with Timezone:</div>
+                <div class="whitespace-nowrap text-cyan-600">
+                  {getReadableTimezone() + " tuejk"}
+                </div>
+              </div>
+              <div class="flex flex-nowrap items-center gap-1">
                 <button
                   class="bg-highlight-transparent-grey rounded p-1 focus:border active:bg-zinc-400"
                   style="line-height: .5"
