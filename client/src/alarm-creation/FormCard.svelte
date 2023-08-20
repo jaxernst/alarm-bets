@@ -9,7 +9,7 @@
   export let emptyHeader: string;
   export let filledHeader: string;
   export let itemNumber: number;
-  export let onCardFocus: () => void;
+  export let onCardFocus: () => void | undefined;
 
   let active = false;
   let container: HTMLElement;
@@ -21,7 +21,7 @@
   function activeOnChildClick(node: HTMLElement) {
     const handleFocusIn = (e: MouseEvent) => {
       active = node.contains(e.target as Node);
-      active && onCardFocus();
+      active && onCardFocus?.();
     };
 
     document.addEventListener("click", handleFocusIn);
