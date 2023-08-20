@@ -61,7 +61,7 @@
   {inputValid}
 >
   <input
-    class="w-min bg-transparent text-center outline-none"
+    class="w-full bg-transparent text-center outline-none sm:w-min"
     type="text"
     placeholder="Enter address or ENS"
     bind:value={otherPlayerInput}

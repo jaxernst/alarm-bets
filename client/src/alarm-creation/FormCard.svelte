@@ -9,7 +9,7 @@
   export let emptyHeader: string;
   export let filledHeader: string;
   export let itemNumber: number;
-  export let onCardFocus: () => void | undefined;
+  export let onCardFocus: (() => void) | undefined = undefined;
 
   let active = false;
   let container: HTMLElement;

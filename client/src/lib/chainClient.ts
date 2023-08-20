@@ -17,11 +17,12 @@ import {
 } from "@web3modal/ethereum";
 import type { EvmAddress } from "../types";
 import { alchemyProvider } from "@wagmi/core/providers/alchemy";
+import { jsonRpcProvider } from "@wagmi/core/providers/jsonRpc";
 import { base, hardhat } from "viem/chains";
 
 export type Account = GetAccountResult & { address: EvmAddress };
 
-export const supportedChains = [base, optimismGoerli, hardhat];
+export const supportedChains = [optimismGoerli, hardhat];
 const projectId = "698bddafdbc932fc6eb19c24ab471c3a";
 
 const { publicClient, webSocketPublicClient } = configureChains(
@@ -29,6 +30,15 @@ const { publicClient, webSocketPublicClient } = configureChains(
   [
     w3mProvider({ projectId }),
     alchemyProvider({ apiKey: "_k4Jxl6GexIvooQrdgnxZj9OFj8pGWrw" }),
+    /*jsonRpcProvider({
+      rpc: (chain) => {
+        if (chain.id !== base.id) return null;
+        return {
+          http: "https://base-mainnet.unifra.io/v1/95e93f841cdc4d64ab3e43721cd2eef9",
+          wss: "wss://base-mainnet.unifra.io/ws/95e93f841cdc4d64ab3e43721cd2eef9",
+        };
+      },
+    }), */
   ]
 );
 
