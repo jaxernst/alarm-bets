@@ -19,6 +19,7 @@ import HubAbi from "./abi/SocialAlarmClockHub";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
 import type { EvmAddress } from "../types";
 import { get } from "svelte/store";
+import { deploymentBlockNumbers } from "./deployments";
 
 export const AlarmCreationEvent = getAbiItem({
   abi: HubAbi,
@@ -87,7 +88,11 @@ export const getAlarmState = async (
     p2Timezone,
   ] = await multicall({
     contracts: [
-      { ...args, functionName: "timeToNextDeadline", args: [targetPlayer === p1 ? p1 : p2] },
+      {
+        ...args,
+        functionName: "timeToNextDeadline",
+        args: [targetPlayer === p1 ? p1 : p2],
+      },
       { ...args, functionName: "missedDeadlines", args: [p1] },
       { ...args, functionName: "missedDeadlines", args: [p2] },
       { ...args, functionName: "numConfirmations", args: [p1] },
@@ -396,6 +401,8 @@ export async function queryAlarmCreationEvents(
   alarmType?: AlarmType
 ) {
   const client = getPublicClient();
+  const deploymentBlock = (deploymentBlockNumbers as any)[client.chain.id] ?? 0;
+
   return await client.getLogs({
     address: hubAddress,
     event: AlarmCreationEvent,
@@ -403,7 +410,8 @@ export async function queryAlarmCreationEvents(
       _type: alarmType ? alarmTypeVals[alarmType] : 0,
       user: userAddress,
     },
-    fromBlock: 0n,
+    fromBlock: BigInt(deploymentBlock),
+    toBlock: "latest",
   });
 }
 
@@ -413,6 +421,8 @@ export async function queryUserJoinedEvents(
   alarmType?: AlarmType
 ) {
   const client = getPublicClient();
+  const deploymentBlock = (deploymentBlockNumbers as any)[client.chain.id] ?? 0;
+
   return await client.getLogs({
     address: hubAddress,
     event: AlarmJoinedEvent,
@@ -420,6 +430,7 @@ export async function queryUserJoinedEvents(
       user: userAddress,
       _type: alarmType ? alarmTypeVals[alarmType] : 0,
     },
-    fromBlock: 0n,
+    fromBlock: BigInt(deploymentBlock),
+    toBlock: "latest",
   });
 }
