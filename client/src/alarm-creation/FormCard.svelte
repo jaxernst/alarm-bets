@@ -57,7 +57,7 @@
       <span transition:fade>{active || !inputEmpty ? filledHeader : ""}</span>
     {/if}
   </div>
-  <div class="grid flex-grow items-center">
+  <div class="grid flex-grow items-center px-1">
     {#if active || !inputEmpty}
       <div
         class="col-start-1 row-start-1 flex justify-center self-center px-1"

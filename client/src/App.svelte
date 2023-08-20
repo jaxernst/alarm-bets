@@ -51,11 +51,11 @@
   </div>
 
   <div
-    class="bg-trans main-container-shadow flex min-h-[574px] min-w-full flex-col gap-2 self-center rounded-3xl p-3 text-zinc-300 shadow-neutral-500 sm:min-h-[340px] sm:w-[620px] sm:min-w-0 md:scale-125"
+    class="bg-trans main-container-shadow flex min-h-[574px] min-w-full flex-col gap-2 self-center rounded-3xl py-3 text-zinc-300 shadow-neutral-500 sm:min-h-[340px] sm:w-[620px] sm:min-w-0 md:scale-125"
     in:fade={{ duration: 500, delay: 500 }}
   >
     <!-- Main content header -->
-    <div class="flex justify-between align-middle">
+    <div class="flex justify-between px-3 align-middle">
       <div class="flex gap-4 rounded-xl px-2">
         <button
           class={activeTabStyles("alarms")}
@@ -88,7 +88,7 @@
       {#if $activeTab === "alarms"}
         <div
           transition:blur
-          class="col-start-1 row-start-1 h-full overflow-hidden"
+          class="col-start-1 row-start-1 h-full overflow-hidden px-3"
         >
           {#if currentAlarms.length === 0}
             <div class=" rounded-2xl p-2 align-middle tracking-tight">
@@ -113,7 +113,7 @@
           <NewAlarm />
         </div>
       {:else if $activeTab === "join"}
-        <div transition:blur class="col-start-1 row-start-1">
+        <div transition:blur class="col-start-1 row-start-1 px-3">
           <JoinAlarm />
         </div>
       {/if}

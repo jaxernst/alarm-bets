@@ -133,8 +133,7 @@
   };
 </script>
 
-<div class="flex h-full flex-col gap-1 px-2">
-  <h3 class="">Join an Alarm</h3>
+<div class="flex h-full flex-col gap-2 px-2 pt-2">
   <div class=" flex h-[30px] items-center gap-2 rounded-xl px-2">
     <input
       type="text"

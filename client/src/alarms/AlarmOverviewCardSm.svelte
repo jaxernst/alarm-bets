@@ -10,9 +10,12 @@
   export let alarmTimeCorrected: boolean;
 </script>
 
-<div class="grid grid-cols-[63%_1fr]">
+<div class="grid grid-cols-[1fr_38%]">
   <div class="flex h-full flex-col items-start justify-center overflow-visible">
-    <div class="relative pt-1" style="font-size: 2.1em; line-height: .85em">
+    <div
+      class="relative flex justify-end self-stretch pr-3 pt-1"
+      style="font-size: 2.1em; line-height: .85em"
+    >
       <ClockDisplay
         overrideTime={timeString(alarmTime)}
         overrideColor={"orange"}
