@@ -12,7 +12,7 @@
 
 <div class="flex h-full items-center justify-evenly">
   <div
-    class="relative flex w-[140px] justify-end pt-1"
+    class="relative flex w-[140px] justify-end pr-1 pt-1"
     style="font-size: 2.4em; line-height: .85em"
   >
     <ClockDisplay
@@ -28,7 +28,7 @@
     {/if}
   </div>
 
-  <div class="flex flex-col justify-evenly self-stretch">
+  <div class="flex flex-col justify-evenly self-stretch pl-1">
     {#if timeToNextDeadline}
       <div class="overflow-visible whitespace-nowrap pl-2 text-xs">
         In <span class="">{formatTime(timeToNextDeadline) + "..."}</span>

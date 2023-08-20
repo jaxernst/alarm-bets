@@ -60,7 +60,7 @@
 <div class="flex flex-grow flex-col items-center justify-evenly gap-1 pb-2">
   <div class="flex items-center">
     <div
-      class={`flex flex-grow items-center gap-2 py-1 text-lg ${
+      class={`flex flex-grow items-center gap-2 py-1 text-lg sm:text-sm ${
         standing < BigInt(0) ? "text-red-700" : "text-green-600"
       }`}
     >
