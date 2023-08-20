@@ -10,7 +10,7 @@
   export let alarmTimeCorrected: boolean;
 </script>
 
-<div class="flex h-full items-center justify-evenly gap-2">
+<div class="flex h-full items-center justify-evenly">
   <div
     class="relative flex w-[140px] justify-end pt-1"
     style="font-size: 2.4em; line-height: .85em"

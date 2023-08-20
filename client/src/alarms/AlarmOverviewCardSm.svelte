@@ -10,11 +10,11 @@
   export let alarmTimeCorrected: boolean;
 </script>
 
-<div class="grid grid-cols-[1fr_38%]">
+<div class="grid grid-cols-[62%_1fr]">
   <div class="flex h-full flex-col items-start justify-center overflow-visible">
     <div
-      class="relative flex justify-end self-stretch pr-3 pt-1"
-      style="font-size: 2.1em; line-height: .85em"
+      class="relative flex pt-1"
+      style="font-size: 1.95em; line-height: .85em"
     >
       <ClockDisplay
         overrideTime={timeString(alarmTime)}
@@ -34,7 +34,10 @@
   </div>
 </div>
 {#if timeToNextDeadline}
-  <div class="overflow-visible whitespace-nowrap pl-2 text-xs">
+  <div
+    class="overflow-visible whitespace-nowrap pl-1 text-xs"
+    style="line-height: .8em"
+  >
     In <span class="">{formatTime(timeToNextDeadline)}</span>
   </div>
 {/if}
