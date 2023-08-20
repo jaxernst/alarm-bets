@@ -16,7 +16,7 @@ import { AlarmStatus } from "@sac/contracts/lib/types";
 import { watchContractEvent } from "@wagmi/core";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
 import SocialAlarmClockHub from "./abi/SocialAlarmClockHub";
-import { deploymentChainIds, hubDeployments } from "./hubDeployments";
+import { deploymentChainIds, hubDeployments } from "./deployments";
 import { parseEther } from "viem";
 
 export type UserAlarm = Awaited<ReturnType<typeof UserAlarmStore>>;
@@ -282,10 +282,14 @@ async function UserAlarmStore(user: EvmAddress, alarm: AlarmBaseInfo) {
   alarmState.subscribe((state) => {
     if (!state) {
       console.error("Invariant error: alarm state should never be undefined");
-      return
+      return;
     }
     // Set interval when there's no interval set, alarm is active, and there's a time value to decrement
-    if (!interval && state.status === AlarmStatus.ACTIVE && state.timeToNextDeadline) {
+    if (
+      !interval &&
+      state.status === AlarmStatus.ACTIVE &&
+      state.timeToNextDeadline
+    ) {
       interval = setInterval(
         () => timeToDeadlineUpdater(countdownInterval),
         countdownInterval * 1000
@@ -387,8 +391,11 @@ async function UserAlarmStore(user: EvmAddress, alarm: AlarmBaseInfo) {
       return res;
     },
     syncTimeToDeadline: async () => {
-      const [p1, p2] = [get(constants).player1, get(constants).player2] ;
-      const timeToNextDeadline = await getTimeToNextDeadline(addr, p1 === user ? p1 : p2);
+      const [p1, p2] = [get(constants).player1, get(constants).player2];
+      const timeToNextDeadline = await getTimeToNextDeadline(
+        addr,
+        p1 === user ? p1 : p2
+      );
       alarmState.update((s) => ({ ...s, timeToNextDeadline }));
     },
   };
