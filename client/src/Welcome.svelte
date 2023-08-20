@@ -11,7 +11,7 @@
   import {
     hubDeployments,
     partnerAlarmClockContractTemplates,
-  } from "./lib/hubDeployments";
+  } from "./lib/deployments";
   import { onMount } from "svelte";
 
   let typewriterComplete = false;
@@ -281,20 +281,20 @@
               </ul>
             </li>
             <li>
-              Base Mainnet Contracts:
+              OP Mainnet Contracts:
               <ul class="indent-4">
                 <li>
                   Hub Contract: <div
                     class="overflow-x-visible break-words text-xs text-cyan-500 sm:text-sm"
                   >
-                    {hubDeployments[8453]}
+                    {hubDeployments[10]}
                   </div>
                 </li>
                 <li>
                   Partner Alarm Contract: <div
                     class="overflow-x-auto text-xs text-cyan-500 sm:text-sm"
                   >
-                    {partnerAlarmClockContractTemplates[8453]}
+                    {partnerAlarmClockContractTemplates[10]}
                   </div>
                 </li>
               </ul>
