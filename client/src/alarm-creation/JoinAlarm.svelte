@@ -47,7 +47,7 @@
         );
         $activeTab = "alarms";
       } else {
-        toast.push("Alarm creation failed with: " + txResult.error.message);
+        toast.push("Alarm creation failed with: " + txResult.error);
       }
     } finally {
       joinPending = false;
@@ -178,7 +178,7 @@
               <div class="px-1 text-sm">
                 <div>Play with Timezone:</div>
                 <div class="whitespace-nowrap text-cyan-600">
-                  {getReadableTimezone() + " tuejk"}
+                  {getReadableTimezone()}
                 </div>
               </div>
               <div class="flex flex-nowrap items-center gap-1">
