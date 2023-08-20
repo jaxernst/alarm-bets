@@ -10,7 +10,7 @@
   export let alarmTimeCorrected: boolean;
 </script>
 
-<div class="flex h-full items-center gap-4">
+<div class="flex h-full items-center justify-evenly gap-2">
   <div
     class="relative flex w-[140px] justify-end pt-1"
     style="font-size: 2.4em; line-height: .85em"
@@ -29,13 +29,13 @@
   </div>
 
   <div class="flex flex-col justify-evenly self-stretch">
+    {#if timeToNextDeadline}
+      <div class="overflow-visible whitespace-nowrap pl-2 text-xs">
+        In <span class="">{formatTime(timeToNextDeadline) + "..."}</span>
+      </div>
+    {/if}
     <div style="font-size: .92em; line-height: 1.3em">
       <AlarmActiveDays {daysActive} />
     </div>
-    {#if timeToNextDeadline}
-      <div class="overflow-visible whitespace-nowrap pl-2 text-xs">
-        In <span class="">{formatTime(timeToNextDeadline)}</span>
-      </div>
-    {/if}
   </div>
 </div>

@@ -31,7 +31,7 @@
   </div>
 </div>
 {#if timeToNextDeadline}
-  <div class="overflow-visible whitespace-nowrap text-xs">
+  <div class="overflow-visible whitespace-nowrap pl-2 text-xs">
     In <span class="">{formatTime(timeToNextDeadline)}</span>
   </div>
 {/if}
