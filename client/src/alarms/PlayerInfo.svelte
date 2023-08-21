@@ -50,8 +50,8 @@
 </script>
 
 <div class="flex justify-between gap-1">
-  <div class={`${isMe ? "orange-text" : "text-zinc-400"}`}>
-    {shorthandAddress(address)}
+  <div class="text-zinc-400">
+    {isMe ? "Me" : shorthandAddress(address)}
   </div>
   <div class="text-[10px] text-zinc-500">
     {timezone ? formatTimezone(Number(timezone)) : ""}
