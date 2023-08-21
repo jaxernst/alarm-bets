@@ -7,14 +7,16 @@
   import { correctAlarmTime } from "../lib/time";
   import AlarmOverviewCardSm from "./AlarmOverviewCardSm.svelte";
   import AlarmOverviewCardLg from "./AlarmOverviewCardLg.svelte";
+  import { formatEther } from "viem";
 
   export let userAlarm: UserAlarm;
 
-  $: [id, daysActive, alarmTime, status] = [
+  $: [id, daysActive, alarmTime, status, missedAlarmPenalty] = [
     $userAlarm.id,
     $userAlarm.alarmDays as number[],
     $userAlarm.alarmTime,
     $userAlarm.status,
+    $userAlarm.missedAlarmPenalty,
   ];
 
   $: correctedAlarmTime = Number(alarmTime);
@@ -46,6 +48,7 @@
     timeToNextDeadline: Number($userAlarm.timeToNextDeadline),
     alarmTimeCorrected: correctedAlarmTime !== Number(alarmTime),
     daysActive,
+    missedAlarmPenalty: Number(formatEther(missedAlarmPenalty)),
   };
 </script>
 
