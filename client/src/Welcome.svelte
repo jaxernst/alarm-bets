@@ -1,21 +1,26 @@
 <script lang="ts">
   import {
     Dialog,
+    DialogDescription,
     DialogOverlay,
     DialogTitle,
   } from "@rgossiaux/svelte-headlessui";
   import Typewriter from "./lib/components/Typewriter.svelte";
-  import { crossfade, fade, slide } from "svelte/transition";
-  import { cubicInOut } from "svelte/easing";
+  import { crossfade, fade, scale, slide } from "svelte/transition";
+  import { cubicIn, cubicInOut, cubicOut, quintInOut } from "svelte/easing";
   import { showWelcome, welcomeHasBeenViewed } from "./view";
   import {
     hubDeployments,
     partnerAlarmClockContractTemplates,
   } from "./lib/deployments";
   import { onMount } from "svelte";
+  import Deadline from "./assets/deadline.svelte";
+  import { iOSSafari } from "./lib/util";
 
+  export let pwaRequired = false;
   let typewriterComplete = false;
   let showAbout = false;
+  let showAppInstall = false;
 
   // Show the about section by default after showing the welcome for the first time
   showWelcome.subscribe((show) => {
@@ -44,8 +49,49 @@
 </script>
 
 <Dialog
-  open={$showWelcome}
-  on:close={() => ($showWelcome = false)}
+  open={showAppInstall}
+  on:close={() => (showAppInstall = false)}
+  class="fixed left-0 top-0 z-50 flex h-screen w-full items-center justify-center "
+>
+  <DialogOverlay class="fixed left-0 top-0 -z-10 h-screen w-screen" />
+  {#if showAppInstall}
+    <div in:slide={{ duration: 600, easing: cubicInOut, axis: "y" }}>
+      <div
+        transition:fade={{ duration: 300, easing: cubicIn }}
+        class="flex min-h-[48%] w-full flex-col items-center justify-evenly gap-5 rounded-2xl bg-zinc-800 p-6 shadow-lg sm:scale-100"
+      >
+        <div class="flex flex-col items-center gap-2">
+          <div class="flex h-10 w-10 justify-center fill-cyan-400">
+            <Deadline />
+          </div>
+          <DialogTitle class="font-digital text-center text-2xl md:text-3xl">
+            Install Alarm Bets
+          </DialogTitle>
+        </div>
+        <DialogDescription class="font-bold sm:text-lg">
+          We noticed you are using a mobile device. For the best mobile
+          experience, please install the application by adding it to your home
+          screen.
+        </DialogDescription>
+
+        <DialogDescription class="font-bold sm:text-lg">
+          In your {iOSSafari ? "Safari" : ""} browser, click the
+          <span class="text-cyan-400">{iOSSafari ? "Share" : "Menu"}</span>
+          button and select
+          <span class="text-cyan-400"
+            >{iOSSafari
+              ? "Add to Home Screen"
+              : "Install / Add Application"}</span
+          >.
+        </DialogDescription>
+      </div>
+    </div>
+  {/if}
+</Dialog>
+
+<Dialog
+  open={pwaRequired || $showWelcome}
+  on:close={() => (pwaRequired ? null : ($showWelcome = false))}
   class="fixed left-0 top-0 flex h-screen w-full items-center justify-center"
 >
   <DialogOverlay
@@ -83,10 +129,15 @@
             class="flex justify-center"
           >
             <button
-              on:click={() => ($showWelcome = false)}
+              on:click={() =>
+                pwaRequired ? (showAppInstall = true) : ($showWelcome = false)}
               class="rounded-lg border border-cyan-500 px-4 py-1 font-bold text-zinc-300 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-cyan-500 hover:text-white hover:shadow-md active:bg-cyan-700 active:text-zinc-400"
             >
-              Enter
+              {#if !pwaRequired}
+                Enter
+              {:else}
+                Install
+              {/if}
             </button>
           </div>
         {/if}

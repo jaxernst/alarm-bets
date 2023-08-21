@@ -1,3 +1,8 @@
+const ua = window.navigator.userAgent;
+const iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+const webkit = !!ua.match(/WebKit/i);
+export const iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
+
 export const shorthandAddress = (address: string) => {
   return "0x" + address.slice(2, 4) + "..." + address.slice(-4);
 };

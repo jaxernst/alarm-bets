@@ -40,26 +40,29 @@
     $displayedAlarmId = get(currentAlarms[0]).id;
   }
 
-  let deferredPrompt;
+  function getPWADisplayMode() {
+    const isStandalone = window.matchMedia(
+      "(display-mode: standalone)"
+    ).matches;
+    if (document.referrer.startsWith("android-app://")) {
+      return "twa";
+    } else if (navigator.standalone || isStandalone) {
+      return "standalone";
+    }
+    return "browser";
+  }
 
+  let pwaRequired = false;
   onMount(() => {
-    window.addEventListener("beforeinstallprompt", (e) => {
-      console.log("Got");
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later.
-      deferredPrompt = e;
-      // Update UI notify the user they can install the PWA
-      // showInstallPromotion();
-      // Optionally, send analytics event that PWA install promo was shown.
-      console.log(`'beforeinstallprompt' event was fired.`);
-    });
+    if ((window as any).mobileCheck() && getPWADisplayMode() === "browser") {
+      pwaRequired = true;
+    }
   });
 </script>
 
 <SvelteToast />
 
-<Welcome />
+<Welcome {pwaRequired} />
 
 <div class="flex h-screen flex-col justify-between gap-2">
   <div class="flex w-full justify-center">
