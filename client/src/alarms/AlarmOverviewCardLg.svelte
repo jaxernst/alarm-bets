@@ -44,7 +44,7 @@
         </span>
         at risk
       </div>
-      <div class="min-w-[130px] overflow-visible whitespace-nowrap text-xs">
+      <div class="w-[160px] overflow-visible whitespace-nowrap text-xs">
         In <span class="">{formatTime(timeToNextDeadline) + "..."}</span>
       </div>
     {/if}
