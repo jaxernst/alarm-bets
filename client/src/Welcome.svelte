@@ -17,7 +17,7 @@
   import Deadline from "./assets/deadline.svelte";
   import { iOSSafari } from "./lib/util";
 
-  export let pwaRequired = false;
+  let pwaRequired = false;
   let typewriterComplete = false;
   let showAbout = false;
   let showAppInstall = false;
