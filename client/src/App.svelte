@@ -62,7 +62,7 @@
 
 <SvelteToast />
 
-<Welcome {pwaRequired} />
+<Welcome />
 
 <div class="flex h-screen flex-col justify-between gap-2">
   <div class="flex w-full justify-center">
