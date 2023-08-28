@@ -1,6 +1,6 @@
-# The Social Alarm Clock (Alarm Bets)
+# Alarm Bets
 
-An onchain 2-player betting game built to incentivize waking up early...
+A smart contract betting game for waking up early...
 
 Demo: [social-alarm.xyz](https://social-alarm.xyz/)
 
