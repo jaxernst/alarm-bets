@@ -1,4 +1,4 @@
-import { account, network, supportedChains } from "./chainClient";
+import { account, network, supportedChains } from "./chainConfig";
 import { derived, writable, type Readable, get } from "svelte/store";
 import {
   getUserAlarmsByType,
