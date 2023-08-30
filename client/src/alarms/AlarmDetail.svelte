@@ -108,7 +108,7 @@
   $: if ($alarm.timeToNextDeadline && !interval) {
     interval = setInterval(() => {
       alarm.syncTimeToDeadline();
-    }, 1000 * 10);
+    }, 2000 * 10);
   }
 
   onDestroy(() => interval && clearInterval(interval));
