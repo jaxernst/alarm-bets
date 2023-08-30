@@ -25,7 +25,7 @@
   import { writable } from "svelte/store";
   import { getCurrentAccount } from "../lib/chainConfig";
   import EthereumIcon from "../assets/ethereum-icon.svelte";
-  import { alarmTime } from "../alarm-creation/alarmCreation";
+  import { onDestroy } from "svelte";
 
   export let alarm: UserAlarm;
 
@@ -102,6 +102,16 @@
       showAddToBalance = false;
     }
   };
+
+  // Periodically call the alarm timeToNextDeadline sync function
+  let interval: NodeJS.Timer;
+  $: if ($alarm.timeToNextDeadline && !interval) {
+    interval = setInterval(() => {
+      alarm.syncTimeToDeadline();
+    }, 1000 * 10);
+  }
+
+  onDestroy(() => interval && clearInterval(interval));
 </script>
 
 <EndAlarmModal {alarm} />
