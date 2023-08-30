@@ -8,7 +8,7 @@
 
   import { SvelteToast } from "@zerodevx/svelte-toast";
   import { fade, blur } from "svelte/transition";
-  import { userAlarms } from "./lib/dappStores";
+  import { userAlarms } from "./lib/contractStores";
 
   import { displayedAlarmId } from "./alarms/stores";
   import Topbar from "./Topbar.svelte";
@@ -17,7 +17,7 @@
   import { type Tab, activeTab } from "./view";
   import { get } from "svelte/store";
   import { AlarmStatus } from "@sac/contracts/lib/types";
-  import { account } from "./lib/chainClient";
+  import { account } from "./lib/chainConfig";
   import Welcome from "./Welcome.svelte";
   import Footer from "./Footer.svelte";
   import { onMount } from "svelte";

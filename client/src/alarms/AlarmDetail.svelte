@@ -15,7 +15,7 @@
   import { submitConfirmation } from "../lib/alarmHelpers";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import { formatTime, timeString } from "../lib/util";
-  import type { UserAlarm } from "../lib/dappStores";
+  import type { UserAlarm } from "../lib/contractStores";
   import { showEndAlarmModal } from "./stores";
   import PlayerInfo from "./PlayerInfo.svelte";
   import { slide } from "svelte/transition";
@@ -23,7 +23,7 @@
   import { toast } from "@zerodevx/svelte-toast";
   import DiamondSpinner from "../lib/components/DiamondSpinner.svelte";
   import { writable } from "svelte/store";
-  import { getCurrentAccount } from "../lib/chainClient";
+  import { getCurrentAccount } from "../lib/chainConfig";
   import EthereumIcon from "../assets/ethereum-icon.svelte";
   import { alarmTime } from "../alarm-creation/alarmCreation";
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { AlarmStatus } from "@sac/contracts/lib/types";
-  import { userAlarms, type UserAlarm } from "../lib/dappStores";
+  import { userAlarms, type UserAlarm } from "../lib/contractStores";
   import { get } from "svelte/store";
   import AlarmOverview from "./AlarmOverview.svelte";
   import { displayedAlarmId } from "./stores";

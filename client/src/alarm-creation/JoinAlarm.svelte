@@ -1,6 +1,6 @@
 <script lang="ts">
   import { toast } from "@zerodevx/svelte-toast";
-  import { getCurrentAccount } from "../lib/chainClient";
+  import { getCurrentAccount } from "../lib/chainConfig";
   import {
     getAlarmById,
     getAlarmConstants,
@@ -19,7 +19,7 @@
   import type { EvmAddress } from "../types";
   import { AlarmStatus } from "@sac/contracts/lib/types";
   import DiamondSpinner from "../lib/components/DiamondSpinner.svelte";
-  import { hub } from "../lib/dappStores";
+  import { hub } from "../lib/contractStores";
   import { activeTab } from "../view";
 
   let alarmId = "";

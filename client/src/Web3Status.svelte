@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { account, ensName } from "./lib/chainClient";
-  import { web3Modal } from "./lib/chainClient";
+  import { account, ensName } from "./lib/chainConfig";
+  import { web3Modal } from "./lib/chainConfig";
   import { shorthandAddress } from "./lib/util";
   import { transactions } from "./lib/transactions";
   import DiamondSpinner from "./lib/components/DiamondSpinner.svelte";
-  import { networkError } from "./lib/dappStores";
+  import { networkError } from "./lib/contractStores";
 
   let displayName: string | undefined;
   $: if ($account?.address) {
