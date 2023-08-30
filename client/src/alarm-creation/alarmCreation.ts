@@ -1,7 +1,7 @@
 import { derived, get, writable, type Readable } from "svelte/store";
-import { account } from "../lib/chainClient";
+import { account } from "../lib/chainConfig";
 import { createAlarm as _createAlarm } from "../lib/alarmHelpers";
-import { hub } from "../lib/dappStores";
+import { hub } from "../lib/contractStores";
 import { parseEther, type Hash } from "viem";
 
 type Days = "M" | "T" | "W" | "Th" | "F" | "Sa" | "Su";
