@@ -4,7 +4,7 @@ A smart contract betting game for waking up early. Put down money, choose your t
 
 Currently in open-development. See the live demo here:
 
-[alarmbets.tech](https:/alarmbets.tech)
+[alarmbets.tech](https://alarmbets.tech)
 
 # Quickstart
 
