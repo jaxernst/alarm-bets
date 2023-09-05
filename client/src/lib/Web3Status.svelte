@@ -1,22 +1,28 @@
 <script lang="ts">
 	import { account, ensName } from './chainConfig';
-	import { web3Modal } from './chainConfig';
+	import { web3Modal as _web3Modal } from './chainConfig';
 	import { shorthandAddress } from './util';
 	import { networkError } from './contractStores';
+	import { onMount } from 'svelte';
 
 	let displayName: string | undefined;
 	$: if ($account?.address) {
 		displayName = $ensName ? $ensName : shorthandAddress($account.address);
 	}
 	$: indicatorColor = $account && $account.isConnected ? 'green' : 'red';
+
+	let web3Modal: undefined | typeof _web3Modal;
+	onMount(() => {
+		web3Modal = _web3Modal;
+	});
 </script>
 
 <div class="flex h-full items-center gap-4">
-	<button class="flex items-center" on:click={() => $web3Modal.openModal()}>
+	<button class="flex items-center" on:click={() => $web3Modal?.openModal()}>
 		{#if !$account || !$account.isConnected}
 			<button
 				class="rounded-2xl bg-local px-3 py-1 text-cyan-500 transition-colors duration-200 hover:text-cyan-300"
-				on:click={() => $web3Modal.openModal()}
+				on:click={() => $web3Modal?.openModal()}
 			>
 				Connect Wallet
 			</button>
