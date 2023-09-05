@@ -1,8 +1,10 @@
 # Alarm Bets
 
-A smart contract betting game for waking up early...
+A smart contract betting game for waking up early. Put down money, choose your target sleep schedule, solves puzzles every morning to prove you've woken up...
 
-Demo: [social-alarm.xyz](https://social-alarm.xyz/)
+Currently in open-development. See the live demo here:
+
+[alarmbets.tech](https://alarmbets.tech)
 
 # Quickstart
 
