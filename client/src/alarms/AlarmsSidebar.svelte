@@ -61,8 +61,8 @@
 <div
   class="bg-transparent-grey flex max-h-[320px] flex-col overflow-y-auto rounded-xl"
 >
-  {#each sortedAlarms as userAlarm}
-    <div class="w-full">
+  {#each sortedAlarms as userAlarm (get(userAlarm).id)}
+    <div class="w-full" animate:flip>
       {#if get(userAlarm).status !== AlarmStatus.CANCELLED}
         <!-- use the flip function to animate the list reordering -->
         <AlarmOverview {userAlarm} />
