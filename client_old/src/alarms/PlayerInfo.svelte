@@ -5,7 +5,7 @@
   import type { UserAlarm } from "../lib/contractStores";
   import { shorthandAddress } from "../lib/util";
   import { getBetStanding } from "../lib/alarmHelpers";
-  import { AlarmStatus } from "@sac/contracts/lib/types";
+  import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
   import Deadline from "../assets/deadline.svelte";
   import { HOUR } from "../lib/time";
   import { getCurrentAccount } from "../lib/chainConfig";

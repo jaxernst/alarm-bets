@@ -1,5 +1,5 @@
 {
-  "name": "@sac/interface",
+  "name": "@alarm-bets/interface",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@gnosis.pm/safe-apps-wagmi": "^2.1.0",
-    "@sac/contracts": "workspace:^",
+    "@alarm-bets/contracts": "workspace:^",
     "@wagmi/core": "^1.3.9",
     "@web3modal/ethereum": "^2.4.1",
     "@web3modal/html": "^2.4.1",

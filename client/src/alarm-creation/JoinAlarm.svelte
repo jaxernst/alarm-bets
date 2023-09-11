@@ -17,7 +17,7 @@
 	import AlarmActiveDays from '../lib/components/AlarmActiveDays.svelte';
 	import ActionButton from '../lib/styled-components/ActionButton.svelte';
 	import type { EvmAddress } from '../lib/types';
-	import { AlarmStatus } from '@sac/contracts/lib/types';
+	import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
 	import DiamondSpinner from '../lib/components/DiamondSpinner.svelte';
 	import { hub } from '../lib/contractStores';
 	import { activeTab } from '../routes/view';

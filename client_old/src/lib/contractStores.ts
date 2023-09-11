@@ -12,7 +12,7 @@ import {
 } from "./alarmHelpers";
 import { transactions } from "./transactions";
 import type { EvmAddress } from "../types";
-import { AlarmStatus } from "@sac/contracts/lib/types";
+import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
 import { watchContractEvent } from "@wagmi/core";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
 import SocialAlarmClockHub from "./abi/SocialAlarmClockHub";

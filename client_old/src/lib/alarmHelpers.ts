@@ -13,7 +13,7 @@ import {
   alarmTypeVals,
   solidityNamedInitTypes,
   AlarmStatus,
-} from "@sac/contracts/lib/types";
+} from "@alarm-bets/contracts/lib/types";
 
 import HubAbi from "./abi/SocialAlarmClockHub";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";

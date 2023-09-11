@@ -13,7 +13,7 @@
   import { transactions } from "../lib/transactions";
   import { MINUTE, correctAlarmTime } from "../lib/time";
   import { submitConfirmation } from "../lib/alarmHelpers";
-  import { AlarmStatus } from "@sac/contracts/lib/types";
+  import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
   import { formatTime, timeString } from "../lib/util";
   import type { UserAlarm } from "../lib/contractStores";
   import { showEndAlarmModal } from "./stores";

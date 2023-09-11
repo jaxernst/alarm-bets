@@ -16,7 +16,7 @@
   import JoinAlarm from "./alarm-creation/JoinAlarm.svelte";
   import { type Tab, activeTab } from "./view";
   import { get } from "svelte/store";
-  import { AlarmStatus } from "@sac/contracts/lib/types";
+  import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
   import { account } from "./lib/chainConfig";
   import Welcome from "./Welcome.svelte";
   import Footer from "./Footer.svelte";

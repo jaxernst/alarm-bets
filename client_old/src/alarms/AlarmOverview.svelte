@@ -2,7 +2,7 @@
   import AlarmActiveDays from "../lib/components/AlarmActiveDays.svelte";
   import { getCurrentAccount } from "../lib/chainConfig";
   import type { UserAlarm } from "../lib/contractStores";
-  import { AlarmStatus } from "@sac/contracts/lib/types";
+  import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
   import { displayedAlarmId } from "./stores";
   import { correctAlarmTime } from "../lib/time";
   import AlarmOverviewCardSm from "./AlarmOverviewCardSm.svelte";

@@ -1,5 +1,5 @@
 {
-	"name": "client",
+	"name": "@alarm-bets/client",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
@@ -33,8 +33,8 @@
 		"vite-plugin-pwa": "^0.16.4"
 	},
 	"dependencies": {
+		"@alarm-bets/contracts": "workspace:^",
 		"@gnosis.pm/safe-apps-wagmi": "^2.1.0",
-		"@sac/contracts": "workspace:^",
 		"@wagmi/core": "^1.3.9",
 		"@web3modal/ethereum": "^2.4.1",
 		"@web3modal/html": "^2.4.1",

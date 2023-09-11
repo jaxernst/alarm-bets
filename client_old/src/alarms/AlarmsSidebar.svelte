@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AlarmStatus } from "@sac/contracts/lib/types";
+  import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
   import { userAlarms, type UserAlarm } from "../lib/contractStores";
   import { get } from "svelte/store";
   import AlarmOverview from "./AlarmOverview.svelte";
