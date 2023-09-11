@@ -1,5 +1,5 @@
 {
-  "name": "@sac/contracts",
+  "name": "@alarm-bets/contracts",
   "private": true,
   "dependencies": {
     "@nomiclabs/hardhat-ethers": "^2.1.1",
