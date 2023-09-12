@@ -1,4 +1,6 @@
 <script>
+	import Welcome from '$lib/Welcome.svelte';
+	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { onMount } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 
@@ -28,6 +30,10 @@
 <svelte:head>
 	{@html webManifest}
 </svelte:head>
+
+<SvelteToast />
+
+<Welcome />
 
 <main>
 	<slot />
