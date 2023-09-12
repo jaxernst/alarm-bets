@@ -6,7 +6,6 @@
 	import AlarmsSidebar from '../alarms/AlarmsSidebar.svelte';
 	import AlarmDetail from '../alarms/AlarmDetail.svelte';
 
-	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { fade, blur } from 'svelte/transition';
 	import { userAlarms } from '$lib/contractStores';
 
@@ -18,7 +17,6 @@
 	import { get } from 'svelte/store';
 	import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
 	import { account } from '$lib/chainConfig';
-	import Welcome from '$lib/Welcome.svelte';
 	import Footer from '$lib/Footer.svelte';
 	import { onMount } from 'svelte';
 	import { getPWADisplayMode, mobileCheck } from '$lib/util';
@@ -46,10 +44,6 @@
 		}
 	});
 </script>
-
-<SvelteToast />
-
-<Welcome />
 
 <div class="flex h-screen flex-col justify-between gap-2">
 	<div class="flex w-full justify-center">
