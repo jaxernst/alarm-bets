@@ -1,9 +1,4 @@
 import type { BigNumberish } from "ethers";
-import {
-  type PartnerAlarmClock,
-  PartnerAlarmClock__factory,
-} from "../typechain-types";
-import { missedAlarmPenalty } from "../../client/src/alarm-creation/alarmCreation";
 
 export type DayOfWeek = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
@@ -16,14 +11,6 @@ export const alarmValToType: Record<number, AlarmType> = {
 };
 
 export type AlarmType = "PartnerAlarmClock";
-
-export type AlarmContractTypes = {
-  PartnerAlarmClock: PartnerAlarmClock;
-};
-
-export const alarmFactories = {
-  PartnerAlarmClock: PartnerAlarmClock__factory,
-};
 
 export type InitializationTypes = {
   PartnerAlarmClock: {
