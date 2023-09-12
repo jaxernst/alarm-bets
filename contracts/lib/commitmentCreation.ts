@@ -1,12 +1,11 @@
 import { BigNumberish, Contract, ethers } from "ethers";
 import { deploy } from "../test/helpers/deploy";
 import { SocialAlarmClockHub } from "../typechain-types";
+import { AlarmContractTypes, alarmFactories } from "./typechainTypes";
 import {
   AlarmType,
-  AlarmContractTypes,
   alarmTypeVals,
   InitializationTypes,
-  alarmFactories,
   solidityInitializationTypes,
   InitializationKeyOrder,
 } from "./types";
