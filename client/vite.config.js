@@ -1,11 +1,15 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
 /** @type {import('vite').UserConfig} */
 const config = {
 	plugins: [
-		sveltekit()
-		/*VitePWA({
+		sveltekit(),
+		SvelteKitPWA({
 			registerType: 'autoUpdate',
+			devOptions: {
+				enabled: true
+			},
 			manifest: {
 				name: 'Alarm Bets',
 				short_name: 'Alarm Bets',
@@ -25,7 +29,7 @@ const config = {
 				background_color: '#252525',
 				display: 'standalone'
 			}
-		}) */
+		})
 	]
 };
 
