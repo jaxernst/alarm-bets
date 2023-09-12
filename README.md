@@ -8,12 +8,10 @@ Currently in open-development. See the live demo here:
 
 # Quickstart
 
-Packages are managed with `yarn`. (To avoid installation errors ensure the correct version is set with `yarn set version berry`).
-
-Install monorepo dependencies:
+Install monorepo dependencies (pnpm):
 
 ```
-yarn install
+pnpm install
 ```
 
 ## Contracts
@@ -21,13 +19,13 @@ yarn install
 Run smart contract test suite:
 
 ```
-yarn test-contracts
+pnpm test-contracts
 ```
 
 Deploy contracts to a local node:
 
 ```
-yarn deploy-local
+pnpm deploy-local
 ```
 
 ## Client
@@ -35,7 +33,7 @@ yarn deploy-local
 The client is configured to target deployed contracts on various networks (including testnets). To run the client locally:
 
 ```
-yarn client
+pnpm client
 ```
 
 ### Running against a local testnet
@@ -52,10 +50,10 @@ FUND_WALLET_2=<wallet address>
 2. Spin up the hardhat node and send funds the wallets:
 
 ```
-yarn deploy-local
+pnpm deploy-local
 ```
 
-3. In a new shell window, run the interface: `yarn client`
+3. In a new shell window, run the interface: `pnpm client`
 
 4. Add the hardhat network (Chain Id: 31337) to you browser wallet if not already added. (Metamask Note: If you see 'nonce too high' error, go to settings and click 'reset activity tab data')
 

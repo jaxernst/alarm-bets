@@ -1,18 +1,13 @@
 {
   "name": "alarm-bets",
-  "packageManager": "yarn@3.5.1",
   "private": true,
   "repository": "https://github.com/jaxernst/the-social-alarm-clock.git",
   "author": "jaxernst <51183683+jaxernst@users.noreply.github.com>",
   "scripts": {
-    "test-contracts": "yarn workspace @alarm-bets/contracts test",
-    "deploy-local": "yarn workspace @alarm-bets/client deploy-local",
-    "client": "yarn workspace @alarm-bets/client dev"
+    "test-contracts": "pnpm run -C contracts test",
+    "deploy-local": "pnpm run -C contracts deploy-local",
+    "client": "pnpm -C client dev"
   },
-  "workspaces": [
-    "client",
-    "contracts"
-  ],
   "dependencies": {
     "ts-node": "^10.9.1",
     "typescript": "^4.8.4"
