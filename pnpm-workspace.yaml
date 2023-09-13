@@ -1,3 +1,4 @@
 packages:
-  - 'contracts'
-  - 'client'
+  - "contracts"
+  - "client"
+  - "notification-server"
