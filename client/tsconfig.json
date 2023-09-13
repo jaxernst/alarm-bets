@@ -8,9 +8,10 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"sourceMap": true,
-		"strict": true
+		"strict": true,
+		"types": ["vite-plugin-pwa/info", "vite-plugin-pwa/register"]
 	},
-	"types": ["vite-plugin-pwa/info"]
+	
 	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	//
 	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
