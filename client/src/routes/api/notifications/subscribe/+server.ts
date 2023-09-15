@@ -17,7 +17,10 @@ export async function POST({ request }: RequestEvent) {
 		setTimeout(resolve, 1000);
 	});
 
-	webpush.sendNotification(subscription, JSON.stringify({ title: 'Hello Notification' }));
+	webpush.sendNotification(
+		subscription,
+		JSON.stringify({ title: 'Upcoming Alarm', body: 'Your alarm is due in 15 minutes!' })
+	);
 
 	return new Response(null, { status: 200 });
 }

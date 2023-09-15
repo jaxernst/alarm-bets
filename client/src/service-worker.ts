@@ -118,13 +118,14 @@ worker.addEventListener('fetch', (event) => {
 /** Push Notifications  **/
 
 self.addEventListener('push', (event) => {
+	console.log('Push event received');
 	const data = event.data?.json();
 
 	const title = data.title || 'Push Notification';
 
 	const options = {
 		body: data.body,
-		icon: data.icon,
+		icon: './sac_logo.svg',
 		badge: data.badge
 	};
 

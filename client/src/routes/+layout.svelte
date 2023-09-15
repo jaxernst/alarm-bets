@@ -4,7 +4,6 @@
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { onMount } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
-	import { supabase } from '$lib/supabaseClient';
 
 	$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : '';
 	onMount(checkForServiceWorkerUpdate)
@@ -17,8 +16,8 @@
 
 <Welcome />
 
-<button on:click={subcribeToPushNotifications} >
-	Subscribe
+<button on:click={subcribeToPushNotifications} class="bg-white m-1 p-1 border border-red-500 rounded active:bg-gray-300 text-red-500">
+	Test Alarm Notification
 </button>
 
 <main>
