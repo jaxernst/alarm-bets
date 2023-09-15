@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 import { build, files } from '$service-worker';
 
-const version = 3;
+const version = 4;
 const worker = self as unknown as ServiceWorkerGlobalScope;
 const STATIC_CACHE_NAME = `cache${version}`;
 const APP_CACHE_NAME = `offline${version}`;
@@ -85,7 +85,7 @@ async function fetchAndCache(request: Request) {
 	}
 }
 
-/*worker.addEventListener('fetch', (event) => {
+worker.addEventListener('fetch', (event) => {
 	if (event.request.method !== 'GET' || event.request.headers.has('range')) {
 		return;
 	}
@@ -111,4 +111,4 @@ async function fetchAndCache(request: Request) {
 			})()
 		);
 	}
-}); */
+});
