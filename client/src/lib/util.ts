@@ -1,3 +1,5 @@
+import { PUBLIC_VAPID_KEY } from '$env/static/public';
+
 export const isIosSafari = () => {
 	const ua = window.navigator.userAgent;
 	const iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
@@ -112,5 +114,51 @@ export function checkForServiceWorkerUpdate() {
 			console.log('Application was updated refreshing the page...');
 			window.location.reload();
 		}
+	}
+}
+
+function urlBase64ToUint8Array(base64String: string) {
+	const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+	const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+
+	const rawData = atob(base64);
+	const outputArray = new Uint8Array(rawData.length);
+
+	for (let i = 0; i < rawData.length; ++i) {
+		outputArray[i] = rawData.charCodeAt(i);
+	}
+	return outputArray;
+}
+
+export function subcribeToPushNotifications() {
+	// Convert the VAPID key to a usable format
+	if (!PUBLIC_VAPID_KEY) {
+		console.warn('VAPID key not found');
+		return;
+	}
+
+	if ('serviceWorker' in navigator && 'PushManager' in window) {
+		navigator.serviceWorker.ready.then((registration) => {
+			registration.pushManager
+				.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+				})
+				.then((subscription) => {
+					// TODO: Send the subscription to your server here
+					console.log(JSON.stringify(subscription));
+					window.fetch('api/notifications/subscribe', {
+						method: 'POST',
+						body: JSON.stringify(subscription),
+						headers: {
+							'content-type': 'application/json'
+						}
+					});
+					console.log('User is subscribed:', subscription);
+				})
+				.catch((error) => {
+					console.error('Failed to subscribe the user: ', error);
+				});
+		});
 	}
 }
