@@ -14,7 +14,7 @@ export async function POST({ request }: RequestEvent) {
 	webpush.setVapidDetails('mailto:jaxernst@gmail.com', PUBLIC_VAPID_KEY, PRIVATE_VAPID_KEY);
 
 	await new Promise((resolve) => {
-		setTimeout(resolve, 10000);
+		setTimeout(resolve, 4000);
 	});
 
 	webpush.sendNotification(
