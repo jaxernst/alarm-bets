@@ -2,6 +2,7 @@
 	import Welcome from '$lib/Welcome.svelte';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { pwaInfo } from 'virtual:pwa-info';
+	import { onMount } from 'svelte';
 
 	$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : '';
 	onMount(checkForServiceWorkerUpdate);
