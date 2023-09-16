@@ -30,7 +30,8 @@ const config = {
 				display: 'standalone'
 			}
 		})
-	]
+	],
+	envDir: "../"
 };
 
 export default config;
