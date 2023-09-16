@@ -1,3 +1,5 @@
+import { PUBLIC_VAPID_KEY } from '$env/static/public';
+
 export const isIosSafari = () => {
 	const ua = window.navigator.userAgent;
 	const iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
