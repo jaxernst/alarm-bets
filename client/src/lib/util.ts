@@ -83,6 +83,7 @@ export function mobileCheck() {
 export function checkForServiceWorkerUpdate() {
 	let updated = false;
 	let activated = false;
+	let hadControllingServiceWorker = !!navigator.serviceWorker.controller;
 
 	navigator.serviceWorker.register('service-worker.js').then((registration) => {
 		registration.addEventListener('updatefound', () => {
@@ -102,7 +103,7 @@ export function checkForServiceWorkerUpdate() {
 	});
 
 	function checkUpdate() {
-		if (activated && updated) {
+		if (activated && updated && hadControllingServiceWorker) {
 			console.log('Application was updated refreshing the page...');
 			window.location.reload();
 		}
