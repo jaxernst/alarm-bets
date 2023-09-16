@@ -79,3 +79,79 @@ export function mobileCheck() {
 	})(navigator.userAgent || navigator.vendor || (window as any).opera);
 	return check;
 }
+
+export function checkForServiceWorkerUpdate() {
+	let updated = false;
+	let activated = false;
+	let hadControllingServiceWorker = !!navigator.serviceWorker.controller;
+
+	navigator.serviceWorker.register('service-worker.js').then((registration) => {
+		registration.addEventListener('updatefound', () => {
+			const worker = registration.installing;
+			worker?.addEventListener('statechange', () => {
+				console.log({ state: worker.state });
+				if (worker.state === 'activated') {
+					activated = true;
+					checkUpdate();
+				}
+			});
+		});
+	});
+	navigator.serviceWorker.addEventListener('controllerchange', () => {
+		updated = true;
+		checkUpdate();
+	});
+
+	function checkUpdate() {
+		if (activated && updated && hadControllingServiceWorker) {
+			console.log('Application was updated refreshing the page...');
+			window.location.reload();
+		}
+	}
+}
+
+function urlBase64ToUint8Array(base64String: string) {
+	const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+	const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+
+	const rawData = atob(base64);
+	const outputArray = new Uint8Array(rawData.length);
+
+	for (let i = 0; i < rawData.length; ++i) {
+		outputArray[i] = rawData.charCodeAt(i);
+	}
+	return outputArray;
+}
+
+export function subcribeToPushNotifications() {
+	// Convert the VAPID key to a usable format
+	if (!PUBLIC_VAPID_KEY) {
+		console.warn('VAPID key not found');
+		return;
+	}
+
+	if ('serviceWorker' in navigator && 'PushManager' in window) {
+		navigator.serviceWorker.ready.then((registration) => {
+			registration.pushManager
+				.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+				})
+				.then((subscription) => {
+					// TODO: Send the subscription to your server here
+					console.log(JSON.stringify(subscription));
+					window.fetch('api/notifications/subscribe', {
+						method: 'POST',
+						body: JSON.stringify(subscription),
+						headers: {
+							'content-type': 'application/json'
+						}
+					});
+					console.log('User is subscribed:', subscription);
+				})
+				.catch((error) => {
+					console.error('Failed to subscribe the user: ', error);
+				});
+		});
+	}
+}

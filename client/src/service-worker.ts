@@ -1,7 +1,9 @@
 /// <reference lib="webworker" />
 import { build, files } from '$service-worker';
 
-const version = 3;
+declare const self: ServiceWorkerGlobalScope;
+
+const version = 6;
 const worker = self as unknown as ServiceWorkerGlobalScope;
 const STATIC_CACHE_NAME = `cache${version}`;
 const APP_CACHE_NAME = `offline${version}`;
