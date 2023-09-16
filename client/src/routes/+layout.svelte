@@ -6,7 +6,7 @@
 	import { pwaInfo } from 'virtual:pwa-info';
 
 	$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : '';
-	onMount(checkForServiceWorkerUpdate)
+	onMount(checkForServiceWorkerUpdate);
 </script>
 
 <svelte:head>
@@ -15,10 +15,6 @@
 <SvelteToast />
 
 <Welcome />
-
-<button on:click={subcribeToPushNotifications} class="bg-white m-1 p-1 border border-red-500 rounded active:bg-gray-300 text-red-500">
-	Test Alarm Notification
-</button>
 
 <main>
 	<slot />
