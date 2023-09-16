@@ -3,9 +3,9 @@
 	import { HOUR, localTzOffsetHrs, systemTimestamp } from '$lib/time';
 	import { checkForServiceWorkerUpdate, subcribeToPushNotifications } from '$lib/util';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
-	import { onMount } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
-	import { supabase } from '$lib/supabaseClient';
+	import { onMount } from 'svelte';
+	import { checkForServiceWorkerUpdate } from '$lib/util';
 
 	$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : '';
 	onMount(checkForServiceWorkerUpdate);
@@ -32,13 +32,6 @@
 <SvelteToast />
 
 <Welcome />
-
-<button
-	on:click={subscribeToAlarmNotifications}
-	class="m-1 rounded border border-red-500 bg-white p-1 text-red-500 active:bg-gray-300"
->
-	Test Alarm Notification
-</button>
 
 <main>
 	<slot />

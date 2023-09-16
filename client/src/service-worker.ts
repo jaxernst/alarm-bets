@@ -3,7 +3,7 @@ import { build, files } from '$service-worker';
 
 declare const self: ServiceWorkerGlobalScope;
 
-const version = 4;
+const version = 6;
 const worker = self as unknown as ServiceWorkerGlobalScope;
 const STATIC_CACHE_NAME = `cache${version}`;
 const APP_CACHE_NAME = `offline${version}`;
@@ -118,13 +118,14 @@ worker.addEventListener('fetch', (event) => {
 /** Push Notifications  **/
 
 self.addEventListener('push', (event) => {
+	console.log('Push event received');
 	const data = event.data?.json();
 
 	const title = data.title || 'Push Notification';
 
 	const options = {
 		body: data.body,
-		icon: data.icon,
+		icon: './sac_logo.svg',
 		badge: data.badge
 	};
 
