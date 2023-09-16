@@ -130,7 +130,7 @@ function urlBase64ToUint8Array(base64String: string) {
 	return outputArray;
 }
 
-export function subcribeToPushNotifications() {
+export function subcribeToPushNotifications(subscriptionParams: Record<string, any>) {
 	// Convert the VAPID key to a usable format
 	if (!PUBLIC_VAPID_KEY) {
 		console.warn('VAPID key not found');
@@ -149,7 +149,7 @@ export function subcribeToPushNotifications() {
 					console.log(JSON.stringify(subscription));
 					window.fetch('api/notifications/subscribe', {
 						method: 'POST',
-						body: JSON.stringify(subscription),
+						body: JSON.stringify({ subscription, params: { ...subscriptionParams } }),
 						headers: {
 							'content-type': 'application/json'
 						}

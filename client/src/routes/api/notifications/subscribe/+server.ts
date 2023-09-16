@@ -3,21 +3,48 @@ import { PRIVATE_VAPID_KEY } from '$env/static/private';
 import { PUBLIC_VAPID_KEY } from '$env/static/public';
 import type { PushSubscription } from 'web-push';
 import webpush from 'web-push';
+import { supabase } from '$lib/supabaseClient';
+import type { EvmAddress } from '$lib/types';
 
-/**
- * Update cached user alarm data
- * TODO: Make this an authenticated route so alarm data can only be updated by
- * a signed in wallet
- * */
+type SubscriptionBody = {
+	subscription: PushSubscription;
+	params: {
+		alarmTime: number;
+		timezoneOffset: number;
+		alarmId: number;
+		userAddress: EvmAddress;
+		alarmDays: number[];
+	};
+};
+
 export async function POST({ request }: RequestEvent) {
-	const subscription: PushSubscription = await request.json();
+	const { subscription, params }: SubscriptionBody = await request.json();
+
 	webpush.setVapidDetails('mailto:jaxernst@gmail.com', PUBLIC_VAPID_KEY, PRIVATE_VAPID_KEY);
 
-	await new Promise((resolve) => {
-		setTimeout(resolve, 1000);
-	});
+	// Save subscription to "alarm_notifications" table
+	try {
+		const { data, error } = await supabase.from('alarm_notifications').insert([
+			{
+				subscription, // jsonb
+				alarm_time: params.alarmTime,
+				timezone_offset: params.timezoneOffset,
+				alarm_id: params.alarmId,
+				alarm_days: params.alarmDays.toString(),
+				user_address: params.userAddress
+			}
+		]);
 
-	webpush.sendNotification(subscription, JSON.stringify({ title: 'Hello Notification' }));
+		if (error) throw error;
 
-	return new Response(null, { status: 200 });
+		console.log('Subscription saved:', data);
+	} catch (error) {
+		console.error('Failed to save the subscription to the database: ', error);
+		return {
+			status: 500,
+			body: { error: 'Failed to save the subscription to the database' }
+		};
+	}
+
+	return new Response(null, { status: 201 });
 }
