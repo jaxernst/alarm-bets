@@ -37,13 +37,10 @@ export async function POST({ request }: RequestEvent) {
 
 		if (error) throw error;
 
-		console.log('Subscription saved:', data);
+		console.log('Subscription saved');
 	} catch (error) {
 		console.error('Failed to save the subscription to the database: ', error);
-		return {
-			status: 500,
-			body: { error: 'Failed to save the subscription to the database' }
-		};
+		return new Response(null, { status: 500 });
 	}
 
 	return new Response(null, { status: 201 });
