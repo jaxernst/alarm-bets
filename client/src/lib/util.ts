@@ -1,4 +1,5 @@
 import { PUBLIC_VAPID_KEY } from '$env/static/public';
+import { toast } from '@zerodevx/svelte-toast';
 
 export const isIosSafari = () => {
 	const ua = window.navigator.userAgent;
@@ -128,8 +129,7 @@ function urlBase64ToUint8Array(base64String: string) {
 export function subcribeToPushNotifications(subscriptionParams: Record<string, any>) {
 	// Convert the VAPID key to a usable format
 	if (!PUBLIC_VAPID_KEY) {
-		console.warn('VAPID key not found');
-		return;
+		throw new Error('VAPID key not found');
 	}
 
 	if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -153,6 +153,8 @@ export function subcribeToPushNotifications(subscriptionParams: Record<string, a
 				})
 				.catch((error) => {
 					console.error('Failed to subscribe the user: ', error);
+					window.alert("Uh Oh! This browser doesn't support push notifications.");
+					throw error;
 				});
 		});
 	}

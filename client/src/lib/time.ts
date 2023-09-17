@@ -6,6 +6,11 @@ export function systemTimestamp(): number {
 	return Math.floor(Date.now() / 1000);
 }
 
+export const timeOfDay = (timestamp: number, timezoneOffsetHrs: number = 0): number => {
+	const date = new Date((timestamp + timezoneOffsetHrs * HOUR) * 1000);
+	return date.getUTCHours() * 3600 + date.getUTCMinutes() * 60 + date.getUTCSeconds();
+};
+
 // Takes the alarm time of day in seconds (0 - 86400) and a UTC timezone offset (-12 - 12)
 // add offsets
 export const correctAlarmTime = (alarmTimeS: number, onchainTimezoneOffsetS: number) => {
