@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPA_ANON_KEY } from '$env/static/public';
+import { PUBLIC_SUPA_ANON_KEY, PUBLIC_SUPA_API_URL } from '$env/static/public';
 
-export const SUPA_API_URL = 'https://grrfumsrhgxumskbpmxw.supabase.co';
-export const supabase = createClient(SUPA_API_URL, PUBLIC_SUPA_ANON_KEY);
+export const supabase = createClient(PUBLIC_SUPA_API_URL, PUBLIC_SUPA_ANON_KEY, {
+	auth: {
+		persistSession: false
+	}
+});
