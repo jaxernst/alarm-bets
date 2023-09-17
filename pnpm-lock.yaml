@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 importers:
 
   .:
@@ -164,6 +160,9 @@ importers:
 
   notification-server:
     dependencies:
+      dotenv:
+        specifier: ^16.0.3
+        version: 16.3.1
       express:
         specifier: ^4.18.2
         version: 4.18.2
@@ -8745,3 +8744,7 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
