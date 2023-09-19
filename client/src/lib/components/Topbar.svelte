@@ -37,11 +37,14 @@
 			</div>
 		</div>
 		<div class="flex justify-end gap-2">
+			<!--
 			<button class="h-5 w-5" on:click={toggleAlarmNotifications}>
-				<div class={`${alarmNotificationsActive ? 'fill-green-500' : 'fill-zinc-400'} opacity-80`}>
-					<NotificationIcon />
-				</div>
-			</button>
+
+					<div class={`${alarmNotificationsActive ? 'fill-green-500' : 'fill-zinc-400'} opacity-80`}>
+						<NotificationIcon />
+					</div>
+				</button>
+			-->
 			<button
 				class="h-5 w-5"
 				on:click={() => {
