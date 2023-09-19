@@ -1,23 +1,23 @@
 <script lang="ts">
 	import '../app.css';
 
-	import Web3Status from '$lib/Web3Status.svelte';
+	import Web3Status from '$lib/components/Web3Status.svelte';
 	import NewAlarm from '../alarm-creation/NewAlarm.svelte';
 	import AlarmsSidebar from '../alarms/AlarmsSidebar.svelte';
 	import AlarmDetail from '../alarms/AlarmDetail.svelte';
 
 	import { fade, blur } from 'svelte/transition';
-	import { userAlarms } from '$lib/contractStores';
+	import { userAlarms } from '$lib/state/contractStores';
 
 	import { displayedAlarmId } from '../alarms/stores';
-	import Topbar from '$lib/Topbar.svelte';
+	import Topbar from '$lib/components/Topbar.svelte';
 	import AlarmClockSymbol from '../assets/alarm-clock-symbol.svelte';
 	import JoinAlarm from '../alarm-creation/JoinAlarm.svelte';
-	import { type Tab, activeTab } from './view';
+	import { type Tab, activeTab } from '../lib/state/appState';
 	import { get } from 'svelte/store';
 	import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
-	import { account } from '$lib/chainConfig';
-	import Footer from '$lib/Footer.svelte';
+	import { account } from '$lib/state/chainConfig';
+	import Footer from '$lib/components/Footer.svelte';
 	import { onMount } from 'svelte';
 	import { getPWADisplayMode, mobileCheck } from '$lib/util';
 

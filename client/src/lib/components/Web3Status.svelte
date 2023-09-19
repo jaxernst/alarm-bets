@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { account, ensName } from './chainConfig';
-	import { web3Modal as _web3Modal } from './chainConfig';
-	import { shorthandAddress } from './util';
-	import { networkError } from './contractStores';
+	import { account, ensName } from '../state/chainConfig';
+	import { web3Modal as _web3Modal } from '../state/chainConfig';
+	import { shorthandAddress } from '../util';
+	import { networkError } from '../state/contractStores';
 	import { onMount } from 'svelte';
 
 	let displayName: string | undefined;

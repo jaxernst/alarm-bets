@@ -1,5 +1,6 @@
 import { PUBLIC_VAPID_KEY } from '$env/static/public';
 import { toast } from '@zerodevx/svelte-toast';
+import type { EvmAddress } from './types';
 
 export const isIosSafari = () => {
 	const ua = window.navigator.userAgent;
@@ -126,8 +127,10 @@ function urlBase64ToUint8Array(base64String: string) {
 	return outputArray;
 }
 
-export function subcribeToPushNotifications(subscriptionParams: Record<string, any>) {
-	// Convert the VAPID key to a usable format
+export async function subscribeToPushNotifications(
+	user: EvmAddress,
+	subscriptionParams: Record<string, any>
+) {
 	if (!PUBLIC_VAPID_KEY) {
 		throw new Error('VAPID key not found');
 	}
@@ -142,7 +145,7 @@ export function subcribeToPushNotifications(subscriptionParams: Record<string, a
 				.then((subscription) => {
 					// TODO: Send the subscription to your server here
 					console.log(JSON.stringify(subscription));
-					window.fetch('api/notifications/subscribe', {
+					window.fetch(`api/${user}/notifications/subscribe`, {
 						method: 'POST',
 						body: JSON.stringify({ subscription, params: { ...subscriptionParams } }),
 						headers: {

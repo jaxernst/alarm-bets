@@ -1,7 +1,7 @@
 <script lang="ts">
 	import AlarmActiveDays from '../lib/components/AlarmActiveDays.svelte';
-	import { getCurrentAccount } from '../lib/chainConfig';
-	import type { UserAlarm } from '../lib/contractStores';
+	import { getCurrentAccount } from '../lib/state/chainConfig';
+	import type { UserAlarm } from '../lib/state/contractStores';
 	import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
 	import { displayedAlarmId } from './stores';
 	import { correctAlarmTime } from '../lib/time';

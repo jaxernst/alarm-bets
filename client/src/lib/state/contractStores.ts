@@ -9,14 +9,14 @@ import {
 	getAlarmState,
 	endAlarm,
 	addToBalance
-} from './alarmHelpers';
-import { transactions } from './transactions';
-import type { EvmAddress } from './types';
+} from '../alarmHelpers';
+import { transactions } from '../transactions';
+import type { EvmAddress } from '../types';
 import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
 import { watchContractEvent } from '@wagmi/core';
-import PartnerAlarmClock from './abi/PartnerAlarmClock';
-import SocialAlarmClockHub from './abi/SocialAlarmClockHub';
-import { deploymentChainIds, hubDeployments } from './deployments';
+import PartnerAlarmClock from '../abi/PartnerAlarmClock';
+import SocialAlarmClockHub from '../abi/SocialAlarmClockHub';
+import { deploymentChainIds, hubDeployments } from '../deployments';
 import { parseEther } from 'viem';
 
 export type UserAlarm = Awaited<ReturnType<typeof UserAlarmStore>>;
@@ -73,7 +73,7 @@ const alarmQueryDeps = derived([account, hub], ([$user, $hub]) => {
 });
 
 // Get alarm info for all non-cancelled alarms
-function MakeUserAlarmsRecord() {
+export const userAlarms = (() => {
 	const userAlarms = writable<Record<number, UserAlarm>>({});
 
 	const addAlarm = async (
@@ -206,13 +206,13 @@ function MakeUserAlarmsRecord() {
 			});
 		}
 	};
-}
-
-export const userAlarms = MakeUserAlarmsRecord();
+})();
 
 /**
  * Store that exposes alarm actions, sets listeners to re-query when deadlines are passed,
  * and caches alarm data
+ *
+ * - Created my the userAlarms store
  */
 async function UserAlarmStore(user: EvmAddress, alarm: AlarmBaseInfo) {
 	const addr = alarm.contractAddress;

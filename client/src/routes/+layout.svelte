@@ -1,7 +1,6 @@
 <script lang="ts">
-	import Welcome from '$lib/Welcome.svelte';
-	import { HOUR, localTzOffsetHrs, systemTimestamp } from '$lib/time';
-	import { checkForServiceWorkerUpdate, subcribeToPushNotifications } from '$lib/util';
+	import Welcome from '$lib/components/Welcome.svelte';
+	import { checkForServiceWorkerUpdate } from '$lib/util';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import { onMount } from 'svelte';
