@@ -5,8 +5,6 @@
 	import { showWelcome } from '../state/appState';
 	import { alarmNotifications } from '../state/appState';
 	import { account } from '$lib/state/chainConfig';
-	import { get } from 'svelte/store';
-	import { userAlarms } from '$lib/state/contractStores';
 
 	// On page load there should be preloaded variable to indicate whether there is a database
 	// subscription set for this user (alarmNotificationsActive).
@@ -17,13 +15,11 @@
 		if (!$account?.address) return;
 
 		if (alarmNotificationsActive) {
-			alert('Unsubscribe not implemented yet');
+			$alarmNotifications.disableAll();
 		} else {
 			$alarmNotifications.enableAll();
 		}
 	};
-
-	$: console.log($userAlarms.loadingState);
 </script>
 
 <div class="mx-6 mt-2 grid w-full items-center sm:mt-4">

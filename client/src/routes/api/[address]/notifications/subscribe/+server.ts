@@ -16,11 +16,12 @@ export type AlarmNoticationParams = {
 
 type SubscriptionBody = {
 	subscription: PushSubscription;
+	deviceId: string;
 	params: AlarmNoticationParams;
 };
 
 export async function POST({ request }: RequestEvent) {
-	const { subscription, params }: SubscriptionBody = await request.json();
+	const { subscription, deviceId, params }: SubscriptionBody = await request.json();
 	webpush.setVapidDetails('mailto:jaxernst@gmail.com', PUBLIC_VAPID_KEY, PRIVATE_VAPID_KEY);
 
 	// Save subscription to "alarm_notifications" table
@@ -30,9 +31,10 @@ export async function POST({ request }: RequestEvent) {
 			const { data, error } = await supabase.from('alarm_notifications').insert([
 				{
 					subscription: subscription as any,
+					alarm_id: param.alarmId,
+					device_id: deviceId,
 					alarm_time: param.alarmTime,
 					timezone_offset: param.timezoneOffset,
-					alarm_id: param.alarmId,
 					alarm_days: param.alarmDays.toString(),
 					user_address: param.userAddress
 				}

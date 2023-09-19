@@ -127,38 +127,40 @@ function urlBase64ToUint8Array(base64String: string) {
 	return outputArray;
 }
 
-export async function subscribeToPushNotifications(
-	user: EvmAddress,
-	subscriptionParams: Record<string, any>
-) {
+export async function deviceHash() {
+	const dataString = navigator.userAgent;
+	const msgUint8 = new TextEncoder().encode(dataString);
+	const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+	const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+	return hashHex;
+}
+
+// Use the Push API to request a push notification subscription
+export async function subscribeToPushNotifications() {
 	if (!PUBLIC_VAPID_KEY) {
 		throw new Error('VAPID key not found');
 	}
 
-	if ('serviceWorker' in navigator && 'PushManager' in window) {
-		navigator.serviceWorker.ready.then((registration) => {
-			registration.pushManager
-				.subscribe({
-					userVisibleOnly: true,
-					applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
-				})
-				.then((subscription) => {
-					// TODO: Send the subscription to your server here
-					console.log(JSON.stringify(subscription));
-					window.fetch(`api/${user}/notifications/subscribe`, {
-						method: 'POST',
-						body: JSON.stringify({ subscription, params: { ...subscriptionParams } }),
-						headers: {
-							'content-type': 'application/json'
-						}
-					});
-					console.log('User is subscribed:', subscription);
-				})
-				.catch((error) => {
-					console.error('Failed to subscribe the user: ', error);
-					window.alert("Uh Oh! This browser doesn't support push notifications.");
-					throw error;
-				});
+	if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+		// If serviceWorker or PushManager are not supported, throw an error or exit the function.
+		console.error("Browser doesn't support service workers or push notifications.");
+		return;
+	}
+
+	try {
+		const registration = await navigator.serviceWorker.ready;
+		const subscription = await registration.pushManager.subscribe({
+			userVisibleOnly: true,
+			applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
 		});
+
+		console.log('User is subscribed:', subscription);
+		return subscription;
+		// If you want to do something with the subscription, such as send it to a server, you can do it here.
+	} catch (error) {
+		console.error('Failed to subscribe the user: ', error);
+		window.alert("Uh Oh! This browser doesn't support push notifications.");
+		throw error; // Re-throwing the error so the calling code knows an error occurred.
 	}
 }
