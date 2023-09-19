@@ -2,13 +2,13 @@
 	import { formatEther } from 'viem';
 	import EthereumIcon from '../assets/ethereum-icon.svelte';
 	import SunIcon from '../assets/sun-icon.svelte';
-	import type { UserAlarm } from '../lib/contractStores';
+	import type { UserAlarm } from '../lib/state/contractStores';
 	import { shorthandAddress } from '../lib/util';
 	import { getBetStanding } from '../lib/alarmHelpers';
 	import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
 	import Deadline from '../assets/deadline.svelte';
 	import { HOUR } from '../lib/time';
-	import { getCurrentAccount } from '../lib/chainConfig';
+	import { getCurrentAccount } from '../lib/state/chainConfig';
 
 	export let player: 1 | 2;
 	export let alarm: UserAlarm;

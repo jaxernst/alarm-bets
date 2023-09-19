@@ -6,7 +6,7 @@ import {
 	readContract,
 	multicall
 } from '@wagmi/core';
-import type { UserAlarm } from './contractStores';
+import type { UserAlarm } from './state/contractStores';
 import {
 	type AlarmType,
 	type InitializationTypes,

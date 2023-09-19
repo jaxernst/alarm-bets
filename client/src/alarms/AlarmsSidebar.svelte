@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
-	import { userAlarms, type UserAlarm } from '../lib/contractStores';
+	import { userAlarms, type UserAlarm } from '../lib/state/contractStores';
 	import { get } from 'svelte/store';
 	import AlarmOverview from './AlarmOverview.svelte';
 	import { displayedAlarmId } from './stores';

@@ -87,7 +87,7 @@ async function fetchAndCache(request: Request) {
 	}
 }
 
-/*worker.addEventListener('fetch', (event) => {
+worker.addEventListener('fetch', (event) => {
 	if (event.request.method !== 'GET' || event.request.headers.has('range')) {
 		return;
 	}
@@ -113,4 +113,21 @@ async function fetchAndCache(request: Request) {
 			})()
 		);
 	}
-}); */
+});
+
+/** Push Notifications  **/
+
+self.addEventListener('push', (event) => {
+	console.log('Push event received');
+	const data = event.data?.json();
+
+	const title = data.title || 'Push Notification';
+
+	const options = {
+		body: data.body,
+		icon: './sac_logo.svg',
+		badge: data.badge
+	};
+
+	event.waitUntil(self.registration.showNotification(title, options));
+});

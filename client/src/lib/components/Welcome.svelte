@@ -5,14 +5,14 @@
 		DialogOverlay,
 		DialogTitle
 	} from '@rgossiaux/svelte-headlessui';
-	import Typewriter from './components/Typewriter.svelte';
+	import Typewriter from './Typewriter.svelte';
 	import { crossfade, fade, slide } from 'svelte/transition';
 	import { cubicIn, cubicInOut } from 'svelte/easing';
-	import { showWelcome, welcomeHasBeenViewed } from '../routes/view';
-	import { hubDeployments, partnerAlarmClockContractTemplates } from './deployments';
+	import { showWelcome, welcomeHasBeenViewed } from '../state/appState';
+	import { hubDeployments, partnerAlarmClockContractTemplates } from '../deployments';
 	import { onMount } from 'svelte';
-	import Deadline from '../assets/deadline.svelte';
-	import { isIosSafari } from './util';
+	import Deadline from '../../assets/deadline.svelte';
+	import { isIosSafari } from '../util';
 
 	let pwaRequired = false;
 	let typewriterComplete = false;
