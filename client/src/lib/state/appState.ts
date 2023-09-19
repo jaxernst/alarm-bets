@@ -23,7 +23,10 @@ export const alarmNotifications = (() => {
 
 	const enableAll = derived([account, userAlarms], ([$account]) => {
 		return () => {
-			if (!$account?.address) return;
+			if (!$account?.address || get(userAlarms.loadingState) !== 'loaded') {
+				console.log('Enable notifications failed: Deps not ready');
+				return;
+			}
 
 			const activeAlarms = userAlarms.getByStatus([AlarmStatus.ACTIVE]);
 			const subscriptionParams = activeAlarms.map((alarm) => {
