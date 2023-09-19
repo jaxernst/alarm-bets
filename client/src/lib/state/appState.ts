@@ -17,7 +17,6 @@ export const alarmNotifications = (() => {
 	const fetchNotificationState = async (address: EvmAddress) => {
 		const res = await fetch(`/api/${address}/notifications/status`);
 		const data: number[] = await res.json();
-		console.log('initial notification get', data);
 		notifications.set(data);
 	};
 
