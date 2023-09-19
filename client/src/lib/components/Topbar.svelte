@@ -5,11 +5,13 @@
 	import { showWelcome } from '../state/appState';
 	import { alarmNotifications } from '../state/appState';
 	import { account } from '$lib/state/chainConfig';
+	import { get } from 'svelte/store';
+	import { userAlarms } from '$lib/state/contractStores';
 
 	// On page load there should be preloaded variable to indicate whether there is a database
 	// subscription set for this user (alarmNotificationsActive).
 	$: alarmNotificationsActive =
-		$alarmNotifications.notificationsEnabled.length && Notification.permission === 'granted';
+		$alarmNotifications.notifications.length && Notification.permission === 'granted';
 
 	$: toggleAlarmNotifications = () => {
 		if (!$account?.address) return;
@@ -20,6 +22,8 @@
 			$alarmNotifications.enableAll();
 		}
 	};
+
+	$: console.log($userAlarms.loadingState);
 </script>
 
 <div class="mx-6 mt-2 grid w-full items-center sm:mt-4">
@@ -36,15 +40,15 @@
 			</div>
 		</div>
 		<div class="flex justify-end gap-2">
-			<button
-				class="h-5 w-5"
-				on:click={toggleAlarmNotifications}
-				disabled={$alarmNotifications.enableReady}
-			>
-				<div class={`${alarmNotificationsActive ? 'fill-green-500' : 'fill-zinc-400'} opacity-80`}>
-					<NotificationIcon />
-				</div>
-			</button>
+			{#if $alarmNotifications.enableReady}
+				<button class="h-5 w-5" on:click={toggleAlarmNotifications}>
+					<div
+						class={`${alarmNotificationsActive ? 'fill-green-500' : 'fill-zinc-400'} opacity-80`}
+					>
+						<NotificationIcon />
+					</div>
+				</button>
+			{/if}
 			<button
 				class="h-5 w-5"
 				on:click={() => {

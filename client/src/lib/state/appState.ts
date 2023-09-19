@@ -11,26 +11,26 @@ export const showWelcome = writable(true);
 export const welcomeHasBeenViewed = writable(false);
 
 export const alarmNotifications = (() => {
-	const notificationsEnabled = writable<number[]>([]);
+	const notifications = writable<number[]>([]);
 
 	account.subscribe(async ($account) => {
 		if (!$account?.address) return;
 
 		const res = await fetch(`/api/${$account.address}/notifications/status`);
 		const data: number[] = await res.json();
-		notificationsEnabled.set(data);
+		notifications.set(data);
 	});
 
-	const enableReady = derived([account, userAlarms], ([$account]) => {
-		if (!$account?.address || get(userAlarms.loadingState) !== 'loaded') {
+	const enableReady = derived([account, userAlarms], ([$account, $userAlarms]) => {
+		if (!$account?.address || $userAlarms.loadingState !== 'loaded') {
 			return false;
 		}
 		return true;
 	});
 
-	const enableAll = derived([account, userAlarms], ([$account]) => {
+	const enableAll = derived([account, enableReady], ([$account, $enableReady]) => {
 		return () => {
-			if (!$account?.address || get(userAlarms.loadingState) !== 'loaded') {
+			if (!$enableReady || !$account?.address) {
 				console.log('Enable notifications failed: Deps not ready');
 				return;
 			}
@@ -53,10 +53,10 @@ export const alarmNotifications = (() => {
 	}) as Readable<() => void>;
 
 	const store = derived(
-		[notificationsEnabled, enableReady, enableAll],
-		([notificationsEnabled, enableReady, enableAll]) => {
+		[notifications, enableReady, enableAll],
+		([notifications, enableReady, enableAll]) => {
 			return {
-				notificationsEnabled,
+				notifications,
 				enableReady,
 				enableAll
 			};

@@ -74,7 +74,7 @@ const alarmQueryDeps = derived([account, hub], ([$user, $hub]) => {
 
 // Get alarm info for all non-cancelled alarms
 export const userAlarms = (() => {
-	const userAlarms = writable<Record<number, UserAlarm>>({});
+	const alarmRecord = writable<Record<number, UserAlarm>>({});
 	const loadingState = writable<'none' | 'loading' | 'loaded' | 'error'>('none');
 	const newAlarmListener = writable<(() => void) | undefined>();
 	const joinedAlarmListener = writable<(() => void) | undefined>();
@@ -93,7 +93,7 @@ export const userAlarms = (() => {
 			status: initialStatus
 		});
 
-		userAlarms.update((s) => ({ ...s, [Number(id)]: alarm }));
+		alarmRecord.update((s) => ({ ...s, [Number(id)]: alarm }));
 	};
 
 	const loadAlarms = async ({ hub, user }: { hub: EvmAddress; user: EvmAddress }) => {
@@ -102,13 +102,13 @@ export const userAlarms = (() => {
 		const alarms = await getUserAlarmsByType(hub, user, 'PartnerAlarmClock');
 		if (!alarms) return {};
 
-		const currentAlarms = get(userAlarms);
+		const currentAlarms = get(alarmRecord);
 		for (const [id, alarm] of Object.entries(alarms)) {
-			if (get(userAlarms)[Number(id)] || alarm.status === AlarmStatus.CANCELLED) {
+			if (get(alarmRecord)[Number(id)] || alarm.status === AlarmStatus.CANCELLED) {
 				continue;
 			}
 			currentAlarms[Number(id)] = await UserAlarmStore(user, alarm);
-			userAlarms.set(currentAlarms);
+			alarmRecord.set(currentAlarms);
 		}
 	};
 
@@ -197,22 +197,28 @@ export const userAlarms = (() => {
 	let lastHub: EvmAddress | undefined;
 	alarmQueryDeps.subscribe(({ user: $user, hub: $hub }) => {
 		if ((lastAccount && $user !== lastAccount) || (lastHub && $hub !== lastHub)) {
-			userAlarms.set({});
+			alarmRecord.set({});
 		}
 		lastAccount = $user;
 		lastHub = $hub;
 	});
 
+	const store = derived([alarmRecord, loadingState], ([alarms, loadingState]) => {
+		return {
+			alarmRecord: alarms,
+			loadingState
+		};
+	});
+
 	return {
-		subscribe: userAlarms.subscribe,
-		loadingState: { subscribe: loadingState.subscribe },
+		...store,
 		getByStatus: (statusArr: AlarmStatus[]) => {
-			return Object.values(get(userAlarms)).filter((alarm) =>
+			return Object.values(get(alarmRecord)).filter((alarm) =>
 				statusArr.includes(get(alarm).status)
 			);
 		},
 		removeAlarm: (id: number) => {
-			userAlarms.update((alarms) => {
+			alarmRecord.update((alarms) => {
 				const { [id]: _, ...updatedAlarms } = alarms;
 				return updatedAlarms;
 			});

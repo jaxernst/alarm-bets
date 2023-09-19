@@ -25,7 +25,7 @@
 		t === $activeTab ? ' underline underline-offset-4 text-bold font-bold ' : ' ';
 
 	$: currentAlarms =
-		$userAlarms &&
+		$userAlarms.alarmRecord &&
 		userAlarms.getByStatus([
 			AlarmStatus.INACTIVE,
 			AlarmStatus.ACTIVE,
@@ -91,7 +91,7 @@
 						>
 							<div class="row-start-1 rounded-2xl sm:col-start-2">
 								{#if $displayedAlarmId}
-									<AlarmDetail alarm={$userAlarms[$displayedAlarmId]} />
+									<AlarmDetail alarm={$userAlarms.alarmRecord[$displayedAlarmId]} />
 								{/if}
 							</div>
 							<AlarmsSidebar />
