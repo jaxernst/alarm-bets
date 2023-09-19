@@ -11,14 +11,21 @@ export const showWelcome = writable(true);
 export const welcomeHasBeenViewed = writable(false);
 
 export const alarmNotifications = (() => {
-	const store = writable<number[]>([]);
+	const notificationsEnabled = writable<number[]>([]);
 
 	account.subscribe(async ($account) => {
 		if (!$account?.address) return;
 
 		const res = await fetch(`/api/${$account.address}/notifications/status`);
 		const data: number[] = await res.json();
-		store.set(data);
+		notificationsEnabled.set(data);
+	});
+
+	const enableReady = derived([account, userAlarms], ([$account]) => {
+		if (!$account?.address || get(userAlarms.loadingState) !== 'loaded') {
+			return false;
+		}
+		return true;
 	});
 
 	const enableAll = derived([account, userAlarms], ([$account]) => {
@@ -45,8 +52,16 @@ export const alarmNotifications = (() => {
 		};
 	}) as Readable<() => void>;
 
-	return {
-		...store,
-		enableAll: get(enableAll)
-	};
+	const store = derived(
+		[notificationsEnabled, enableReady, enableAll],
+		([notificationsEnabled, enableReady, enableAll]) => {
+			return {
+				notificationsEnabled,
+				enableReady,
+				enableAll
+			};
+		}
+	);
+
+	return store;
 })();

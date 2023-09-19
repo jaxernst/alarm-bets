@@ -2,17 +2,17 @@
 	import '../app.css';
 
 	import Web3Status from '$lib/components/Web3Status.svelte';
-	import NewAlarm from '../alarm-creation/NewAlarm.svelte';
-	import AlarmsSidebar from '../alarms/AlarmsSidebar.svelte';
-	import AlarmDetail from '../alarms/AlarmDetail.svelte';
+	import NewAlarm from '$lib/components/alarm-creation/NewAlarm.svelte';
+	import AlarmsSidebar from '$lib/components/alarms/AlarmsSidebar.svelte';
+	import AlarmDetail from '$lib/components/alarms/AlarmDetail.svelte';
 
 	import { fade, blur } from 'svelte/transition';
 	import { userAlarms } from '$lib/state/contractStores';
 
-	import { displayedAlarmId } from '../alarms/stores';
+	import { displayedAlarmId } from '$lib/components/alarms/stores';
 	import Topbar from '$lib/components/Topbar.svelte';
-	import AlarmClockSymbol from '../assets/alarm-clock-symbol.svelte';
-	import JoinAlarm from '../alarm-creation/JoinAlarm.svelte';
+	import AlarmClockSymbol from '../lib/icon-components/alarm-clock-symbol.svelte';
+	import JoinAlarm from '$lib/components/alarm-creation/JoinAlarm.svelte';
 	import { type Tab, activeTab } from '../lib/state/appState';
 	import { get } from 'svelte/store';
 	import { AlarmStatus } from '@alarm-bets/contracts/lib/types';

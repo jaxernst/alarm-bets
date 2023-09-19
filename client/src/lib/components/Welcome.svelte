@@ -11,7 +11,7 @@
 	import { showWelcome, welcomeHasBeenViewed } from '../state/appState';
 	import { hubDeployments, partnerAlarmClockContractTemplates } from '../deployments';
 	import { onMount } from 'svelte';
-	import Deadline from '../../assets/deadline.svelte';
+	import Deadline from '../icon-components/deadline.svelte';
 	import { isIosSafari } from '../util';
 
 	let pwaRequired = false;

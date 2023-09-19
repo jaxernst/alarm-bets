@@ -2,7 +2,7 @@
 	import { isAddress } from 'viem';
 	import FormCard from '../FormCard.svelte';
 	import { otherPlayer, playerInputErrorMsg } from '../alarmCreation';
-	import { getCurrentAccount } from '../../lib/state/chainConfig';
+	import { getCurrentAccount } from '$lib/state/chainConfig';
 	import { fetchEnsAddress } from '@wagmi/core';
 
 	let inputValid: boolean;

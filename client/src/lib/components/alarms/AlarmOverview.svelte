@@ -1,10 +1,9 @@
 <script lang="ts">
-	import AlarmActiveDays from '../lib/components/AlarmActiveDays.svelte';
-	import { getCurrentAccount } from '../lib/state/chainConfig';
-	import type { UserAlarm } from '../lib/state/contractStores';
+	import { getCurrentAccount } from '$lib/state/chainConfig';
+	import type { UserAlarm } from '$lib/state/contractStores';
 	import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
 	import { displayedAlarmId } from './stores';
-	import { correctAlarmTime } from '../lib/time';
+	import { correctAlarmTime } from '$lib/time';
 	import AlarmOverviewCardSm from './AlarmOverviewCardSm.svelte';
 	import AlarmOverviewCardLg from './AlarmOverviewCardLg.svelte';
 	import { formatEther } from 'viem';
