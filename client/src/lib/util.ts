@@ -161,6 +161,5 @@ export async function subscribeToPushNotifications() {
 	} catch (error) {
 		console.error('Failed to subscribe the user: ', error);
 		window.alert("Uh Oh! This browser doesn't support push notifications.");
-		throw error; // Re-throwing the error so the calling code knows an error occurred.
 	}
 }

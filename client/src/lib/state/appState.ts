@@ -20,6 +20,7 @@ export const alarmNotifications = (() => {
 		notifications.set(data);
 	};
 
+	// Auto fetch notification status once an account is available
 	let initialFetch = false;
 	account.subscribe(($account) => {
 		if (!$account?.address) return;
@@ -40,53 +41,57 @@ export const alarmNotifications = (() => {
 		return true;
 	});
 
-	/**
-	 * TODO: This should check the alarm id being subscribed to to avoid duplicate subscriptions
-	 */
-	const enableAll = derived([account, enableReady], ([$account, $enableReady]) => {
-		return async () => {
-			if (!$enableReady || !$account?.address) {
-				console.log('Enable notifications failed: Deps not ready');
-				return;
-			}
-
-			const activeAlarms = userAlarms.getByStatus([AlarmStatus.ACTIVE]);
-			const subscriptionParams = activeAlarms.map((alarm) => {
-				const a = get(alarm);
-				const isP1 = a.player1.toLowerCase() === $account.address?.toLowerCase();
-				return {
-					alarmTime: Number(a.alarmTime),
-					timezoneOffset: isP1 ? Number(a.player1Timezone) : Number(a.player2Timezone),
-					alarmId: Number(a.id),
-					userAddress: $account.address,
-					alarmDays: a.alarmDays
-				};
-			});
-
-			const subscription = subscribeToPushNotifications();
-
-			// Update state optimistically
-			notifications.update((n) => [...n, ...activeAlarms.map((a) => get(a).id)]);
-
-			const saveSubscriptionBody = {
-				subscription,
-				deviceId: await deviceHash(),
-				params: { ...subscriptionParams }
-			};
-
-			const res = await fetch(`api/${$account.address}/notifications/subscribe`, {
-				method: 'POST',
-				body: JSON.stringify(saveSubscriptionBody),
-				headers: {
-					'content-type': 'application/json'
+	const enableAll = derived(
+		[account, enableReady, notifications],
+		([$account, $enableReady, $notifications]) => {
+			return async () => {
+				if (!$enableReady || !$account?.address) {
+					console.log('Enable notifications failed: Deps not ready');
+					return;
 				}
-			});
 
-			if (!res.ok) {
-				notifications.set([]);
-			}
-		};
-	}) as Readable<() => void>;
+				const activeAlarms = userAlarms.getByStatus([AlarmStatus.ACTIVE]);
+				const subscriptionParams = activeAlarms
+					.map((alarm) => {
+						const a = get(alarm);
+						const isP1 = a.player1.toLowerCase() === $account.address?.toLowerCase();
+						return {
+							alarmTime: Number(a.alarmTime),
+							timezoneOffset: isP1 ? Number(a.player1Timezone) : Number(a.player2Timezone),
+							alarmId: Number(a.id),
+							userAddress: $account.address,
+							alarmDays: a.alarmDays
+						};
+					})
+					.filter((alarm) => !$notifications.includes(alarm.alarmId));
+
+				const subscription = await subscribeToPushNotifications();
+
+				if (!subscription) return;
+
+				const oldNotifications = [...$notifications];
+				notifications.set([...$notifications, ...subscriptionParams.map((p) => p.alarmId)]);
+
+				const saveSubscriptionBody = {
+					subscription,
+					deviceId: await deviceHash(),
+					params: { ...subscriptionParams }
+				};
+
+				const res = await fetch(`api/${$account.address}/notifications/subscribe`, {
+					method: 'POST',
+					body: JSON.stringify(saveSubscriptionBody),
+					headers: {
+						'content-type': 'application/json'
+					}
+				});
+
+				if (!res.ok) {
+					notifications.set(oldNotifications);
+				}
+			};
+		}
+	) as Readable<() => void>;
 
 	const disableAll = derived([account], ([$account]) => {
 		return async () => {
