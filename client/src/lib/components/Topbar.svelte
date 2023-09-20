@@ -1,6 +1,6 @@
 <script lang="ts">
-	import InfoIcon from '../../assets/info-icon.svelte';
-	import NotificationIcon from '../../assets/notification-icon.svelte';
+	import InfoIcon from '../icon-components/info-icon.svelte';
+	import NotificationIcon from '../icon-components/notification-icon.svelte';
 	import ClockDisplay from './ClockDisplay.svelte';
 	import { showWelcome } from '../state/appState';
 	import { alarmNotifications } from '../state/appState';
@@ -8,17 +8,16 @@
 
 	// On page load there should be preloaded variable to indicate whether there is a database
 	// subscription set for this user (alarmNotificationsActive).
-	$: alarmNotificationsActive = $alarmNotifications.length && Notification.permission === 'granted';
+	$: alarmNotificationsActive =
+		$alarmNotifications.notifications.length && Notification.permission === 'granted';
 
 	$: toggleAlarmNotifications = () => {
 		if (!$account?.address) return;
 
 		if (alarmNotificationsActive) {
-			alert('Unsubscribe not implemented yet');
-			// Pretend that subscirptions were remove
-			alarmNotifications.set([]);
+			$alarmNotifications.disableAll();
 		} else {
-			alarmNotifications.enableAll();
+			$alarmNotifications.enableAll();
 		}
 	};
 </script>
@@ -37,14 +36,15 @@
 			</div>
 		</div>
 		<div class="flex justify-end gap-2">
-			<!--
-			<button class="h-5 w-5" on:click={toggleAlarmNotifications}>
-
-					<div class={`${alarmNotificationsActive ? 'fill-green-500' : 'fill-zinc-400'} opacity-80`}>
+			{#if $alarmNotifications.enableReady}
+				<button class="h-5 w-5" on:click={toggleAlarmNotifications}>
+					<div
+						class={`${alarmNotificationsActive ? 'fill-green-500' : 'fill-zinc-400'} opacity-80`}
+					>
 						<NotificationIcon />
 					</div>
 				</button>
-			-->
+			{/if}
 			<button
 				class="h-5 w-5"
 				on:click={() => {

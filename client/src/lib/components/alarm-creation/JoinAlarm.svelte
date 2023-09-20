@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { toast } from '@zerodevx/svelte-toast';
-	import { getCurrentAccount } from '../lib/state/chainConfig';
+	import { getCurrentAccount } from '$lib/state/chainConfig';
 	import {
 		getAlarmById,
 		getAlarmConstants,
@@ -8,19 +8,19 @@
 		getPlayerTimezone,
 		getStatus,
 		startAlarm
-	} from '../lib/alarmHelpers';
-	import { transactions } from '../lib/transactions';
-	import { shorthandAddress, timeString } from '../lib/util';
+	} from '$lib/alarmHelpers';
+	import { transactions } from '$lib/transactions';
+	import { shorthandAddress, timeString } from '$lib/util';
 	import { formatEther } from 'viem';
-	import { MINUTE, localTzOffsetHrs } from '../lib/time';
-	import ClockDisplay from '../lib/components/ClockDisplay.svelte';
-	import AlarmActiveDays from '../lib/components/AlarmActiveDays.svelte';
-	import ActionButton from '../lib/styled-components/ActionButton.svelte';
-	import type { EvmAddress } from '../lib/types';
+	import { MINUTE, localTzOffsetHrs } from '$lib/time';
+	import ClockDisplay from '$lib/components/ClockDisplay.svelte';
+	import AlarmActiveDays from '$lib/components/AlarmActiveDays.svelte';
+	import ActionButton from '$lib/styled-components/ActionButton.svelte';
+	import type { EvmAddress } from '$lib/types';
 	import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
-	import DiamondSpinner from '../lib/components/DiamondSpinner.svelte';
-	import { hub } from '../lib/state/contractStores';
-	import { activeTab } from '../lib/state/appState';
+	import DiamondSpinner from '$lib/components/DiamondSpinner.svelte';
+	import { hub } from '$lib/state/contractStores';
+	import { activeTab } from '$lib/state/appState';
 
 	let alarmId = '';
 	let error: null | string = null;

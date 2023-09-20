@@ -1,25 +1,25 @@
 <script lang="ts">
-	import SettingsIcon from '../assets/settings-icon.svelte';
-	import ClockDisplay from '../lib/components/ClockDisplay.svelte';
+	import SettingsIcon from '$lib/icon-components/settings-icon.svelte';
+	import ClockDisplay from '$lib/components/ClockDisplay.svelte';
 	import EndAlarmModal from './EndAlarmModal.svelte';
 	import { Menu, MenuButton, MenuItems, MenuItem } from '@rgossiaux/svelte-headlessui';
 
 	import { formatEther } from 'viem';
-	import { transactions } from '../lib/transactions';
-	import { MINUTE, correctAlarmTime } from '../lib/time';
-	import { submitConfirmation } from '../lib/alarmHelpers';
+	import { transactions } from '$lib/transactions';
+	import { MINUTE, correctAlarmTime } from '$lib/time';
+	import { submitConfirmation } from '$lib/alarmHelpers';
 	import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
-	import { formatTime, timeString } from '../lib/util';
-	import type { UserAlarm } from '../lib/state/contractStores';
+	import { formatTime, timeString } from '$lib/util';
+	import type { UserAlarm } from '$lib/state/contractStores';
 	import { showEndAlarmModal } from './stores';
 	import PlayerInfo from './PlayerInfo.svelte';
 	import { slide } from 'svelte/transition';
 	import { expoOut } from 'svelte/easing';
 	import { toast } from '@zerodevx/svelte-toast';
-	import DiamondSpinner from '../lib/components/DiamondSpinner.svelte';
+	import DiamondSpinner from '$lib/components/DiamondSpinner.svelte';
 	import { writable } from 'svelte/store';
-	import { getCurrentAccount } from '../lib/state/chainConfig';
-	import EthereumIcon from '../assets/ethereum-icon.svelte';
+	import { getCurrentAccount } from '$lib/state/chainConfig';
+	import EthereumIcon from '$lib/icon-components/ethereum-icon.svelte';
 	import { onDestroy } from 'svelte';
 
 	export let alarm: UserAlarm;
@@ -93,7 +93,7 @@
 	};
 
 	// Periodically call the alarm timeToNextDeadline sync function
-	let interval: NodeJS.Timer;
+	let interval: NodeJS.Timeout;
 	$: if ($alarm.timeToNextDeadline && !interval) {
 		interval = setInterval(() => {
 			alarm.syncTimeToDeadline();

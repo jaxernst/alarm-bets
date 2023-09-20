@@ -2,7 +2,8 @@ import { derived, get, writable, type Readable } from 'svelte/store';
 import { account } from './chainConfig';
 import { userAlarms } from './contractStores';
 import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
-import { subscribeToPushNotifications } from '$lib/util';
+import { deviceHash, subscribeToPushNotifications } from '$lib/util';
+import type { EvmAddress } from '$lib/types';
 
 export type Tab = 'alarms' | 'new' | 'join';
 export const activeTab = writable<Tab>('alarms');
@@ -11,39 +12,115 @@ export const showWelcome = writable(true);
 export const welcomeHasBeenViewed = writable(false);
 
 export const alarmNotifications = (() => {
-	const store = writable<number[]>([]);
+	const notifications = writable<number[]>([]);
 
-	account.subscribe(async ($account) => {
-		if (!$account?.address) return;
-
-		const res = await fetch(`/api/${$account.address}/notifications/status`);
+	const fetchNotificationState = async (address: EvmAddress) => {
+		const res = await fetch(`/api/${address}/notifications/status`);
 		const data: number[] = await res.json();
-		store.set(data);
+		notifications.set(data);
+	};
+
+	// Auto fetch notification status once an account is available
+	let initialFetch = false;
+	account.subscribe(($account) => {
+		if (!$account?.address) return;
+		if (!initialFetch) {
+			initialFetch = true;
+			fetchNotificationState($account.address);
+		}
 	});
 
-	const enableAll = derived([account, userAlarms], ([$account]) => {
-		return () => {
-			if (!$account?.address) return;
+	const enableReady = derived([account, userAlarms], ([$account, $userAlarms]) => {
+		if (
+			!$account?.address ||
+			$userAlarms.loadingState !== 'loaded' ||
+			Object.keys($userAlarms.alarmRecord).length === 0
+		) {
+			return false;
+		}
+		return true;
+	});
 
-			const activeAlarms = userAlarms.getByStatus([AlarmStatus.ACTIVE]);
-			const subscriptionParams = activeAlarms.map((alarm) => {
-				const a = get(alarm);
-				const isP1 = a.player1.toLowerCase() === $account.address?.toLowerCase();
-				return {
-					alarmTime: Number(a.alarmTime),
-					timezoneOffset: isP1 ? Number(a.player1Timezone) : Number(a.player2Timezone),
-					alarmId: Number(a.id),
-					userAddress: $account.address,
-					alarmDays: a.alarmDays
+	const enableAll = derived(
+		[account, enableReady, notifications],
+		([$account, $enableReady, $notifications]) => {
+			return async () => {
+				if (!$enableReady || !$account?.address) {
+					console.log('Enable notifications failed: Deps not ready');
+					return;
+				}
+
+				const activeAlarms = userAlarms.getByStatus([AlarmStatus.ACTIVE]);
+				const subscriptionParams = activeAlarms
+					.map((alarm) => {
+						const a = get(alarm);
+						const isP1 = a.player1.toLowerCase() === $account.address?.toLowerCase();
+						return {
+							alarmTime: Number(a.alarmTime),
+							timezoneOffset: isP1 ? Number(a.player1Timezone) : Number(a.player2Timezone),
+							alarmId: Number(a.id),
+							userAddress: $account.address,
+							alarmDays: a.alarmDays
+						};
+					})
+					.filter((alarm) => !$notifications.includes(alarm.alarmId));
+
+				const subscription = await subscribeToPushNotifications();
+
+				if (!subscription) return;
+
+				const oldNotifications = [...$notifications];
+				notifications.set([...$notifications, ...subscriptionParams.map((p) => p.alarmId)]);
+
+				const saveSubscriptionBody = {
+					subscription,
+					deviceId: await deviceHash(),
+					params: { ...subscriptionParams }
 				};
+
+				const res = await fetch(`api/${$account.address}/notifications/subscribe`, {
+					method: 'POST',
+					body: JSON.stringify(saveSubscriptionBody),
+					headers: {
+						'content-type': 'application/json'
+					}
+				});
+
+				if (!res.ok) {
+					notifications.set(oldNotifications);
+				}
+			};
+		}
+	) as Readable<() => void>;
+
+	const disableAll = derived([account], ([$account]) => {
+		return async () => {
+			if (!$account?.address) return;
+			const old = get(notifications);
+			notifications.set([]);
+			const res = await fetch(`/api/${$account.address}/notifications/unsubscribe`, {
+				method: 'POST'
 			});
 
-			subscribeToPushNotifications($account.address, subscriptionParams);
+			// Undo optimistic update if it failed
+			if (!res.ok) {
+				notifications.set(old);
+				return;
+			}
 		};
-	}) as Readable<() => void>;
+	}) as Readable<() => Promise<void>>;
 
-	return {
-		...store,
-		enableAll: get(enableAll)
-	};
+	const store = derived(
+		[notifications, enableReady, enableAll, disableAll],
+		([notifications, enableReady, enableAll, disableAll]) => {
+			return {
+				notifications,
+				enableReady,
+				enableAll,
+				disableAll
+			};
+		}
+	);
+
+	return store;
 })();

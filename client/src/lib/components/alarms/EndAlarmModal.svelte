@@ -1,17 +1,11 @@
 <script lang="ts">
-	import {
-		Dialog,
-		DialogDescription,
-		DialogOverlay,
-		DialogTitle
-	} from '@rgossiaux/svelte-headlessui';
-	import type { UserAlarm } from '../lib/state/contractStores';
-	import { getCurrentAccount } from '../lib/state/chainConfig';
+	import { Dialog } from '@rgossiaux/svelte-headlessui';
+	import type { UserAlarm } from '$lib/state/contractStores';
+	import { getCurrentAccount } from '$lib/state/chainConfig';
 	import { showEndAlarmModal } from './stores';
-	import { shorthandAddress } from '../lib/util';
-	import { transactions } from '../lib/transactions';
+	import { shorthandAddress } from '$lib/util';
 	import { toast } from '@zerodevx/svelte-toast';
-	import DiamondSpinner from '../lib/components/DiamondSpinner.svelte';
+	import DiamondSpinner from '$lib/components/DiamondSpinner.svelte';
 
 	export let alarm: UserAlarm;
 

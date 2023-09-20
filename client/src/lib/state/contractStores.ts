@@ -74,7 +74,10 @@ const alarmQueryDeps = derived([account, hub], ([$user, $hub]) => {
 
 // Get alarm info for all non-cancelled alarms
 export const userAlarms = (() => {
-	const userAlarms = writable<Record<number, UserAlarm>>({});
+	const alarmRecord = writable<Record<number, UserAlarm>>({});
+	const loadingState = writable<'none' | 'loading' | 'loaded' | 'error'>('none');
+	const newAlarmListener = writable<(() => void) | undefined>();
+	const joinedAlarmListener = writable<(() => void) | undefined>();
 
 	const addAlarm = async (
 		user: EvmAddress,
@@ -90,28 +93,36 @@ export const userAlarms = (() => {
 			status: initialStatus
 		});
 
-		userAlarms.update((s) => ({ ...s, [Number(id)]: alarm }));
+		alarmRecord.update((s) => ({ ...s, [Number(id)]: alarm }));
+	};
+
+	const loadAlarms = async ({ hub, user }: { hub: EvmAddress; user: EvmAddress }) => {
+		if (!user || !hub) return {};
+
+		const alarms = await getUserAlarmsByType(hub, user, 'PartnerAlarmClock');
+		if (!alarms) return {};
+
+		const currentAlarms = get(alarmRecord);
+		for (const [id, alarm] of Object.entries(alarms)) {
+			if (get(alarmRecord)[Number(id)] || alarm.status === AlarmStatus.CANCELLED) {
+				continue;
+			}
+			currentAlarms[Number(id)] = await UserAlarmStore(user, alarm);
+			alarmRecord.set(currentAlarms);
+		}
 	};
 
 	// Auto fetch user alarms and create stores for them
-	alarmQueryDeps.subscribe(async ({ hub: $hub, user: $user }) => {
-		if (!$user || !$hub) return {};
-		const alarms = await getUserAlarmsByType($hub, $user, 'PartnerAlarmClock');
-		if (!alarms) return {};
-
-		const currentAlarms = get(userAlarms);
-		for (const [id, alarm] of Object.entries(alarms)) {
-			if (get(userAlarms)[Number(id)] || alarm.status === AlarmStatus.CANCELLED) {
-				continue;
-			}
-			currentAlarms[Number(id)] = await UserAlarmStore($user, alarm);
-			userAlarms.set(currentAlarms);
+	alarmQueryDeps.subscribe(async ({ hub, user }) => {
+		if (!hub || !user) return;
+		loadingState.set('loading');
+		try {
+			await loadAlarms({ hub, user });
+			loadingState.set('loaded');
+		} catch {
+			loadingState.set('error');
 		}
 	});
-
-	// Event listener stores
-	const newAlarmListener = writable<(() => void) | undefined>();
-	const joinedAlarmListener = writable<(() => void) | undefined>();
 
 	// Create new alarm event listeners
 	alarmQueryDeps.subscribe(({ hub: $hub, user: $user }) => {
@@ -186,21 +197,28 @@ export const userAlarms = (() => {
 	let lastHub: EvmAddress | undefined;
 	alarmQueryDeps.subscribe(({ user: $user, hub: $hub }) => {
 		if ((lastAccount && $user !== lastAccount) || (lastHub && $hub !== lastHub)) {
-			userAlarms.set({});
+			alarmRecord.set({});
 		}
 		lastAccount = $user;
 		lastHub = $hub;
 	});
 
+	const store = derived([alarmRecord, loadingState], ([alarms, loadingState]) => {
+		return {
+			alarmRecord: alarms,
+			loadingState
+		};
+	});
+
 	return {
-		subscribe: userAlarms.subscribe,
+		...store,
 		getByStatus: (statusArr: AlarmStatus[]) => {
-			return Object.values(get(userAlarms)).filter((alarm) =>
+			return Object.values(get(alarmRecord)).filter((alarm) =>
 				statusArr.includes(get(alarm).status)
 			);
 		},
 		removeAlarm: (id: number) => {
-			userAlarms.update((alarms) => {
+			alarmRecord.update((alarms) => {
 				const { [id]: _, ...updatedAlarms } = alarms;
 				return updatedAlarms;
 			});
