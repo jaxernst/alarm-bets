@@ -27,8 +27,16 @@ async function runNotificationSchedule(row: RowSchema) {
     parseAlarmDays(row.alarm_days)
   );
 
-  const notifyTimeout = timeTillNext - row.submission_window;
+  if (timeTillNext <= row.submission_window) {
+    // If time untill next alarm is less then the submission window, reschedule after the
+    // alarm time has passed to get the next alarm time
+    console.log("Waiting for alarm to pass before rescheduling");
+    setTimeout(() => runNotificationSchedule(row), (timeTillNext + 5) * 1000);
 
+    return;
+  }
+
+  const notifyTimeout = timeTillNext - row.submission_window;
   console.log("Next notification in ", notifyTimeout / 60, "minutes");
 
   schedules[scheduleKey(row)] = setTimeout(async () => {
@@ -99,7 +107,6 @@ export async function runScheduler() {
         table: "alarm_notifications",
       },
       (payload) => {
-        console.log(payload);
         const key = scheduleKey(payload.old as RowSchema);
         if (!(key in schedules)) {
           console.warn("Attempted to delete non-existent schedule", key);

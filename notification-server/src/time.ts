@@ -67,9 +67,5 @@ export function getTimeUntilNextAlarm(
     daysAway = 7 - curDay + _nextAlarmDay(0);
   }
 
-  const res = referenceTimestamp + daysAway * DAY - curTimestamp;
-  if (res < 10) {
-    return 10;
-  }
-  return res;
+  return referenceTimestamp + daysAway * DAY - curTimestamp;
 }
