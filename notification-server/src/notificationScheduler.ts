@@ -1,83 +1,113 @@
-import { systemTimestamp, timeOfDay } from "./time";
+import { getTimeUntilNextAlarm, systemTimestamp, timeOfDay } from "./time";
 import { supabaseClient } from "./server";
 import { RowSchema, ScheduleKey } from "./types";
-import { sendNotification } from "web-push";
+import { sendNotification, type PushSubscription } from "web-push";
 
-const schedules = new Set<ScheduleKey>();
+const schedules: Record<ScheduleKey, NodeJS.Timeout> = {};
 
-function getTimeUntilNextAlarm(
-  alarmTimeSeconds: number,
-  timezoneOffsetHours: number,
-  alarmDays: number[]
-) {
-  const now = timeOfDay(systemTimestamp());
-  if (now > alarmTimeSeconds) {
-    console.warn("Alarm time is in the past, skipping");
-    return;
-  }
+const scheduleKey = (row: RowSchema): ScheduleKey =>
+  `0x${row.user_address}-${row.alarm_id}-${row.device_id}` as const;
 
-  return alarmTimeSeconds - now;
+function parseAlarmDays(alarmDays: string) {
+  return alarmDays.split(",").map((day) => parseInt(day));
 }
 
-async function startAlarmNotificationSchedule(row: RowSchema) {
-  // Temp for testing: timeout until the next alarm time for a one-off notification
+function cancelNotificationSchedule(key: ScheduleKey) {
+  if (key in schedules) {
+    clearTimeout(schedules[key]);
+    delete schedules[key];
+    console.log("Notification schedule canceled for", key);
+  }
+}
 
-  const timeout = getTimeUntilNextAlarm(
+async function runNotificationSchedule(row: RowSchema) {
+  const timeTillNext = getTimeUntilNextAlarm(
     row.alarm_time,
     row.timezone_offset,
-    row.alarm_days
+    parseAlarmDays(row.alarm_days)
   );
 
-  if (!timeout) {
-    return;
-  }
+  const notifyTimeout = timeTillNext - row.submission_window;
 
-  setTimeout(async () => {
-    // Send the notification
+  console.log("Next notification in ", notifyTimeout / 60, "minutes");
 
-    // Delete db entry (temp)
-    const { data, error } = await supabaseClient
-      .from("alarm_notifications")
-      .delete()
-      .match({ user_address: row.user_address, alarm_id: row.alarm_id });
+  schedules[scheduleKey(row)] = setTimeout(async () => {
+    const res = await sendNotification(
+      row.subscription as unknown as PushSubscription,
+      JSON.stringify({
+        title: "Upcoming Alarm",
+        body: "Your alarm submission window is open. Wake up and submit your alarm!",
+      })
+    );
 
-    if (error) {
-      console.warn("Error deleting alarm notification: ", error);
+    if (res.statusCode === 201) {
+      console.log("Notification sent successfully");
+    } else {
+      console.error("Failed to send notification", res);
     }
 
-    console.log(
-      "Send result:",
-      await sendNotification(
-        row.subscription,
-        JSON.stringify({
-          title: "Upcoming Alarm",
-          body: "Your alarm is due in 15 minutes!",
-        })
-      )
-    );
-  }, timeout * 1000);
+    runNotificationSchedule(row);
+  }, notifyTimeout * 1000);
 }
 
-export function runScheduler(
-  getNotificationSubscriptions: () => Promise<RowSchema[]>
-) {
-  // TODO: Instead of running and interval, the server should listen for db updates
-  // to start and stop notification schedules
-  setInterval(async () => {
-    const subscriptions = await getNotificationSubscriptions();
+export async function runScheduler() {
+  // Fetch initial notification subscription data
+  const { data, error } = await supabaseClient
+    .from("alarm_notifications")
+    .select("*");
 
-    for (let row of subscriptions) {
-      const scheduleKey =
-        `0x${row.user_address}-${row.alarm_id}-${row.alarm_time}` as const;
+  if (error) {
+    throw new Error(
+      "Error fetching alarm notifications from Supabase: " + error
+    );
+  }
 
-      // If the schedule is not already set, add it to the schedules set and schedule the alarm notification
-      if (!schedules.has(scheduleKey)) {
-        schedules.add(scheduleKey);
-        startAlarmNotificationSchedule(row);
-        console.log("New notification schedule created:", row);
+  // Populate schedules set with initial notification subscriptions
+  for (let row of data) {
+    const key = scheduleKey(row);
+    // If the schedule is not already set, add it to the schedules set and schedule the alarm notification
+    console.log("Starting alarm notification schedule for", key);
+    runNotificationSchedule(row);
+  }
+
+  const insertNotifChannel = supabaseClient
+    .channel("schema-db-changes")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "alarm_notifications",
+      },
+      (payload) => {
+        const key = scheduleKey(payload.new as RowSchema);
+        // If the schedule is not already set, add it to the schedules set and schedule the alarm notification
+        if (key in schedules) {
+          console.warn("Attempted to add duplicate schedule", key);
+          return;
+        }
+
+        console.log("Starting alarm notification schedule for", key);
+        runNotificationSchedule(payload.new as RowSchema);
       }
-    }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "DELETE",
+        schema: "public",
+        table: "alarm_notifications",
+      },
+      (payload) => {
+        console.log(payload);
+        const key = scheduleKey(payload.old as RowSchema);
+        if (!(key in schedules)) {
+          console.warn("Attempted to delete non-existent schedule", key);
+          return;
+        }
 
-    // If there are new entries, add them to the schedules set and scehdule the alarm notification
-  }, 5000);
+        cancelNotificationSchedule(key);
+      }
+    )
+    .subscribe();
 }

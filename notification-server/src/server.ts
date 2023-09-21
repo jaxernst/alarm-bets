@@ -2,6 +2,7 @@ import express from "express";
 import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
 import { runScheduler } from "./notificationScheduler";
+import type { Database } from "../../database";
 
 require("dotenv").config({ path: "../.env" });
 
@@ -9,7 +10,7 @@ if (!process.env.PUBLIC_SUPA_API_URL || !process.env.PUBLIC_SUPA_ANON_KEY) {
   throw new Error("Missing Supabase env variables for notifcation server");
 }
 
-export const supabaseClient = createClient(
+export const supabaseClient = createClient<Database>(
   process.env.PUBLIC_SUPA_API_URL,
   process.env.PUBLIC_SUPA_ANON_KEY,
   {
@@ -37,17 +38,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  runScheduler(async () => {
-    const { data, error } = await supabaseClient
-      .from("alarm_notifications")
-      .select("*");
-
-    if (error) {
-      throw new Error(
-        "Error fetching alarm notifications from Supabase: " + error
-      );
-    }
-
-    return data;
-  });
+  runScheduler();
 });
