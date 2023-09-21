@@ -11,30 +11,33 @@ export interface Database {
     Tables: {
       alarm_notifications: {
         Row: {
-          alarm_days: string | null
+          alarm_days: string
           alarm_id: number
           alarm_time: number
+          device_id: string
           submission_window: number
-          subscription: Json | null
-          timezone_offset: number | null
+          subscription: Json
+          timezone_offset: number
           user_address: string
         }
         Insert: {
-          alarm_days?: string | null
+          alarm_days?: string
           alarm_id?: number
           alarm_time: number
+          device_id: string
           submission_window?: number
-          subscription?: Json | null
-          timezone_offset?: number | null
+          subscription: Json
+          timezone_offset: number
           user_address: string
         }
         Update: {
-          alarm_days?: string | null
+          alarm_days?: string
           alarm_id?: number
           alarm_time?: number
+          device_id?: string
           submission_window?: number
-          subscription?: Json | null
-          timezone_offset?: number | null
+          subscription?: Json
+          timezone_offset?: number
           user_address?: string
         }
         Relationships: []

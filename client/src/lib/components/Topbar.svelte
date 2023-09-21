@@ -39,7 +39,7 @@
 			{#if $alarmNotifications.enableReady}
 				<button class="h-5 w-5" on:click={toggleAlarmNotifications}>
 					<div
-						class={`${alarmNotificationsActive ? 'fill-green-500' : 'fill-zinc-400'} opacity-80`}
+						class={`${alarmNotificationsActive ? 'fill-green-600' : 'fill-zinc-400'} opacity-80`}
 					>
 						<NotificationIcon />
 					</div>
