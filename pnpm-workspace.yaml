@@ -2,3 +2,4 @@ packages:
   - "contracts"
   - "client"
   - "notification-server"
+  - "dapp-sync"
