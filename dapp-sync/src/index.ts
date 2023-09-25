@@ -1,9 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database as PartnerAlarmsDb } from "../../partner-alarms";
-import { createPublicClient, http, webSocket } from "viem";
+import { PublicClient, createPublicClient, http, webSocket } from "viem";
 import { mainnet, optimismGoerli } from "viem/chains";
 
 require("dotenv").config({ path: "../.env" });
+
+/**
+ * Db should have all alarm IDs for partner alarms
+ * Each db row should contain the alarm constants, addresses, and the current status
+ */
 
 if (!process.env.PUBLIC_SUPA_API_URL || !process.env.PUBLIC_SUPA_ANON_KEY) {
   throw new Error("Missing Supabase env variables for notifcation server");
@@ -32,9 +37,13 @@ const alchemyEndpoints = {
 
 export const viemWsClient = createPublicClient({
   chain: mainnet,
-  transport: http(),
+  transport: webSocket(alchemyEndpoints.optimismGoerli.ws),
 });
 
+const queryAlarmCreationEvents = async (client: PublicClient) => {};
+const queryUserJoinedEvents = async (client: PublicClient) => {};
+
+// Need to populate the db with all alarm id
 const unwatch = viemWsClient.watchBlockNumber({
   onBlockNumber: (blockNumber: any) => console.log(blockNumber),
 });
