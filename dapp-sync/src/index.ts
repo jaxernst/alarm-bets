@@ -41,7 +41,6 @@ export const viemWsClient = createPublicClient({
 });
 
 const queryAlarmCreationEvents = async (client: PublicClient) => {};
-const queryUserJoinedEvents = async (client: PublicClient) => {};
 
 // Need to populate the db with all alarm id
 const unwatch = viemWsClient.watchBlockNumber({
