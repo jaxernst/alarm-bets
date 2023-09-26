@@ -46,7 +46,7 @@ export interface Database {
         Row: {
           alarm_address: string
           alarm_days: string
-          alarm_id: string
+          alarm_id: number
           alarm_time: number
           player1: string
           player2: string
@@ -55,7 +55,7 @@ export interface Database {
         Insert: {
           alarm_address: string
           alarm_days: string
-          alarm_id: string
+          alarm_id: number
           alarm_time: number
           player1: string
           player2: string
@@ -64,7 +64,7 @@ export interface Database {
         Update: {
           alarm_address?: string
           alarm_days?: string
-          alarm_id?: string
+          alarm_id?: number
           alarm_time?: number
           player1?: string
           player2?: string

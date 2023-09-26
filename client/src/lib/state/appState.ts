@@ -38,7 +38,7 @@ export const alarmNotifications = (() => {
 				};
 			});
 
-			subscribeToPushNotifications($account.address, subscriptionParams);
+			subscribeToPushNotifications($account.address);
 		};
 	}) as Readable<() => void>;
 

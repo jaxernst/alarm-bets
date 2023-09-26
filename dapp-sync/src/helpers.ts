@@ -1,16 +1,16 @@
 import { PublicClient, parseAbiItem } from "viem";
 import PartnerAlarmClock from "./abi/PartnerAlarmClock";
+import { viemClient } from ".";
 
 export type EvmAddress = `0x${string}`;
 
 type AlarmType = "PartnerAlarmClock";
 
-const alarmTypeVals: Record<AlarmType, number> = {
+export const alarmTypeVals: Record<AlarmType, number> = {
   PartnerAlarmClock: 0,
 };
 
 export const queryAlarmCreationEvents = async (
-  client: PublicClient,
   hubAddress: EvmAddress,
   opts?: {
     fromBlock?: bigint;
@@ -19,7 +19,7 @@ export const queryAlarmCreationEvents = async (
     user?: EvmAddress;
   }
 ) => {
-  return await client.getLogs({
+  return await viemClient.getLogs({
     address: hubAddress,
     event: parseAbiItem(
       "event AlarmCreation(address indexed user, uint8 indexed _type, address alarmAddr, uint id)"
