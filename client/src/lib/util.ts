@@ -1,5 +1,4 @@
 import { PUBLIC_VAPID_KEY } from '$env/static/public';
-import { toast } from '@zerodevx/svelte-toast';
 import type { EvmAddress } from './types';
 
 export const isIosSafari = () => {
@@ -88,6 +87,12 @@ export function checkForServiceWorkerUpdate() {
 	let updated = false;
 	let activated = false;
 	let hadControllingServiceWorker = !!navigator.serviceWorker.controller;
+	function checkUpdate() {
+		if (activated && updated && hadControllingServiceWorker) {
+			console.log('Application was updated refreshing the page...');
+			window.location.reload();
+		}
+	}
 
 	navigator.serviceWorker.register('service-worker.js').then((registration) => {
 		registration.addEventListener('updatefound', () => {
@@ -105,13 +110,6 @@ export function checkForServiceWorkerUpdate() {
 		updated = true;
 		checkUpdate();
 	});
-
-	function checkUpdate() {
-		if (activated && updated && hadControllingServiceWorker) {
-			console.log('Application was updated refreshing the page...');
-			window.location.reload();
-		}
-	}
 }
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -136,7 +134,6 @@ export async function deviceHash() {
 	return hashHex;
 }
 
-// Use the Push API to request a push notification subscription
 export async function subscribeToPushNotifications() {
 	if (!PUBLIC_VAPID_KEY) {
 		throw new Error('VAPID key not found');
