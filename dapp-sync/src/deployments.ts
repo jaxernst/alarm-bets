@@ -1,4 +1,5 @@
-import type { EvmAddress } from "./types";
+import { hardhat, optimism, optimismGoerli, base } from "viem/chains";
+import { EvmAddress } from "./helpers";
 
 export type DeploymentChain = (typeof deploymentChains)[number];
 export const deploymentChains = [

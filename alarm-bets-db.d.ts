@@ -27,36 +27,48 @@ export interface Database {
         }
         Relationships: []
       }
+      dapp_sync_status: {
+        Row: {
+          alarm_type: string
+          last_block_queried: number | null
+        }
+        Insert: {
+          alarm_type: string
+          last_block_queried?: number | null
+        }
+        Update: {
+          alarm_type?: string
+          last_block_queried?: number | null
+        }
+        Relationships: []
+      }
       partner_alarms: {
         Row: {
           alarm_address: string
           alarm_days: string
           alarm_id: string
           alarm_time: number
-          other_player: string
+          player1: string
+          player2: string
           submission_window: number
-          timezone_offset: number
-          user_address: string
         }
         Insert: {
           alarm_address: string
           alarm_days: string
           alarm_id: string
           alarm_time: number
-          other_player: string
+          player1: string
+          player2: string
           submission_window: number
-          timezone_offset: number
-          user_address: string
         }
         Update: {
           alarm_address?: string
           alarm_days?: string
           alarm_id?: string
           alarm_time?: number
-          other_player?: string
+          player1?: string
+          player2?: string
           submission_window?: number
-          timezone_offset?: number
-          user_address?: string
         }
         Relationships: []
       }
