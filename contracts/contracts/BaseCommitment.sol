@@ -2,6 +2,8 @@
 pragma solidity ^0.8.9;
 
 import {ICommitment} from "./interfaces/ICommitment.sol";
+import {IAlarmBetsHub} from "./interfaces/IAlarmBetsHub.sol";
+
 import "./types.sol";
 
 /**
@@ -11,39 +13,29 @@ import "./types.sol";
  *
  * @dev Customized commitments inhereit from this contract, and can override functions as needed.
  */
-contract BaseCommitment is ICommitment {
-    string public name;
+abstract contract BaseCommitment is ICommitment {
+    IAlarmBetsHub deploymentHub;
+
     CommitmentStatus public status;
-    address public owner;
-    uint nextProofId = 1;
 
     bool initialized = false;
     modifier initializer() {
         require(!initialized, "ALREADY_INITIALIZED");
-        owner = tx.origin;
         status = CommitmentStatus.ACTIVE;
         initialized = true;
         _;
     }
 
-    function init(bytes calldata data) public payable virtual initializer {
-        string memory description;
-        (name, description) = abi.decode(data, (string, string));
-
-        emit CommitmentInitialized(description);
+    function baseInit() public payable virtual initializer {
+        deploymentHub = IAlarmBetsHub(msg.sender);
     }
 
-    function _submitConfirmationWithProof(string memory proofUri) internal {
-        emit ProofSubmitted(proofUri, ++nextProofId);
-        _submitConfirmation();
-    }
-
-    function _submitConfirmation() internal {
-        emit ConfirmationSubmitted(msg.sender);
+    function _submitConfirmation(uint points) internal {
+        deploymentHub.recordConfirmation(points);
     }
 
     function _updateStatus(CommitmentStatus newStatus) internal {
-        emit StatusChanged(status, newStatus);
+        deploymentHub.emitStatusChanged(status, newStatus);
         status = newStatus;
     }
 }

@@ -4,8 +4,21 @@ pragma solidity ^0.8.9;
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {BaseCommitment} from "./BaseCommitment.sol";
-import {ISocialAlarmClockHub} from "./interfaces/ISocialAlarmClockHub.sol";
+import {ICommitment} from "./interfaces/ICommitment.sol";
+import {IAlarmBetsHub} from "./interfaces/IAlarmBetsHub.sol";
 import "./types.sol";
+
+/**
+ * Starting to introduce points systems for when alarms record confirmations
+ * Need some sort of point multiplier to be adjusted by governance
+
+ *  - Naive partner alarm clock should start at with a 1x multiplier, as botting is trivial
+ * 
+ *  - A type of attestable partner puzzle alarm clock could be next where the multiplier is higher,
+ *   but the alarm bets backend has to attest to the user completing a puzzle (perhaps this can
+ *   be done by having an EOA for the backend which is registered as an attestor in the alarm hub. When
+ *   users complete puzzles, they must get a signature from the backend prooving they complete the puzzle )
+ **/
 
 /**
  * @notice The Hub and the Factory are derived from their implementations in the Social Commitment
@@ -40,10 +53,15 @@ contract AlarmFactory is Ownable {
  * The hub stores deployed alarm references and contains events for frontends to index and track
  * users alarms
  */
-contract SocialAlarmClockHub is AlarmFactory, ISocialAlarmClockHub {
+contract SocialAlarmClockHub is AlarmFactory, IAlarmBetsHub {
     uint public nextAlarmId = 1;
+
     mapping(uint => BaseCommitment) public alarms; // Lookup alarm by id
-    mapping(address => uint) public alarmIds; // Lookup alarms by address
+    mapping(address => uint) public alarmIds; // AAlarm address loopup
+    mapping(address => RegisteredAlarmType) // Alarm type lookup
+
+    mapping(address => uint) public alarmBetsPoints;
+    mapping(RegisteredAlarmType => uint) public pointMultipliers;
 
     event UserJoined(
         address indexed user,
@@ -57,6 +75,12 @@ contract SocialAlarmClockHub is AlarmFactory, ISocialAlarmClockHub {
         RegisteredAlarmType indexed _type,
         address alarmAddr,
         uint id
+    );
+
+    event StatusChanged(
+        uint indexed alarmId,
+        CommitmentStatus from,
+        CommitmentStatus to
     );
 
     /**
@@ -75,11 +99,35 @@ contract SocialAlarmClockHub is AlarmFactory, ISocialAlarmClockHub {
         emit AlarmCreation(msg.sender, _type, address(alarm), id);
     }
 
+    modifier onlyHubRegisteredAlarm() {
+        require(alarmIds[msg.sender] != 0, "NOT_HUB_REGISTERED_ALARM");
+        _;
+    }
+
     /**
      * Called by alarm to indicate a user has joined
      */
-    function emitUserJoined(RegisteredAlarmType _type, address user) external {
-        require(alarmIds[msg.sender] != 0, "NOT_HUB_REGISTERED_ALARM");
+    function onUserJoined(
+        RegisteredAlarmType _type,
+        address user
+    ) external onlyHubRegisteredAlarm {
         emit UserJoined(user, _type, msg.sender, alarmIds[msg.sender]);
+    }
+
+    function onStatusChanged(
+        CommitmentStatus oldStatus,
+        CommitmentStatus newStatus
+    ) external onlyHubRegisteredAlarm {
+        emit StatusChanged(msg.sender, oldStatus, newStatus);
+    }
+
+    function onConfirmationSubmitted(
+        address submittingUser,
+        uint pointsEarned
+    ) external onlyHubRegisteredAlarm {
+        
+        alarmBetsPoints[submittingUser] +=
+            pointsEarned *
+            pointMultipliers[RegisteredAlarmType.ALARM_BETS];
     }
 }

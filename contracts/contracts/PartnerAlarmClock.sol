@@ -3,8 +3,8 @@ pragma solidity ^0.8.9;
 
 import "./BaseCommitment.sol";
 import "./library/AlarmSchedule.sol";
-import {ISocialAlarmClockHub} from "./interfaces/ISocialAlarmClockHub.sol";
-import {IConfirmationSubmitter, ICommitment} from "./interfaces/ICommitment.sol";
+
+import {ICommitmentConfirmationSubmitter, ICommitment} from "./interfaces/ICommitment.sol";
 
 /**
  * The partner alarm clock is a commitment contract that allows two people to set an 'alarm'
@@ -13,8 +13,8 @@ import {IConfirmationSubmitter, ICommitment} from "./interfaces/ICommitment.sol"
  * confirmation transaction before the alarm time. Failure to do so can result in a penalty
  * that will transfer funds to the other party.
  */
-contract PartnerAlarmClock is BaseCommitment, IConfirmationSubmitter {
-    ISocialAlarmClockHub deploymentHub;
+contract PartnerAlarmClock is BaseCommitment, ICommitmentConfirmationSubmitter {
+    string public constant override name = "PartnerAlarmClock";
 
     using AlarmSchedule for AlarmSchedule.Schedule;
 
@@ -53,7 +53,8 @@ contract PartnerAlarmClock is BaseCommitment, IConfirmationSubmitter {
         bytes calldata data
     ) public payable virtual override initializer {
         require(msg.value > 0, "BET_VALUE_REQUIRED");
-        deploymentHub = ISocialAlarmClockHub(msg.sender);
+
+        BaseCommitment.initBase();
 
         // Initialize to an inactive state, commitment becomes activated once player 2 starts
         // Note: Alarm should never return to the INACTIVE state after starting
@@ -112,7 +113,6 @@ contract PartnerAlarmClock is BaseCommitment, IConfirmationSubmitter {
         );
 
         status = CommitmentStatus.ACTIVE;
-        emit CommitmentInitialized("Alarm Bet Started");
     }
 
     function addToBalance(address player) public payable onlyPlayerArg(player) {
