@@ -125,6 +125,13 @@ function urlBase64ToUint8Array(base64String: string) {
 	return outputArray;
 }
 
+export function notificationPermissionGranted() {
+	if (typeof window !== 'undefined') {
+		return Notification.permission === 'granted';
+	}
+	return false;
+}
+
 export async function deviceHash() {
 	const dataString = navigator.userAgent;
 	const msgUint8 = new TextEncoder().encode(dataString);

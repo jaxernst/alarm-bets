@@ -2,7 +2,7 @@ import { derived, get, writable, type Readable } from 'svelte/store';
 import { account } from './chainConfig';
 import { userAlarms } from './contractStores';
 import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
-import { deviceHash, subscribeToPushNotifications } from '$lib/util';
+import { deviceHash, notificationPermissionGranted, subscribeToPushNotifications } from '$lib/util';
 import type { EvmAddress } from '$lib/types';
 
 export type Tab = 'alarms' | 'new' | 'join';
@@ -11,116 +11,90 @@ export const activeTab = writable<Tab>('alarms');
 export const showWelcome = writable(true);
 export const welcomeHasBeenViewed = writable(false);
 
-export const alarmNotifications = (() => {
-	const notifications = writable<number[]>([]);
+const fetchNotificationState = async (address: EvmAddress) => {
+	const res = await fetch(`/api/${address}/notifications/${await deviceHash()}/status`);
+	const { subscribed }: { subscribed: boolean } = await res.json();
+	return subscribed;
+};
 
-	const fetchNotificationState = async (address: EvmAddress) => {
-		const res = await fetch(`/api/${address}/notifications/status`);
-		const data: number[] = await res.json();
-		notifications.set(data);
-	};
+export const notifications = (() => {
+	const enabledBackend = writable<boolean>();
+	const enabledClient = writable<boolean>(notificationPermissionGranted());
+	const enabled = derived([enabledBackend, enabledClient], ([$enabledBackend, $enabledClient]) => {
+		return $enabledBackend && $enabledClient;
+	});
+
+	const loading = writable(false);
 
 	// Auto fetch notification status once an account is available
-	let initialFetch = false;
-	account.subscribe(($account) => {
+	account.subscribe(async ($account) => {
 		if (!$account?.address) return;
-		if (!initialFetch) {
-			initialFetch = true;
-			fetchNotificationState($account.address);
-		}
+		const res = await fetchNotificationState($account.address);
+		enabledBackend.set(res);
 	});
 
 	const enableReady = derived([account, userAlarms], ([$account, $userAlarms]) => {
-		if (
-			!$account?.address ||
-			$userAlarms.loadingState !== 'loaded' ||
-			Object.keys($userAlarms.alarmRecord).length === 0
-		) {
-			return false;
-		}
-		return true;
+		return $account?.address ? true : false;
 	});
 
-	const enableAll = derived(
-		[account, enableReady, notifications],
-		([$account, $enableReady, $notifications]) => {
-			return async () => {
-				if (!$enableReady || !$account?.address) {
-					console.log('Enable notifications failed: Deps not ready');
-					return;
-				}
+	const toggleNotifications = derived(
+		[account, enabledBackend, enabledClient],
+		([$account, $enabledBackend, $enabledClient]) => {
+			const toggle = async () => {
+				if (!$account?.address) return;
 
-				const activeAlarms = userAlarms.getByStatus([AlarmStatus.ACTIVE]);
-				const subscriptionParams = activeAlarms
-					.map((alarm) => {
-						const a = get(alarm);
-						const isP1 = a.player1.toLowerCase() === $account.address?.toLowerCase();
-						return {
-							alarmTime: Number(a.alarmTime),
-							timezoneOffset: isP1 ? Number(a.player1Timezone) : Number(a.player2Timezone),
-							alarmId: Number(a.id),
-							userAddress: $account.address,
-							alarmDays: a.alarmDays
-						};
-					})
-					.filter((alarm) => !$notifications.includes(alarm.alarmId));
+				const deviceId = await deviceHash();
 
-				const subscription = await subscribeToPushNotifications();
+				if ($enabledBackend && $enabledClient) {
+					const res = await fetch(
+						`/api/${$account.address}/notifications/${deviceId}/unsubscribe`,
+						{
+							method: 'POST'
+						}
+					);
 
-				if (!subscription) return;
+					res.ok && enabledBackend.set(false);
+				} else {
+					// Get subscription object from the browser web-push api
+					const subscription = await subscribeToPushNotifications();
+					if (!subscription) return;
 
-				const oldNotifications = [...$notifications];
-				notifications.set([...$notifications, ...subscriptionParams.map((p) => p.alarmId)]);
+					enabledClient.set(notificationPermissionGranted());
 
-				const saveSubscriptionBody = {
-					subscription,
-					deviceId: await deviceHash(),
-					params: { ...subscriptionParams }
-				};
+					if (!$enabledBackend) {
+						const res = await fetch(`api/${$account.address}/notifications/${deviceId}/subscribe`, {
+							method: 'POST',
+							body: JSON.stringify(subscription),
+							headers: {
+								'content-type': 'application/json'
+							}
+						});
 
-				const res = await fetch(`api/${$account.address}/notifications/subscribe`, {
-					method: 'POST',
-					body: JSON.stringify(saveSubscriptionBody),
-					headers: {
-						'content-type': 'application/json'
+						res.ok && enabledBackend.set(true);
 					}
-				});
+				}
+			};
 
-				if (!res.ok) {
-					notifications.set(oldNotifications);
+			return async () => {
+				loading.set(true);
+				try {
+					await toggle();
+				} finally {
+					loading.set(false);
 				}
 			};
 		}
-	) as Readable<() => void>;
+	) as Readable<() => Promise<void>>;
 
-	const disableAll = derived([account], ([$account]) => {
-		return async () => {
-			if (!$account?.address) return;
-			const old = get(notifications);
-			notifications.set([]);
-			const res = await fetch(`/api/${$account.address}/notifications/unsubscribe`, {
-				method: 'POST'
-			});
-
-			// Undo optimistic update if it failed
-			if (!res.ok) {
-				notifications.set(old);
-				return;
-			}
-		};
-	}) as Readable<() => Promise<void>>;
-
-	const store = derived(
-		[notifications, enableReady, enableAll, disableAll],
-		([notifications, enableReady, enableAll, disableAll]) => {
+	return derived(
+		[enabled, enableReady, toggleNotifications, loading],
+		([enabled, enableReady, toggle, loading]) => {
 			return {
-				notifications,
+				enabled,
 				enableReady,
-				enableAll,
-				disableAll
+				loading,
+				toggle
 			};
 		}
 	);
-
-	return store;
 })();
