@@ -69,7 +69,7 @@
 						<div class="h-[18px] w-[18px] stroke-cyan-500">
 							<AlarmClockSymbol />
 						</div>
-						<div>{Object.keys($userAlarms).length}</div>
+						<div>{Object.keys($userAlarms.alarmRecord).length}</div>
 					</div>
 				{/if}
 
