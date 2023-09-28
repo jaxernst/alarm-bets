@@ -230,7 +230,6 @@ export async function createAlarm<T extends AlarmType>(
 	initData: InitializationTypes[T],
 	value?: bigint
 ) {
-	console.log(initData);
 	const byteData = encodeCreationParams(type, initData);
 	const { request } = await prepareWriteContract({
 		address: hubAddress,

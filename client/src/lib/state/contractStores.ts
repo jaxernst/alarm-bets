@@ -116,14 +116,12 @@ export const userAlarms = (() => {
 	alarmQueryDeps.subscribe(({ hub: $hub, user: $user }) => {
 		const _newAlarmListener = get(newAlarmListener);
 		if (_newAlarmListener) {
-			console.log('Removed new alarm listener');
 			_newAlarmListener(); // Unsub function
 			newAlarmListener.set(undefined);
 		}
 
 		const _joinedAlarmListener = get(joinedAlarmListener);
 		if (_joinedAlarmListener) {
-			console.log('Removed joined alarm listener');
 			_joinedAlarmListener(); // Unsub funciton
 			joinedAlarmListener.set(undefined);
 		}
@@ -293,7 +291,6 @@ async function UserAlarmStore(user: EvmAddress, hub: EvmAddress, alarm: AlarmBas
 			state.timeToNextDeadline <= 0 &&
 			!reinitializingState
 		) {
-			console.log('getting new alarm state');
 			reinitializingState = true;
 			get(initAlarmState)().finally(() => (reinitializingState = false));
 		}
