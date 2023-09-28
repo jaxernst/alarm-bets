@@ -1,5 +1,5 @@
 {
-  "name": "@alarm-bets/notification-server",
+  "name": "@alarm-bets/dapp-notify",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
