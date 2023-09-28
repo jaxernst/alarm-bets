@@ -10,7 +10,7 @@ let gasPrice = parseUnits("1", "gwei");
  */
 async function main() {
   const factory = await ethers.getContractFactory("AlarmBetsHub");
-  gasPrice = (await ethers.provider.getGasPrice()).add(parseUnits("1", "gwei"));
+  gasPrice = (await ethers.provider.getGasPrice()).add(parseUnits("2", "gwei"));
   const hub = await factory.deploy({ gasPrice });
   console.log("Deployed protocol hub to", hub.address);
 

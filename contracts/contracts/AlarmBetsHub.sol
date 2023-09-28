@@ -62,7 +62,7 @@ contract AlarmBetsHub is AlarmFactory, IAlarmBetsHub {
 
     event UserJoined(
         address indexed user,
-        RegisteredAlarmType indexed _type,
+        RegisteredAlarmType indexed alarmType,
         address alarmAddr,
         uint id
     );

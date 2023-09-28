@@ -123,7 +123,7 @@ export default [
       {
         indexed: true,
         internalType: "enum RegisteredAlarmType",
-        name: "_type",
+        name: "alarmType",
         type: "uint8",
       },
       {

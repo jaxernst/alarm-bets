@@ -2,10 +2,10 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../alarm-bets-db";
 import { createPublicClient, http, webSocket } from "viem";
 import { optimism, optimismGoerli } from "viem/chains";
-import { hubDeployments } from "./deployments";
 import { EvmAddress, alarmTypeVals, queryAlarmCreationEvents } from "./helpers";
-import PartnerAlarmClock from "./abi/PartnerAlarmClock";
-import SocialAlarmClockHub from "./abi/SocialAlarmClockHub";
+import { hubDeployments } from "@alarm-bets/contracts/lib/deployments";
+import PartnerAlarmClock from "@alarm-bets/contracts/lib/abi/PartnerAlarmClock";
+import AlarmBetsHub from "@alarm-bets/contracts/lib/abi/AlarmBetsHub";
 
 require("dotenv").config({ path: "../.env" });
 
@@ -20,6 +20,10 @@ const chains = {
 };
 
 const hubAddress = hubDeployments[chains[chainName].id];
+
+if (!hubAddress) {
+  throw new Error(`Missing hub address for chain ${chainName}`);
+}
 
 if (!process.env.ALCHEMY_OP_GOERLI_KEY || !process.env.ALCHEMY_OP_MAINNET_KEY) {
   throw new Error("Missing Alchemy API key");
@@ -62,8 +66,8 @@ export const viemClient = createPublicClient({
  *
  * After these alarms have been backfilled, we will start watching for new alarms
  *
- * There needs to be some commit posted to the db each time a new block event is
- * recevied so we know where to pick up from if the sync process dies
+ * Occassionally, we will save the last received block number to the db to pick up from
+ * after a restart
  */
 
 const alarmConstantsMulticallArgs = (alarmAddr: EvmAddress) => {
@@ -246,10 +250,10 @@ async function startPartnerAlarmSync() {
   console.log("Listening for new alarm events...");
   viemClient.watchContractEvent({
     address: hubAddress,
-    abi: SocialAlarmClockHub,
+    abi: AlarmBetsHub,
     eventName: "AlarmCreation",
     args: {
-      _type: alarmTypeVals["PartnerAlarmClock"],
+      alarmType: alarmTypeVals["PartnerAlarmClock"],
     },
     onLogs: (logs) => {
       logs.forEach((log) => {
@@ -261,6 +265,17 @@ async function startPartnerAlarmSync() {
         onNewAlarmEvent(Number(log.blockNumber), alarmAddr, Number(id));
       });
     },
+  });
+
+  console.log("listening for status changed events...");
+  viemClient.watchContractEvent({
+    address: hubAddress,
+    abi: AlarmBetsHub,
+    eventName: "StatusChanged",
+    args: {
+      alarmType: alarmTypeVals["PartnerAlarmClock"],
+    },
+    onLogs: () => void,
   });
 
   setInterval(async () => {

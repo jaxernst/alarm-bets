@@ -10,11 +10,11 @@ export const hubDeployments: Record<
   EvmAddress
 > = {
   31337: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-  420: "0xa38A60Ac4291A6474BE2cca2cd10d6b49589D790",
+  420: "0x4eEFc0E9A80730fb5207Ea395036004350Dd30B1",
 };
 
 export const partnerAlarmClockContractTemplates = {
-  420: "0x9F2Cc4a92FCA405FcFA5aC99F2E8a197738c2Ada",
+  420: "0xCe012c7310AE6BEecBAa49f727e4341607093F41",
 };
 
 export const deploymentBlockNumbers: Record<
