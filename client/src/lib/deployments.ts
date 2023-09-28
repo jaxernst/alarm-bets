@@ -7,7 +7,7 @@ export const deploymentChainIds = deploymentChains.map((c) => c.id);
 
 export const hubDeployments: Record<(typeof deploymentChainIds)[number], EvmAddress> = {
 	31337: '0x5fbdb2315678afecb367f032d93f642f64180aa3',
-	420: '0xe36a39e59e4Cd17E0922E8d7c1209606abda0186'
+	420: '0x345d6532B3542bE064407C31Eb8d7cBa4033Cd36'
 };
 
 export const partnerAlarmClockContractTemplates = {

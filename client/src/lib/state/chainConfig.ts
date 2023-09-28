@@ -17,7 +17,7 @@ import { hardhat, optimism } from 'viem/chains';
 
 export type Account = GetAccountResult & { address: EvmAddress };
 
-export const supportedChains = [optimismGoerli, optimism, hardhat];
+export const supportedChains = [optimismGoerli];
 const projectId = '698bddafdbc932fc6eb19c24ab471c3a';
 
 const { publicClient, webSocketPublicClient } = configureChains(
