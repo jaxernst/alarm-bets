@@ -4,10 +4,6 @@ pragma solidity ^0.8.9;
 import "../types.sol";
 
 interface ICommitment {
-    event ConfirmationSubmitted(address from);
-    event ProofSubmitted(string uri, uint proofId);
-    event ConfirmationRevoked(string uri, uint proofId);
-
     function init(bytes calldata) external payable;
 
     function status() external view returns (CommitmentStatus);

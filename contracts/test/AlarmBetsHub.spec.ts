@@ -6,10 +6,11 @@ import {
   registerNewType,
 } from "../lib/commitmentCreation";
 import { alarmTypeVals } from "../lib/types";
-import { PartnerAlarmClock, SocialAlarmClockHub } from "../typechain-types";
+import { PartnerAlarmClock } from "../typechain-types";
 import { ZERO_ADDRESS } from "./helpers/constants";
 import { deploy, deployTyped } from "./helpers/deploy";
 import { waitAll, repeat } from "./helpers/util";
+import { AlarmBetsHub } from "../typechain-types/contracts/AlarmBetsHub.sol/AlarmBetsHub";
 
 const partnerAlarmDefault = (p1: string, p2: string) => ({
   alarmTime: 1,
@@ -21,8 +22,8 @@ const partnerAlarmDefault = (p1: string, p2: string) => ({
   player2: p2,
 });
 
-describe("SocialAlarmClockHub", () => {
-  let commitmentHub: SocialAlarmClockHub;
+describe("AlarmBetsHub", () => {
+  let commitmentHub: AlarmBetsHub;
   let alarm: PartnerAlarmClock;
   let owner: SignerWithAddress;
   let rando1: SignerWithAddress;
@@ -33,9 +34,7 @@ describe("SocialAlarmClockHub", () => {
   });
 
   beforeEach(async () => {
-    commitmentHub = await (
-      await ethers.getContractFactory("SocialAlarmClockHub")
-    ).deploy();
+    commitmentHub = await deployTyped<AlarmBetsHub>("AlarmBetsHub");
     alarm = await deployTyped<PartnerAlarmClock>("PartnerAlarmClock");
   });
 

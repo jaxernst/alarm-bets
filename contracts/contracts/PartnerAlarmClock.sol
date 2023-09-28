@@ -49,12 +49,10 @@ contract PartnerAlarmClock is BaseCommitment, ICommitmentConfirmationSubmitter {
         _;
     }
 
-    function init(
-        bytes calldata data
-    ) public payable virtual override initializer {
+    function init(bytes calldata data) public payable virtual override {
         require(msg.value > 0, "BET_VALUE_REQUIRED");
 
-        BaseCommitment.initBase();
+        BaseCommitment.baseInit();
 
         // Initialize to an inactive state, commitment becomes activated once player 2 starts
         // Note: Alarm should never return to the INACTIVE state after starting
@@ -107,12 +105,8 @@ contract PartnerAlarmClock is BaseCommitment, ICommitmentConfirmationSubmitter {
 
         players[player2].schedule.start();
 
-        deploymentHub.emitUserJoined(
-            RegisteredAlarmType.PARTNER_ALARM_CLOCK,
-            player2
-        );
-
-        status = CommitmentStatus.ACTIVE;
+        _recordUserJoined(player2);
+        _updateStatus(CommitmentStatus.ACTIVE);
     }
 
     function addToBalance(address player) public payable onlyPlayerArg(player) {
@@ -126,7 +120,7 @@ contract PartnerAlarmClock is BaseCommitment, ICommitmentConfirmationSubmitter {
      */
     function submitConfirmation() external override onlyPlayer {
         players[msg.sender].schedule.recordEntry();
-        _submitConfirmation();
+        _submitConfirmation(msg.sender, 1);
     }
 
     function missedDeadlines(

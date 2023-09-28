@@ -10,20 +10,17 @@ import "./types.sol";
 
 /**
  * Starting to introduce points systems for when alarms record confirmations
- * Need some sort of point multiplier to be adjusted by governance
-
+ * Need some sort of point multiplier for each alarm type to be controllable by
+ * governance.
+ *
  *  - Naive partner alarm clock should start at with a 1x multiplier, as botting is trivial
- * 
+ *
  *  - A type of attestable partner puzzle alarm clock could be next where the multiplier is higher,
  *   but the alarm bets backend has to attest to the user completing a puzzle (perhaps this can
  *   be done by having an EOA for the backend which is registered as an attestor in the alarm hub. When
  *   users complete puzzles, they must get a signature from the backend prooving they complete the puzzle )
- **/
-
-/**
- * @notice The Hub and the Factory are derived from their implementations in the Social Commitment
- * Protocol repository and adpated to be used only for the Social Alarm Clock
- */
+ *
+ * */
 
 /**
  * @notice The AlarmFactory is responsible for creating new alarms from pre-registered alarm contract
@@ -53,12 +50,12 @@ contract AlarmFactory is Ownable {
  * The hub stores deployed alarm references and contains events for frontends to index and track
  * users alarms
  */
-contract SocialAlarmClockHub is AlarmFactory, IAlarmBetsHub {
+contract AlarmBetsHub is AlarmFactory, IAlarmBetsHub {
     uint public nextAlarmId = 1;
 
     mapping(uint => BaseCommitment) public alarms; // Lookup alarm by id
-    mapping(address => uint) public alarmIds; // AAlarm address loopup
-    mapping(address => RegisteredAlarmType) // Alarm type lookup
+    mapping(address => RegisteredAlarmType) public alarmType; // Alarm address lookup
+    mapping(address => uint) public alarmId; // Alarm address lookup
 
     mapping(address => uint) public alarmBetsPoints;
     mapping(RegisteredAlarmType => uint) public pointMultipliers;
@@ -83,6 +80,12 @@ contract SocialAlarmClockHub is AlarmFactory, IAlarmBetsHub {
         CommitmentStatus to
     );
 
+    event ConfirmationSubmitted(
+        address indexed user,
+        uint indexed alarmId,
+        uint pointsEarned
+    );
+
     /**
      * Creates and initializes an alarm
      */
@@ -95,39 +98,50 @@ contract SocialAlarmClockHub is AlarmFactory, IAlarmBetsHub {
 
         uint id = nextAlarmId++;
         alarms[id] = alarm;
-        alarmIds[address(alarm)] = id;
+        alarmId[address(alarm)] = id;
+        alarmType[address(alarm)] = _type;
+
         emit AlarmCreation(msg.sender, _type, address(alarm), id);
     }
 
     modifier onlyHubRegisteredAlarm() {
-        require(alarmIds[msg.sender] != 0, "NOT_HUB_REGISTERED_ALARM");
+        require(alarmId[msg.sender] != 0, "NOT_HUB_REGISTERED_ALARM");
         _;
     }
 
     /**
      * Called by alarm to indicate a user has joined
      */
-    function onUserJoined(
-        RegisteredAlarmType _type,
-        address user
-    ) external onlyHubRegisteredAlarm {
-        emit UserJoined(user, _type, msg.sender, alarmIds[msg.sender]);
+    function onUserJoined(address user) external onlyHubRegisteredAlarm {
+        emit UserJoined(
+            user,
+            alarmType[msg.sender],
+            msg.sender,
+            alarmId[msg.sender]
+        );
     }
 
     function onStatusChanged(
         CommitmentStatus oldStatus,
         CommitmentStatus newStatus
     ) external onlyHubRegisteredAlarm {
-        emit StatusChanged(msg.sender, oldStatus, newStatus);
+        emit StatusChanged(alarmId[msg.sender], oldStatus, newStatus);
     }
 
     function onConfirmationSubmitted(
         address submittingUser,
         uint pointsEarned
     ) external onlyHubRegisteredAlarm {
-        
+        RegisteredAlarmType _alarmType = alarmType[msg.sender];
+
         alarmBetsPoints[submittingUser] +=
             pointsEarned *
-            pointMultipliers[RegisteredAlarmType.ALARM_BETS];
+            pointMultipliers[_alarmType];
+
+        emit ConfirmationSubmitted(
+            submittingUser,
+            alarmId[msg.sender],
+            pointsEarned
+        );
     }
 }

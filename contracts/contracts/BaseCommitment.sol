@@ -30,12 +30,16 @@ abstract contract BaseCommitment is ICommitment {
         deploymentHub = IAlarmBetsHub(msg.sender);
     }
 
-    function _submitConfirmation(uint points) internal {
-        deploymentHub.recordConfirmation(points);
+    function _recordUserJoined(address user) internal {
+        deploymentHub.onUserJoined(user);
+    }
+
+    function _submitConfirmation(address submittingUser, uint points) internal {
+        deploymentHub.onConfirmationSubmitted(submittingUser, points);
     }
 
     function _updateStatus(CommitmentStatus newStatus) internal {
-        deploymentHub.emitStatusChanged(status, newStatus);
+        deploymentHub.onStatusChanged(status, newStatus);
         status = newStatus;
     }
 }
