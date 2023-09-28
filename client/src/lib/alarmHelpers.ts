@@ -373,7 +373,7 @@ export async function queryAlarmCreationEvents(
 		address: hubAddress,
 		event: AlarmCreationEvent,
 		args: {
-			_type: alarmType ? alarmTypeVals[alarmType] : 0,
+			alarmType: alarmType ? alarmTypeVals[alarmType] : 0,
 			user: userAddress
 		},
 		fromBlock: BigInt(deploymentBlock),
@@ -394,7 +394,7 @@ export async function queryUserJoinedEvents(
 		event: AlarmJoinedEvent,
 		args: {
 			user: userAddress,
-			_type: alarmType ? alarmTypeVals[alarmType] : 0
+			alarmType: alarmType ? alarmTypeVals[alarmType] : 0
 		},
 		fromBlock: BigInt(deploymentBlock),
 		toBlock: 'latest'

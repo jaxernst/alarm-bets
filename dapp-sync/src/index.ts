@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../alarm-bets-db";
-import { createPublicClient, http, webSocket } from "viem";
+import { createPublicClient, getAbiItem, http, webSocket } from "viem";
 import { optimism, optimismGoerli } from "viem/chains";
 import { EvmAddress, alarmTypeVals, queryAlarmCreationEvents } from "./helpers";
 import { hubDeployments } from "@alarm-bets/contracts/lib/deployments";
@@ -155,6 +155,19 @@ async function onNewAlarmEvent(
   recordLastQueriedBlock(blockNumber);
 }
 
+async function onAlarmStatusChanged(alarmId: number, status: number) {
+  console.log("Alarm status changed for alarm", alarmId);
+  const { error } = await supabaseClient
+    .from("partner_alarms")
+    .update({ status })
+    .eq("alarm_id", alarmId);
+
+  if (error) {
+    console.log(error);
+    throw new Error("Failed to update alarm status");
+  }
+}
+
 async function backfillAlarmConstants() {
   const { data } = await supabaseClient
     .from("dapp_sync_status")
@@ -275,7 +288,16 @@ async function startPartnerAlarmSync() {
     args: {
       alarmType: alarmTypeVals["PartnerAlarmClock"],
     },
-    onLogs: () => void,
+    onLogs: (logs) => {
+      logs.forEach((log) => {
+        if (!log.args.alarmId || !log.args.to) {
+          throw new Error("Missing event args");
+        }
+
+        const alarmId = Number(log.args.alarmId);
+        onAlarmStatusChanged(alarmId, log.args.to);
+      });
+    },
   });
 
   setInterval(async () => {
