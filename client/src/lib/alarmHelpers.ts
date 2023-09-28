@@ -15,11 +15,11 @@ import {
 	AlarmStatus
 } from '@alarm-bets/contracts/lib/types';
 
-import HubAbi from './abi/AlarmBetsHub';
-import PartnerAlarmClock from './abi/PartnerAlarmClock';
+import HubAbi from '@alarm-bets/contracts/lib/abi/AlarmBetsHub';
+import PartnerAlarmClock from '@alarm-bets/contracts/lib/abi/PartnerAlarmClock';
 import type { EvmAddress } from './types';
 import { get } from 'svelte/store';
-import { deploymentBlockNumbers } from './deployments';
+import { deploymentBlockNumbers } from '@alarm-bets/contracts/lib/deployments';
 
 export const AlarmCreationEvent = getAbiItem({
 	abi: HubAbi,

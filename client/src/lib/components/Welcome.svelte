@@ -9,7 +9,10 @@
 	import { crossfade, fade, slide } from 'svelte/transition';
 	import { cubicIn, cubicInOut } from 'svelte/easing';
 	import { showWelcome, welcomeHasBeenViewed } from '../state/appState';
-	import { hubDeployments, partnerAlarmClockContractTemplates } from '../deployments';
+	import {
+		hubDeployments,
+		partnerAlarmClockContractTemplates
+	} from '@alarm-bets/contracts/lib/deployments';
 	import { onMount } from 'svelte';
 	import Deadline from '../icon-components/deadline.svelte';
 	import { isIosSafari } from '../util';
@@ -312,6 +315,7 @@
 								</li>
 							</ul>
 						</li>
+						<!--
 						<li>
 							OP Mainnet Contracts:
 							<ul class="indent-4">
@@ -331,6 +335,7 @@
 								</li>
 							</ul>
 						</li>
+						-->
 					</ul>
 				</div>
 				<div class="text-yellow-500">

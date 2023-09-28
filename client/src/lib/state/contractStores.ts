@@ -14,11 +14,10 @@ import { transactions } from '../transactions';
 import type { EvmAddress } from '../types';
 import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
 import { watchContractEvent } from '@wagmi/core';
-import PartnerAlarmClock from '../abi/PartnerAlarmClock';
-import SocialAlarmClockHub from '../abi/AlarmBetsHub';
-import { deploymentChainIds, hubDeployments } from '../deployments';
+import AlarmBetsHub from '@alarm-bets/contracts/lib/abi/AlarmBetsHub';
+
+import { deploymentChainIds, hubDeployments } from '@alarm-bets/contracts/lib/deployments';
 import { parseEther } from 'viem';
-import AlarmBetsHub from '../abi/AlarmBetsHub';
 
 export type UserAlarm = Awaited<ReturnType<typeof UserAlarmStore>>;
 export type AlarmState = {
@@ -138,7 +137,7 @@ export const userAlarms = (() => {
 				watchContractEvent(
 					{
 						address: $hub,
-						abi: SocialAlarmClockHub,
+						abi: AlarmBetsHub,
 						eventName: 'AlarmCreation'
 					},
 					([log]) => {
@@ -161,7 +160,7 @@ export const userAlarms = (() => {
 				watchContractEvent(
 					{
 						address: $hub,
-						abi: SocialAlarmClockHub,
+						abi: AlarmBetsHub,
 						eventName: 'UserJoined'
 					},
 					([log]) => {
