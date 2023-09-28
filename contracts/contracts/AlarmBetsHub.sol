@@ -68,19 +68,21 @@ contract AlarmBetsHub is AlarmFactory, IAlarmBetsHub {
     );
 
     event AlarmCreation(
+        RegisteredAlarmType indexed alarmType,
         address indexed user,
-        RegisteredAlarmType indexed _type,
         address alarmAddr,
         uint id
     );
 
     event StatusChanged(
+        RegisteredAlarmType indexed alarmType,
         uint indexed alarmId,
         CommitmentStatus from,
         CommitmentStatus to
     );
 
     event ConfirmationSubmitted(
+        RegisteredAlarmType indexed alarmType,
         address indexed user,
         uint indexed alarmId,
         uint pointsEarned
@@ -108,7 +110,7 @@ contract AlarmBetsHub is AlarmFactory, IAlarmBetsHub {
         alarmId[address(alarm)] = id;
         alarmType[address(alarm)] = _type;
 
-        emit AlarmCreation(msg.sender, _type, address(alarm), id);
+        emit AlarmCreation(_type, msg.sender, address(alarm), id);
     }
 
     modifier onlyHubRegisteredAlarm() {
@@ -132,7 +134,12 @@ contract AlarmBetsHub is AlarmFactory, IAlarmBetsHub {
         CommitmentStatus oldStatus,
         CommitmentStatus newStatus
     ) external onlyHubRegisteredAlarm {
-        emit StatusChanged(alarmId[msg.sender], oldStatus, newStatus);
+        emit StatusChanged(
+            alarmType[msg.sender],
+            alarmId[msg.sender],
+            oldStatus,
+            newStatus
+        );
     }
 
     function onConfirmationSubmitted(
@@ -145,6 +152,7 @@ contract AlarmBetsHub is AlarmFactory, IAlarmBetsHub {
         alarmBetsPoints[submittingUser] += pointsEarned;
 
         emit ConfirmationSubmitted(
+            _alarmType,
             submittingUser,
             alarmId[msg.sender],
             pointsEarned
