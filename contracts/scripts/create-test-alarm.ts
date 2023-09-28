@@ -19,9 +19,9 @@ async function main() {
   const u1 = new Wallet(process.env.TEST_U1_KEY as string, ethers.provider);
   const u2 = new Wallet(process.env.TEST_U2_KEY as string, ethers.provider);
 
-  const hub = (
-    await ethers.getContractAt("SocialAlarmClockHub", HUB_ADDR)
-  ).connect(u1);
+  const hub = (await ethers.getContractAt("AlarmBetsHub", HUB_ADDR)).connect(
+    u1
+  );
 
   for (let u of [u1, u2]) {
     await signer.sendTransaction({ to: u.address, value: parseEther("1") });
@@ -42,6 +42,7 @@ async function main() {
       missedAlarmPenalty,
       submissionWindow,
       -6 * HOUR,
+      u1.address,
       u2.address,
     ]
   );

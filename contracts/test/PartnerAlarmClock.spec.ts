@@ -16,9 +16,8 @@ import {
 } from "./helpers/time";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber, BigNumberish, getDefaultProvider } from "ethers";
-import { AlarmStatus, alarmTypeVals } from "../lib/types";
-import { ZERO_ADDRESS } from "./helpers/constants";
+import { BigNumber, BigNumberish } from "ethers";
+import { AlarmStatus } from "../lib/types";
 
 describe("Partner Alarm Clock spec", () => {
   let hub: SocialAlarmClockHub;
@@ -27,7 +26,6 @@ describe("Partner Alarm Clock spec", () => {
   let p1: SignerWithAddress;
   let p2: SignerWithAddress;
 
-  // Defaults
   const DEF_INITIAL_DEPOSIT = parseEther("1");
   const DEF_PENALTY = parseEther("0.1");
   const DEF_SUBMISSION_WINDOW = 30; // seconds
@@ -58,7 +56,7 @@ describe("Partner Alarm Clock spec", () => {
   };
 
   before(async () => {
-    hub = await deployTyped<SocialAlarmClockHub>("SocialAlarmClockHub");
+    hub = await deployTyped<SocialAlarmClockHub>("AlarmBetsHub");
   });
 
   beforeEach(async () => {

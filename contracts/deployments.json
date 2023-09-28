@@ -1,7 +1,7 @@
 {
   "optimism-goerli": {
-    "SocialAlarmClockHub": "0xe36a39e59e4Cd17E0922E8d7c1209606abda0186",
-    "PartnerAlarmClock": "0x847cc5099d86e931216cDb8B3eCBC5acB354420e"
+    "AlarmBetsHub": "0x92eb8aD38ce67B3499CdEEaD96f97D45087c37D4",
+    "PartnerAlarmClock": "0x345d6532B3542bE064407C31Eb8d7cBa4033Cd36"
   },
   "base-mainnet": {
     "SocialAlarmClockHub": "0x61d68465f88b9DE628D5d0Cbac12A5B8c5E4E236",

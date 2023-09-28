@@ -15,7 +15,7 @@ import {
 	AlarmStatus
 } from '@alarm-bets/contracts/lib/types';
 
-import HubAbi from './abi/SocialAlarmClockHub';
+import HubAbi from './abi/AlarmBetsHub';
 import PartnerAlarmClock from './abi/PartnerAlarmClock';
 import type { EvmAddress } from './types';
 import { get } from 'svelte/store';

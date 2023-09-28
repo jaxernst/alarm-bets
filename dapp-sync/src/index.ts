@@ -9,7 +9,7 @@ import SocialAlarmClockHub from "./abi/SocialAlarmClockHub";
 
 require("dotenv").config({ path: "../.env" });
 
-// Every 50 seconds received, update dapp-sync table state
+// Every 50 seconds received, update dapp-sync status in db
 const BLOCK_SYNC_INTERVAL = 60;
 
 const chainName: "optimismGoerli" | "optimism" = "optimismGoerli";
@@ -18,6 +18,8 @@ const chains = {
   optimismGoerli: optimismGoerli,
   optimismMainnet: optimism,
 };
+
+const hubAddress = hubDeployments[chains[chainName].id];
 
 if (!process.env.ALCHEMY_OP_GOERLI_KEY || !process.env.ALCHEMY_OP_MAINNET_KEY) {
   throw new Error("Missing Alchemy API key");
@@ -34,8 +36,6 @@ const alchemyEndpoints = {
   },
 };
 
-const hubAddress = hubDeployments[chains[chainName].id];
-
 if (!process.env.PUBLIC_SUPA_API_URL || !process.env.PRIVATE_SUPA_SERVICE_KEY) {
   throw new Error("Missing Supabase env variables for notifcation server");
 }
@@ -50,13 +50,6 @@ export const supabaseClient = createClient<Database>(
   }
 );
 
-export const wsClient = createPublicClient({
-  chain: chains[chainName],
-  transport: webSocket(
-    "wss://opt-goerli.g.alchemy.com/v2/_k4Jxl6GexIvooQrdgnxZj9OFj8pGWrw"
-  ),
-});
-
 export const viemClient = createPublicClient({
   chain: chains[chainName],
   transport: http(alchemyEndpoints[chainName].http),
@@ -64,8 +57,8 @@ export const viemClient = createPublicClient({
 
 /**
  * To start the sync process, we will query the RPC for all partner alarm creation
- * events. For each creation event, we will query for the alarm constants and store
- * those in the db
+ * events. For each creation event that we don't have an id saved, we will query for the
+ * alarm constants and store those in the db
  *
  * After these alarms have been backfilled, we will start watching for new alarms
  *
@@ -79,6 +72,7 @@ const alarmConstantsMulticallArgs = (alarmAddr: EvmAddress) => {
     contracts: [
       { ..._multicallArgs, functionName: "alarmTime" },
       { ..._multicallArgs, functionName: "alarmDays" },
+      { ..._multicallArgs, functionName: "status" },
       { ..._multicallArgs, functionName: "player1" },
       { ..._multicallArgs, functionName: "player2" },
       { ..._multicallArgs, functionName: "submissionWindow" },
@@ -91,6 +85,7 @@ function formatAlarmConstants(
   alarmAddr: EvmAddress,
   alarmTime: bigint,
   alarmDays: readonly number[],
+  status: number,
   player1: EvmAddress,
   player2: EvmAddress,
   submissionWindow: bigint
@@ -98,6 +93,7 @@ function formatAlarmConstants(
   return {
     alarm_id: alarmId,
     alarm_address: alarmAddr,
+    status,
     player1,
     player2,
     alarm_time: Number(alarmTime),
@@ -209,17 +205,20 @@ async function backfillAlarmConstants() {
   // Save alarm constants to db
   const rowsToInsert = multicallRes.map((res, i) => {
     const { id, alarmAddr } = alarmInfo[i];
-    const [alarmTime, alarmDays, player1, player2, submissionWindow]: [
-      bigint,
-      readonly number[],
-      EvmAddress,
-      EvmAddress,
-      bigint
-    ] = res as any;
+    const [
+      alarmTime,
+      alarmDays,
+      alarmStatus,
+      player1,
+      player2,
+      submissionWindow,
+    ]: [bigint, readonly number[], number, EvmAddress, EvmAddress, bigint] =
+      res as any;
 
     return {
       alarm_id: Number(id),
       alarm_address: alarmAddr,
+      status: alarmStatus,
       player1,
       player2,
       alarm_time: Number(alarmTime),
@@ -234,6 +233,7 @@ async function backfillAlarmConstants() {
     .insert(rowsToInsert);
 
   if (error1) {
+    console.log(error1);
     throw new Error("Failed to insert alarm constants");
   }
 
