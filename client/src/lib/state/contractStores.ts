@@ -15,9 +15,10 @@ import type { EvmAddress } from '../types';
 import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
 import { watchContractEvent } from '@wagmi/core';
 import PartnerAlarmClock from '../abi/PartnerAlarmClock';
-import SocialAlarmClockHub from '../abi/SocialAlarmClockHub';
+import SocialAlarmClockHub from '../abi/AlarmBetsHub';
 import { deploymentChainIds, hubDeployments } from '../deployments';
 import { parseEther } from 'viem';
+import AlarmBetsHub from '../abi/AlarmBetsHub';
 
 export type UserAlarm = Awaited<ReturnType<typeof UserAlarmStore>>;
 export type AlarmState = {
@@ -76,21 +77,9 @@ const alarmQueryDeps = derived([account, hub], ([$user, $hub]) => {
 export const userAlarms = (() => {
 	const userAlarms = writable<Record<number, UserAlarm>>({});
 
-	const addAlarm = async (
-		user: EvmAddress,
-		alarmAddr: EvmAddress,
-		id: number,
-		creationBlock: number,
-		initialStatus: AlarmStatus
-	) => {
-		const alarm = await UserAlarmStore(user, {
-			contractAddress: alarmAddr,
-			id,
-			creationBlock,
-			status: initialStatus
-		});
-
-		userAlarms.update((s) => ({ ...s, [Number(id)]: alarm }));
+	const addAlarm = async (user: EvmAddress, hub: EvmAddress, alarmParams: AlarmBaseInfo) => {
+		const alarm = await UserAlarmStore(user, hub, alarmParams);
+		userAlarms.update((s) => ({ ...s, [Number(alarmParams.id)]: alarm }));
 	};
 
 	// Auto fetch user alarms and create stores for them
@@ -104,7 +93,7 @@ export const userAlarms = (() => {
 			if (get(userAlarms)[Number(id)] || alarm.status === AlarmStatus.CANCELLED) {
 				continue;
 			}
-			currentAlarms[Number(id)] = await UserAlarmStore($user, alarm);
+			currentAlarms[Number(id)] = await UserAlarmStore($user, $hub, alarm);
 			userAlarms.set(currentAlarms);
 		}
 	});
@@ -144,13 +133,12 @@ export const userAlarms = (() => {
 					([log]) => {
 						if (log.args.user !== $user) return;
 						if (!log.args.alarmAddr || !log.args.id) throw Error('Creation event invalid');
-						addAlarm(
-							$user,
-							log.args.alarmAddr,
-							Number(log.args.id),
-							Number(log.blockNumber),
-							AlarmStatus.INACTIVE
-						);
+						addAlarm($user, $hub, {
+							contractAddress: log.args.alarmAddr,
+							id: Number(log.args.id),
+							creationBlock: Number(log.blockNumber),
+							status: AlarmStatus.INACTIVE
+						});
 					}
 				)
 			);
@@ -168,13 +156,12 @@ export const userAlarms = (() => {
 					([log]) => {
 						if (log.args.user !== $user) return;
 						if (!log.args.alarmAddr || !log.args.id) throw Error('Creation event invalid');
-						addAlarm(
-							$user,
-							log.args.alarmAddr,
-							Number(log.args.id),
-							Number(log.blockNumber),
-							AlarmStatus.ACTIVE
-						);
+						addAlarm($user, $hub, {
+							contractAddress: log.args.alarmAddr,
+							id: Number(log.args.id),
+							creationBlock: Number(log.blockNumber),
+							status: AlarmStatus.ACTIVE
+						});
 					}
 				)
 			);
@@ -214,7 +201,7 @@ export const userAlarms = (() => {
  *
  * - Created my the userAlarms store
  */
-async function UserAlarmStore(user: EvmAddress, alarm: AlarmBaseInfo) {
+async function UserAlarmStore(user: EvmAddress, hub: EvmAddress, alarm: AlarmBaseInfo) {
 	const addr = alarm.contractAddress;
 
 	const constants = writable({
@@ -300,11 +287,13 @@ async function UserAlarmStore(user: EvmAddress, alarm: AlarmBaseInfo) {
 	// Add status change listener
 	watchContractEvent(
 		{
-			address: addr,
-			abi: PartnerAlarmClock,
+			address: hub,
+			abi: AlarmBetsHub,
 			eventName: 'StatusChanged'
 		},
 		([log]) => {
+			if (!log.args.alarmId || Number(log.args.alarmId) !== alarm.id) return;
+
 			console.log('Status changed', log);
 			const newStatus = log.args.to! as AlarmStatus;
 			alarmState.update((s) => ({ ...s, status: newStatus }));
@@ -317,14 +306,16 @@ async function UserAlarmStore(user: EvmAddress, alarm: AlarmBaseInfo) {
 	// Listen for confirmation events and update alarm state
 	watchContractEvent(
 		{
-			address: addr,
-			abi: PartnerAlarmClock,
+			address: hub,
+			abi: AlarmBetsHub,
 			eventName: 'ConfirmationSubmitted'
 		},
 		([log]) => {
+			if (!log.args.alarmId || Number(log.args.alarmId) !== alarm.id) return;
+
 			let newConfirmationCount: Partial<AlarmState>;
 			alarmState.update((s) => {
-				if (log.args.from === get(constants).player1) {
+				if (log.args.user === get(constants).player1) {
 					newConfirmationCount = {
 						player1Confirmations: (s.player1Confirmations ?? 0n) + 1n
 					};
