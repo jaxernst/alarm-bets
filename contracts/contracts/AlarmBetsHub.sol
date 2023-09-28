@@ -86,6 +86,13 @@ contract AlarmBetsHub is AlarmFactory, IAlarmBetsHub {
         uint pointsEarned
     );
 
+    function setPointsMultiplier(
+        RegisteredAlarmType _type,
+        uint multiplier
+    ) public onlyOwner {
+        pointMultipliers[_type] = multiplier;
+    }
+
     /**
      * Creates and initializes an alarm
      */
@@ -130,13 +137,12 @@ contract AlarmBetsHub is AlarmFactory, IAlarmBetsHub {
 
     function onConfirmationSubmitted(
         address submittingUser,
-        uint pointsEarned
+        uint _pointsEarned
     ) external onlyHubRegisteredAlarm {
         RegisteredAlarmType _alarmType = alarmType[msg.sender];
 
-        alarmBetsPoints[submittingUser] +=
-            pointsEarned *
-            pointMultipliers[_alarmType];
+        uint pointsEarned = _pointsEarned * pointMultipliers[_alarmType];
+        alarmBetsPoints[submittingUser] += pointsEarned;
 
         emit ConfirmationSubmitted(
             submittingUser,
