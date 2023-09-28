@@ -10,12 +10,9 @@ let gasPrice = parseUnits("1", "gwei");
  */
 async function main() {
   const factory = await ethers.getContractFactory("AlarmBetsHub");
-  gasPrice = await ethers.provider.getGasPrice();
-  // const CPH = await factory.deploy({ gasPrice });
-  const hub = await factory.attach(
-    "0x92eb8aD38ce67B3499CdEEaD96f97D45087c37D4"
-  );
-  // console.log("Deployed protocol hub to", hub.address);
+  gasPrice = (await ethers.provider.getGasPrice()).add(parseUnits("1", "gwei"));
+  const hub = await factory.deploy({ gasPrice });
+  console.log("Deployed protocol hub to", hub.address);
 
   await registerType(hub, "PartnerAlarmClock");
 }
