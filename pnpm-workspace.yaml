@@ -1,5 +1,5 @@
 packages:
   - "contracts"
   - "client"
-  - "notification-server"
+  - "dapp-notify"
   - "dapp-sync"

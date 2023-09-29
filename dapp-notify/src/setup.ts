@@ -1,8 +1,6 @@
-import express from "express";
 import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
-import { runScheduler } from "./notificationScheduler";
-import type { Database } from "../../database";
+import type { Database } from "../../alarm-bets-db";
 
 require("dotenv").config({ path: "../.env" });
 
@@ -29,14 +27,3 @@ webpush.setVapidDetails(
   process.env.PUBLIC_VAPID_KEY,
   process.env.PRIVATE_VAPID_KEY
 );
-
-const app = express();
-const PORT = 3000;
-
-app.get("/", (req, res) => {
-  res.send("Hello, TypeScript!");
-});
-
-app.listen(PORT, () => {
-  runScheduler();
-});
