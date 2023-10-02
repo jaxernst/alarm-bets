@@ -5,9 +5,12 @@ import { optimism, optimismGoerli } from "viem/chains";
 import { EvmAddress, alarmTypeVals, queryAlarmCreationEvents } from "./helpers";
 import { hubDeployments } from "@alarm-bets/contracts/lib/deployments";
 import PartnerAlarmClock from "@alarm-bets/contracts/lib/abi/PartnerAlarmClock";
+import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
 import AlarmBetsHub from "@alarm-bets/contracts/lib/abi/AlarmBetsHub";
 
 require("dotenv").config({ path: "../.env" });
+
+type RowSchema = Database["public"]["Tables"]["partner_alarms"]["Row"];
 
 // Every 50 seconds received, update dapp-sync status in db
 const BLOCK_SYNC_INTERVAL = 60;
@@ -155,17 +158,103 @@ async function onNewAlarmEvent(
   recordLastQueriedBlock(blockNumber);
 }
 
-async function onAlarmStatusChanged(alarmId: number, status: number) {
+async function onAlarmStatusChanged(
+  alarmId: number,
+  oldStatus: number,
+  newStatus: number
+) {
   console.log("Alarm status changed for alarm", alarmId);
+
+  const updatedRow: Partial<RowSchema> = { status: newStatus };
+
+  if (oldStatus === AlarmStatus.INACTIVE) {
+    const { data, error } = await supabaseClient
+      .from("partner_alarms")
+      .select("alarm_address,player1,player2")
+      .eq("alarm_id", alarmId);
+
+    if (error) throw error;
+    if (!data)
+      throw new Error(`Missing expected data in query for alarm id ${alarmId}`);
+
+    const [p1Tz, p2Tz] = await queryTimezoneOffsets(data);
+    updatedRow["player1_timezone"] = Number(p1Tz);
+    updatedRow["player2_timezone"] = Number(p2Tz);
+  }
+
+  console.log("updated row:", updatedRow);
   const { error } = await supabaseClient
     .from("partner_alarms")
-    .update({ status })
+    .update(updatedRow)
     .eq("alarm_id", alarmId);
 
   if (error) {
     console.log(error);
     throw new Error("Failed to update alarm status");
   }
+}
+
+async function queryTimezoneOffsets(
+  alarmsToQuery: {
+    alarm_address: string;
+    player1: string;
+    player2: string;
+  }[]
+) {
+  const contractCalls = alarmsToQuery
+    .map(
+      ({ alarm_address, player1, player2 }) =>
+        [
+          {
+            address: alarm_address as EvmAddress,
+            abi: PartnerAlarmClock,
+            functionName: "playerTimezone",
+            args: [player1 as EvmAddress],
+          },
+          {
+            address: alarm_address as EvmAddress,
+            abi: PartnerAlarmClock,
+            functionName: "playerTimezone",
+            args: [player2 as EvmAddress],
+          },
+        ] as const
+    )
+    .flat();
+
+  return await viemClient.multicall({
+    contracts: contractCalls,
+    allowFailure: false,
+  });
+}
+
+/**
+ * Query and add timezone values for activated alarms
+ */
+async function addTimezoneOffsets(alarms: RowSchema[]) {
+  // Inactive alarms don't have both player's timezone offset
+  const alarmsToQuery = alarms.filter((a) => a.status !== AlarmStatus.INACTIVE);
+
+  if (alarmsToQuery.length === 0) return alarms;
+
+  const res = await queryTimezoneOffsets(alarmsToQuery);
+
+  if (res.length !== alarmsToQuery.length * 2) throw new Error("whoopsie");
+
+  let iRes = 0;
+  const timezoneAdded = alarmsToQuery.reduce((acc, alarm) => {
+    acc[alarm.alarm_id] = {
+      ...alarm,
+      player1_timezone: Number(res[iRes]),
+      player2_timezone: Number(res[iRes + 1]),
+    };
+
+    iRes += 2;
+    return acc;
+  }, {} as { [key: string]: (typeof alarms)[0] });
+
+  return alarms.map((a) =>
+    timezoneAdded[a.alarm_id] ? timezoneAdded[a.alarm_id] : a
+  );
 }
 
 async function backfillAlarmConstants() {
@@ -220,7 +309,7 @@ async function backfillAlarmConstants() {
   );
 
   // Save alarm constants to db
-  const rowsToInsert = multicallRes.map((res, i) => {
+  const alarmConstants = multicallRes.map((res, i) => {
     const { id, alarmAddr } = alarmInfo[i];
     const [
       alarmTime,
@@ -243,6 +332,8 @@ async function backfillAlarmConstants() {
       submission_window: Number(submissionWindow),
     };
   });
+
+  const rowsToInsert = await addTimezoneOffsets(alarmConstants);
 
   console.log("Inserting", rowsToInsert.length, "rows");
   const { error: error1 } = await supabaseClient
@@ -290,12 +381,16 @@ async function startPartnerAlarmSync() {
     },
     onLogs: (logs) => {
       logs.forEach((log) => {
-        if (!log.args.alarmId || !log.args.to) {
-          throw new Error("Missing event args");
+        if (
+          !log.args.alarmId ||
+          log.args.to === undefined ||
+          log.args.from === undefined
+        ) {
+          return console.error("Missing event args");
         }
 
         const alarmId = Number(log.args.alarmId);
-        onAlarmStatusChanged(alarmId, log.args.to);
+        onAlarmStatusChanged(alarmId, log.args.from, log.args.to);
       });
     },
   });
