@@ -330,6 +330,8 @@ async function backfillAlarmConstants() {
       alarm_time: Number(alarmTime),
       alarm_days: alarmDays.toString(),
       submission_window: Number(submissionWindow),
+      player1_timezone: null,
+      player2_timezone: null,
     };
   });
 
