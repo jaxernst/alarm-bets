@@ -89,7 +89,7 @@ async function scheduleNext(
   }
 
   const notifyTimeout = timeTillNextAlarm - alarm.submissionWindow;
-  console.log("Next notification in ", notifyTimeout / 60, "minutes");
+  console.log("Alarm notification due in ", notifyTimeout / 60, "minutes");
 
   const timer = setTimeout(async () => {
     onNotificationDue(user);
@@ -110,12 +110,12 @@ async function getActiveAlarms(user: EvmAddress) {
   const { data, error } = await supabaseClient
     .from("partner_alarms")
     .select("*")
-    .eq("user_address", user)
-    .eq("status", AlarmStatus.ACTIVE);
+    .eq("status", AlarmStatus.ACTIVE)
+    .or(`player1.eq.${user}, player2.eq.${user}`);
 
   if (error) {
     throw new Error(
-      "Error fetching alarm notifications from Supabase: " + error
+      "Error fetching alarm notifications from Supabase: " + error.details
     );
   }
 
@@ -125,6 +125,7 @@ async function getActiveAlarms(user: EvmAddress) {
 async function startAlarmScheduler(user: EvmAddress) {
   const timers: Record<AlarmId, NodeJS.Timeout> = {};
   const activeAlarms = await getActiveAlarms(user);
+  console.log("Starting scehdules for", activeAlarms.length, "alarm/s");
 
   for (const alarm of activeAlarms) {
     if (alarm.player1_timezone === null || alarm.player2_timezone === null) {
@@ -149,20 +150,40 @@ async function startAlarmScheduler(user: EvmAddress) {
     );
   }
 
-  // Listen to the db for changing alarm status
-  // -> On status changed to active: start a schedule for that alarm
-  // -> On status changed to anything but active: stop the schedule for that alarm
+  /* Listen to the db for changing alarm status */
 
-  return timers;
+  if (activeAlarms.length >= 100) {
+    throw new Error(
+      "Too many alarms for supabase realtime subscriptions using the in.() filter"
+    );
+  }
+
+  supabaseClient
+    .channel("alarm-state-updates")
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "partner_alarms",
+      },
+      (payload) => {
+        // -> On status changed to anything but active: stop the schedule for that alarm
+        // -> On status changed to active: start a schedule for that alarm
+        console.log("Partner_alarms table updated", payload);
+      }
+    )
+    .subscribe();
 }
 
 /**
  * When new notification subscriptions are added, check if the user already has
  * a notification scheduler running.
  * If already running -> add the new device/subscription pair to notification state
- * If not already running -> start scehduler for that user
+ * If not already running -> start scheduler for that user
  */
 async function onNotificationsRowAdded(row: AlarmNotificationRow) {
+  console.log("notification subscription row added");
   const user = row.user_address as EvmAddress;
 
   // If user already has an alarm scheduler active, add the new device to the list
@@ -171,9 +192,12 @@ async function onNotificationsRowAdded(row: AlarmNotificationRow) {
   if (userState) {
     const userDevices = userState.deviceSubscriptions;
     // If device is already in the device/subscription list, do nothing
-    if (userDevices?.some((device) => device.deviceId === row.device_id))
+    if (userDevices?.some((device) => device.deviceId === row.device_id)) {
+      console.log("Device already subscribed");
       return;
+    }
 
+    console.log("Adding device to subscirptions");
     // If device is not already stored in the device/subscription list, add it
     return notificationState.set(user, {
       ...userState,
@@ -187,10 +211,13 @@ async function onNotificationsRowAdded(row: AlarmNotificationRow) {
     });
   }
 
+  console.log("No alarm schedule started. Starting schedule for", user);
   startAlarmScheduler(user);
 }
 
-async function onNotificationsRowDeleted(row: AlarmNotificationRow) {}
+async function onNotificationsRowDeleted(row: AlarmNotificationRow) {
+  console.log("Notification row deleted");
+}
 
 export async function runAlarmDeadlineNotificationSchedule(
   supabaseClient: SupabaseClient<Database>
@@ -212,7 +239,7 @@ export async function runAlarmDeadlineNotificationSchedule(
   }
 
   supabaseClient
-    .channel("schema-db-changes")
+    .channel("notification-state-update")
     .on(
       "postgres_changes",
       {
@@ -220,7 +247,9 @@ export async function runAlarmDeadlineNotificationSchedule(
         schema: "public",
         table: "alarm_notifications",
       },
-      (payload) => onNotificationsRowAdded(payload.new as AlarmNotificationRow)
+      (payload) => {
+        onNotificationsRowAdded(payload.new as AlarmNotificationRow);
+      }
     )
     .on(
       "postgres_changes",
@@ -229,7 +258,9 @@ export async function runAlarmDeadlineNotificationSchedule(
         schema: "public",
         table: "alarm_notifications",
       },
-      (payload) => onNotificationsRowAdded(payload.old as AlarmNotificationRow)
+      (payload) => {
+        onNotificationsRowDeleted(payload.old as AlarmNotificationRow);
+      }
     )
     .subscribe();
 }
