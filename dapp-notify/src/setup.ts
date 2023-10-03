@@ -4,18 +4,13 @@ import type { Database } from "../../alarm-bets-db";
 
 require("dotenv").config({ path: "../.env" });
 
-if (!process.env.PUBLIC_SUPA_API_URL || !process.env.PUBLIC_SUPA_ANON_KEY) {
+if (!process.env.PUBLIC_SUPA_API_URL || !process.env.PRIVATE_SUPA_SERVICE_KEY) {
   throw new Error("Missing Supabase env variables for notifcation server");
 }
 
 export const supabaseClient = createClient<Database>(
   process.env.PUBLIC_SUPA_API_URL,
-  process.env.PUBLIC_SUPA_ANON_KEY,
-  {
-    auth: {
-      persistSession: false,
-    },
-  }
+  process.env.PRIVATE_SUPA_SERVICE_KEY
 );
 
 if (!process.env.PUBLIC_VAPID_KEY || !process.env.PRIVATE_VAPID_KEY) {
