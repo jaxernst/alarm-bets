@@ -257,18 +257,10 @@ async function addTimezoneOffsets(alarms: RowSchema[]) {
   );
 }
 
-async function backfillAlarmConstants() {
-  const { data } = await supabaseClient
-    .from("dapp_sync_status")
-    .select("last_block_queried")
-    .eq("alarm_type", "PartnerAlarmClock");
-
-  console.log("Resuming alarm sync from block", data?.[0].last_block_queried);
-
-  const block = await viemClient.getBlockNumber();
+async function backfillAlarmConstants(fromBlock: number, toBlock: number) {
   const events = await queryAlarmCreationEvents(hubAddress, {
-    fromBlock: BigInt(data?.[0].last_block_queried ?? 0),
-    toBlock: block,
+    fromBlock: BigInt(fromBlock),
+    toBlock: BigInt(toBlock),
     alarmType: "PartnerAlarmClock",
   });
 
@@ -346,12 +338,21 @@ async function backfillAlarmConstants() {
     console.log(error1);
     throw new Error("Failed to insert alarm constants");
   }
-
-  recordLastQueriedBlock(Number(block));
 }
 
+async function backfillStatusUpdates(fromBlock: number, toBlock: number) {}
+
 async function startPartnerAlarmSync() {
-  await backfillAlarmConstants();
+  const { data } = await supabaseClient
+    .from("dapp_sync_status")
+    .select("last_block_queried")
+    .eq("alarm_type", "PartnerAlarmClock");
+
+  const lastObservedBlock = data?.[0].last_block_queried ?? 0;
+  const queryToBlock = await viemClient.getBlockNumber();
+  await backfillAlarmConstants(lastObservedBlock, Number(queryToBlock));
+  await backfillStatusUpdates(lastObservedBlock, Number(queryToBlock));
+  recordLastQueriedBlock(Number(queryToBlock));
 
   console.log("Listening for new alarm events...");
   viemClient.watchContractEvent({
