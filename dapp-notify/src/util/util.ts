@@ -1,5 +1,5 @@
 import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
-import { supabaseClient } from "../setup";
+import { supabaseClient } from "../.";
 import { EvmAddress } from "../types";
 
 export function parseAlarmDays(alarmDays: string) {

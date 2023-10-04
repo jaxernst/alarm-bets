@@ -71,6 +71,9 @@ export const viemClient = createPublicClient({
  *
  * Occassionally, we will save the last received block number to the db to pick up from
  * after a restart
+ *
+ * TODO: we need to handle the case where alarm state variables (only status rn) change while
+ * dapp-sync is down. We need to updates statuses by querying events from the last saved block
  */
 
 const alarmConstantsMulticallArgs = (alarmAddr: EvmAddress) => {
@@ -135,6 +138,7 @@ async function onNewAlarmEvent(
     .select("alarm_id")
     .eq("alarm_id", alarmId);
 
+  console.log(existingAlarm);
   if (existingAlarm?.length) {
     throw new Error("Alarm already exists in db");
   }
@@ -350,6 +354,7 @@ async function startPartnerAlarmSync() {
 
   const lastObservedBlock = data?.[0].last_block_queried ?? 0;
   const queryToBlock = await viemClient.getBlockNumber();
+
   await backfillAlarmConstants(lastObservedBlock, Number(queryToBlock));
   await backfillStatusUpdates(lastObservedBlock, Number(queryToBlock));
   recordLastQueriedBlock(Number(queryToBlock));

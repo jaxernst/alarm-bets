@@ -1,19 +1,13 @@
-import { getTimeUntilNextAlarm } from "../time";
+import { getTimeUntilNextAlarm } from "../util/time";
 import { sendNotification, type PushSubscription } from "web-push";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../alarm-bets-db";
 import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
-import { supabaseClient } from "../setup";
-import { getActiveAlarms, parseAlarmDays } from "./util";
+import { EvmAddress } from "../types";
+import { getActiveAlarms, parseAlarmDays } from "../util/util";
 
-/**
- * -> New row added to alarm_notifications table
- *  -> If user does not have an alarm scheduler, start one
- *  -> If user does have an alarm scheduler active, add the new device to the list
- */
-
-type EvmAddress = `0x${string}`;
 type AlarmId = number;
+
 type AlarmNotificationRow =
   Database["public"]["Tables"]["alarm_notifications"]["Row"];
 
@@ -24,13 +18,12 @@ type DeviceSubscription = {
   subscription: PushSubscription;
 };
 
-type ScheduleKey = `${EvmAddress}-${AlarmId}`;
-
+// Global state to manage notification scehdules
 const deviceSubscriptions: Record<EvmAddress, DeviceSubscription[]> = {};
 const scheduleTimers: Record<EvmAddress, Record<AlarmId, NodeJS.Timeout>> = {};
 
-async function onNotificationDue(user: EvmAddress) {
-  const devices = notificationState.get(user)?.deviceSubscriptions;
+async function sendPushNotification(user: EvmAddress) {
+  const devices = deviceSubscriptions[user];
   if (!devices) {
     console.error("No ddevices found to notify", user);
     return new Error("No devices found");
@@ -56,16 +49,17 @@ async function onNotificationDue(user: EvmAddress) {
 async function scheduleNext(
   user: EvmAddress,
   alarm: {
-    alarmTime: number;
-    alarmDays: number[];
+    id: number;
+    time: number;
+    days: number[];
     timezoneOffset: number;
     submissionWindow: number;
   }
 ) {
   const timeTillNextAlarm = getTimeUntilNextAlarm(
-    alarm.alarmTime,
+    alarm.time,
     alarm.timezoneOffset,
-    alarm.alarmDays
+    alarm.days
   );
 
   if (timeTillNextAlarm <= alarm.submissionWindow) {
@@ -81,8 +75,12 @@ async function scheduleNext(
   const notifyTimeout = timeTillNextAlarm - alarm.submissionWindow;
   console.log("Alarm notification due in ", notifyTimeout / 60, "minutes");
 
-  setTimeout(async () => {
-    onNotificationDue(user);
+  if (!scheduleTimers[user]) {
+    scheduleTimers[user] = {};
+  }
+
+  scheduleTimers[user][alarm.id] = setTimeout(async () => {
+    sendPushNotification(user);
 
     // After sending the notification, wait for the submission window to close
     // (when alarm is due) and then schedule the next notification
@@ -94,7 +92,112 @@ async function scheduleNext(
   }, notifyTimeout * 1000);
 }
 
-async function startAlarmScheduler(user: EvmAddress) {
+async function onAlarmActivated(alarm: AlarmRow) {
+  if (alarm.status !== AlarmStatus.ACTIVE) {
+    throw new Error("Alarm not activated");
+  }
+
+  console.log("Alarm", alarm.alarm_id, "activated");
+
+  const p1 = alarm.player1 as EvmAddress;
+  const p2 = alarm.player2 as EvmAddress;
+
+  // If either player has notifications subscriptions, start the schedule
+  // for that player1-alarmId key
+  if (deviceSubscriptions[p1] && !scheduleTimers[p1][alarm.alarm_id]) {
+    if (!alarm.player1_timezone) {
+      throw new Error("Missing p1 timezone for active alarm");
+    }
+
+    console.log("Scheduling this alarm notification for player 1");
+    return scheduleNext(p1, {
+      id: alarm.alarm_time,
+      time: alarm.alarm_time,
+      days: parseAlarmDays(alarm.alarm_days),
+      timezoneOffset: alarm.player1_timezone,
+      submissionWindow: alarm.submission_window,
+    });
+  }
+
+  if (deviceSubscriptions[p2] && !scheduleTimers[p2][alarm.alarm_id]) {
+    if (!alarm.player2_timezone) {
+      throw new Error("Missing p1 timezone for active alarm");
+    }
+
+    console.log("Scheduling this alarm notification for player 2");
+    return scheduleNext(p2, {
+      id: alarm.alarm_id,
+      time: alarm.alarm_time,
+      days: parseAlarmDays(alarm.alarm_days),
+      timezoneOffset: alarm.player2_timezone,
+      submissionWindow: alarm.submission_window,
+    });
+  }
+}
+
+async function onAlarmDeactivated(alarm: AlarmRow) {
+  const p1 = alarm.player1 as EvmAddress;
+  const p2 = alarm.player2 as EvmAddress;
+
+  if (scheduleTimers[p1]?.[alarm.alarm_id]) {
+    clearTimeout(scheduleTimers[p1][alarm.alarm_id]);
+    delete scheduleTimers[p1][alarm.alarm_id];
+  }
+
+  if (scheduleTimers[p2]?.[alarm.alarm_id]) {
+    clearTimeout(scheduleTimers[p2][alarm.alarm_id]);
+    delete scheduleTimers[p2][alarm.alarm_id];
+  }
+}
+
+async function onNotificationsRowAdded(row: AlarmNotificationRow) {
+  console.log("\n Notification subscription row added");
+
+  const user = row.user_address as EvmAddress;
+  const userDevices = deviceSubscriptions[user];
+
+  // If no devices active add the first one and start the active alarm schedules
+  if (!userDevices) {
+    deviceSubscriptions[user] = [];
+    startActiveAlarmSchedules(user);
+  }
+
+  // Add the device to the list
+  if (
+    !deviceSubscriptions[user].some(
+      (device) => device.deviceId === row.device_id
+    )
+  ) {
+    deviceSubscriptions[user] = [
+      ...deviceSubscriptions[user],
+      {
+        subscription: row.subscription as unknown as PushSubscription,
+        deviceId: row.device_id,
+      },
+    ];
+  }
+}
+
+async function onNotificationsRowDeleted(row: AlarmNotificationRow) {
+  console.log("\n Notification row deleted");
+
+  const user = row.user_address as EvmAddress;
+  const userDevices = deviceSubscriptions[user];
+
+  // Remove device id from the array
+  const newDevices = userDevices.filter((d) => d.deviceId !== row.device_id);
+  console.log("User has", newDevices.length, "subscriptions active");
+
+  // If there are no more devices, delete user from subscirption record and cancel
+  // all pending notification timers
+  if (newDevices.length === 0) {
+    console.log("No subscriptions left, canceling timers");
+    delete deviceSubscriptions[user];
+    Object.values(scheduleTimers[user]).forEach(clearTimeout);
+  }
+}
+
+async function startActiveAlarmSchedules(user: EvmAddress) {
   const activeAlarms = await getActiveAlarms(user);
   console.log("Starting scehdules for", activeAlarms.length, "alarm/s");
 
@@ -106,9 +209,10 @@ async function startAlarmScheduler(user: EvmAddress) {
     const isPlayer1 = user.toLowerCase() === alarm.player1.toLowerCase();
 
     scheduleNext(user, {
-      alarmTime: alarm.alarm_time,
+      id: alarm.alarm_id,
+      time: alarm.alarm_time,
+      days: parseAlarmDays(alarm.alarm_days),
       submissionWindow: alarm.submission_window,
-      alarmDays: parseAlarmDays(alarm.alarm_days),
       timezoneOffset: isPlayer1
         ? alarm.player1_timezone
         : alarm.player2_timezone,
@@ -116,102 +220,7 @@ async function startAlarmScheduler(user: EvmAddress) {
   }
 }
 
-async function onAlarmActiveActivated(alarm: AlarmRow) {
-  if (alarm.status !== AlarmStatus.ACTIVE) {
-    throw new Error("Alarm not activated");
-  }
-
-  const p1 = alarm.player1 as EvmAddress;
-  const p2 = alarm.player2 as EvmAddress;
-
-  // If the alarm status becomes active and either player has notifications subscriptions,
-  // start the schedule for that player1-alarmId pair
-  if (deviceSubscriptions[p1] && !scheduleTimers[p1][alarm.alarm_id]) {
-    if (!alarm.player1_timezone) {
-      throw new Error("Missing p1 timezone for active alarm");
-    }
-
-    return scheduleNext(p1, {
-      alarmTime: alarm.alarm_time,
-      alarmDays: parseAlarmDays(alarm.alarm_days),
-      timezoneOffset: alarm.player1_timezone,
-      submissionWindow: alarm.submission_window,
-    });
-  }
-
-  if (deviceSubscriptions[p2] && !scheduleTimers[p2][alarm.alarm_id]) {
-    if (!alarm.player2_timezone) {
-      throw new Error("Missing p1 timezone for active alarm");
-    }
-
-    return scheduleNext(p2, {
-      alarmTime: alarm.alarm_time,
-      alarmDays: parseAlarmDays(alarm.alarm_days),
-      timezoneOffset: alarm.player2_timezone,
-      submissionWindow: alarm.submission_window,
-    });
-  }
-}
-
-async function onAlarmDeactivated(alarm: AlarmRow) {
-  const p1 = alarm.player1 as EvmAddress;
-  const p2 = alarm.player2 as EvmAddress;
-  if (scheduleTimers[p1][alarm.alarm_id]) {
-    clearTimeout(scheduleTimers[p1][alarm.alarm_id]);
-    delete scheduleTimers[p1][alarm.alarm_id];
-  }
-  if (scheduleTimers[p2][alarm.alarm_id]) {
-    clearTimeout(scheduleTimers[p2][alarm.alarm_id]);
-    delete scheduleTimers[p2][alarm.alarm_id];
-  }
-}
-
-async function onAlarmStatusUpdated(alarm: AlarmRow) {}
-
-/**
- * When new notification subscriptions are added, check if the user already has
- * a notification scheduler running.
- * If already running -> add the new device/subscription pair to notification state
- * If not already running -> start scheduler for that user
- */
-async function onNotificationsRowAdded(row: AlarmNotificationRow) {
-  console.log("notification subscription row added");
-  const user = row.user_address as EvmAddress;
-
-  // If user already has an alarm scheduler active, add the new device to the list
-  const userState = notificationState.get(user);
-
-  if (userState) {
-    const userDevices = userState.deviceSubscriptions;
-    // If device is already in the device/subscription list, do nothing
-    if (userDevices?.some((device) => device.deviceId === row.device_id)) {
-      console.log("Device already subscribed");
-      return;
-    }
-
-    console.log("Adding device to subscirptions");
-    // If device is not already stored in the device/subscription list, add it
-    return notificationState.set(user, {
-      ...userState,
-      deviceSubscriptions: [
-        ...userDevices,
-        {
-          deviceId: row.device_id,
-          subscription: row.subscription as unknown as PushSubscription,
-        },
-      ],
-    });
-  }
-
-  console.log("No alarm schedule started. Starting schedule for", user);
-  startAlarmScheduler(user);
-}
-
-async function onNotificationsRowDeleted(row: AlarmNotificationRow) {
-  console.log("Notification row deleted");
-}
-
-export async function runAlarmDeadlineNotificationSchedule(
+export async function runAlarmDeadlineNotificationScheduler(
   supabaseClient: SupabaseClient<Database>
 ) {
   // Fetch initial notification subscription data
@@ -230,6 +239,7 @@ export async function runAlarmDeadlineNotificationSchedule(
     onNotificationsRowAdded(row);
   }
 
+  // Listen for changes to user notification subscriptions
   supabaseClient
     .channel("notification-state-update")
     .on(
@@ -256,6 +266,7 @@ export async function runAlarmDeadlineNotificationSchedule(
     )
     .subscribe();
 
+  // Listen for changes to user alarm state
   supabaseClient
     .channel("alarm-state-updates")
     .on(
@@ -266,17 +277,30 @@ export async function runAlarmDeadlineNotificationSchedule(
         table: "partner_alarms",
       },
       (payload) => {
-        // -> On status changed to anything but active: stop the schedule for that alarm
-        // -> On status changed to active: start a schedule for that alarm
         const newRow = payload.new as AlarmRow;
         const oldRow = payload.old as AlarmRow;
-        if (newRow.status !== oldRow.status) {
-          onAlarmStatusChanged(
-            newRow.alarm_id,
-            newRow.player1,
-            newRow.player2,
-            newRow.status
-          );
+
+        if (newRow.status === oldRow.status) return; // Only care about changes to status
+
+        if (newRow.status === AlarmStatus.ACTIVE) {
+          onAlarmActivated(newRow);
+        } else if (oldRow.status === AlarmStatus.ACTIVE) {
+          onAlarmDeactivated(newRow);
+        }
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "partner_alarms",
+      },
+      (payload) => {
+        const newRow = payload.new as AlarmRow;
+        if (newRow.status === AlarmStatus.ACTIVE) {
+          console.log("Active alarm row created");
+          onAlarmActivated(newRow);
         }
       }
     )
