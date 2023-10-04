@@ -104,7 +104,7 @@ async function onAlarmActivated(alarm: AlarmRow) {
 
   // If either player has notifications subscriptions, start the schedule
   // for that player1-alarmId key
-  if (deviceSubscriptions[p1] && !scheduleTimers[p1][alarm.alarm_id]) {
+  if (deviceSubscriptions[p1] && !scheduleTimers[p1]?.[alarm.alarm_id]) {
     if (!alarm.player1_timezone) {
       throw new Error("Missing p1 timezone for active alarm");
     }
@@ -119,7 +119,7 @@ async function onAlarmActivated(alarm: AlarmRow) {
     });
   }
 
-  if (deviceSubscriptions[p2] && !scheduleTimers[p2][alarm.alarm_id]) {
+  if (deviceSubscriptions[p2] && !scheduleTimers[p2]?.[alarm.alarm_id]) {
     if (!alarm.player2_timezone) {
       throw new Error("Missing p1 timezone for active alarm");
     }
@@ -139,12 +139,16 @@ async function onAlarmDeactivated(alarm: AlarmRow) {
   const p1 = alarm.player1 as EvmAddress;
   const p2 = alarm.player2 as EvmAddress;
 
+  console.log("Alarm", alarm.alarm_id, "deactivated");
+
   if (scheduleTimers[p1]?.[alarm.alarm_id]) {
+    console.log("Clearing timer for player 1");
     clearTimeout(scheduleTimers[p1][alarm.alarm_id]);
     delete scheduleTimers[p1][alarm.alarm_id];
   }
 
   if (scheduleTimers[p2]?.[alarm.alarm_id]) {
+    console.log("Clearing timer for player 2");
     clearTimeout(scheduleTimers[p2][alarm.alarm_id]);
     delete scheduleTimers[p2][alarm.alarm_id];
   }
@@ -199,7 +203,7 @@ async function onNotificationsRowDeleted(row: AlarmNotificationRow) {
 
 async function startActiveAlarmSchedules(user: EvmAddress) {
   const activeAlarms = await getActiveAlarms(user);
-  console.log("Starting scehdules for", activeAlarms.length, "alarm/s");
+  console.log("Starting schedules for", activeAlarms.length, "alarm/s");
 
   for (const alarm of activeAlarms) {
     if (alarm.player1_timezone === null || alarm.player2_timezone === null) {
