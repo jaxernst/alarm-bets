@@ -4,6 +4,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../alarm-bets-db";
 import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
 import { supabaseClient } from "../setup";
+import { getActiveAlarms, parseAlarmDays } from "./util";
 
 /**
  * -> New row added to alarm_notifications table
@@ -13,7 +14,6 @@ import { supabaseClient } from "../setup";
 
 type EvmAddress = `0x${string}`;
 type AlarmId = number;
-type ScheduleKey = `${EvmAddress}-${AlarmId}`;
 type AlarmNotificationRow =
   Database["public"]["Tables"]["alarm_notifications"]["Row"];
 
@@ -24,16 +24,10 @@ type DeviceSubscription = {
   subscription: PushSubscription;
 };
 
-type AlarmNotificationState = {
-  scheduleTimers: Record<AlarmId, NodeJS.Timeout>;
-  deviceSubscriptions: DeviceSubscription[];
-};
+type ScheduleKey = `${EvmAddress}-${AlarmId}`;
 
-const notificationState = new Map<EvmAddress, AlarmNotificationState>();
-
-function parseAlarmDays(alarmDays: string) {
-  return alarmDays.split(",").map((day) => parseInt(day));
-}
+const deviceSubscriptions: Record<EvmAddress, DeviceSubscription[]> = {};
+const scheduleTimers: Record<EvmAddress, Record<AlarmId, NodeJS.Timeout>> = {};
 
 async function onNotificationDue(user: EvmAddress) {
   const devices = notificationState.get(user)?.deviceSubscriptions;
@@ -66,8 +60,7 @@ async function scheduleNext(
     alarmDays: number[];
     timezoneOffset: number;
     submissionWindow: number;
-  },
-  onTimerSet: (timer: NodeJS.Timeout) => void
+  }
 ) {
   const timeTillNextAlarm = getTimeUntilNextAlarm(
     alarm.alarmTime,
@@ -81,49 +74,27 @@ async function scheduleNext(
     console.log(
       "WARNING: Waiting for submission window to close before scheduling next notification"
     );
-    setTimeout(
-      () => scheduleNext(user, alarm, onTimerSet),
-      (timeTillNextAlarm + 1) * 1000
-    );
+    setTimeout(() => scheduleNext(user, alarm), (timeTillNextAlarm + 1) * 1000);
     return;
   }
 
   const notifyTimeout = timeTillNextAlarm - alarm.submissionWindow;
   console.log("Alarm notification due in ", notifyTimeout / 60, "minutes");
 
-  const timer = setTimeout(async () => {
+  setTimeout(async () => {
     onNotificationDue(user);
 
     // After sending the notification, wait for the submission window to close
     // (when alarm is due) and then schedule the next notification
     // - Add a buffer to correct for any chain clock latency
     setTimeout(
-      () => scheduleNext(user, alarm, onTimerSet),
+      () => scheduleNext(user, alarm),
       (alarm.submissionWindow + 10) * 1000
     );
   }, notifyTimeout * 1000);
-
-  onTimerSet(timer);
-}
-
-async function getActiveAlarms(user: EvmAddress) {
-  const { data, error } = await supabaseClient
-    .from("partner_alarms")
-    .select("*")
-    .eq("status", AlarmStatus.ACTIVE)
-    .or(`player1.eq.${user}, player2.eq.${user}`);
-
-  if (error) {
-    throw new Error(
-      "Error fetching alarm notifications from Supabase: " + error.details
-    );
-  }
-
-  return data;
 }
 
 async function startAlarmScheduler(user: EvmAddress) {
-  const timers: Record<AlarmId, NodeJS.Timeout> = {};
   const activeAlarms = await getActiveAlarms(user);
   console.log("Starting scehdules for", activeAlarms.length, "alarm/s");
 
@@ -134,47 +105,68 @@ async function startAlarmScheduler(user: EvmAddress) {
 
     const isPlayer1 = user.toLowerCase() === alarm.player1.toLowerCase();
 
-    scheduleNext(
-      user,
-      {
-        alarmTime: alarm.alarm_time,
-        submissionWindow: alarm.submission_window,
-        alarmDays: parseAlarmDays(alarm.alarm_days),
-        timezoneOffset: isPlayer1
-          ? alarm.player1_timezone
-          : alarm.player2_timezone,
-      },
-      (timer: NodeJS.Timeout) => {
-        timers[alarm.alarm_id] = timer;
-      }
-    );
+    scheduleNext(user, {
+      alarmTime: alarm.alarm_time,
+      submissionWindow: alarm.submission_window,
+      alarmDays: parseAlarmDays(alarm.alarm_days),
+      timezoneOffset: isPlayer1
+        ? alarm.player1_timezone
+        : alarm.player2_timezone,
+    });
   }
-
-  /* Listen to the db for changing alarm status */
-
-  if (activeAlarms.length >= 100) {
-    throw new Error(
-      "Too many alarms for supabase realtime subscriptions using the in.() filter"
-    );
-  }
-
-  supabaseClient
-    .channel("alarm-state-updates")
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "partner_alarms",
-      },
-      (payload) => {
-        // -> On status changed to anything but active: stop the schedule for that alarm
-        // -> On status changed to active: start a schedule for that alarm
-        console.log("Partner_alarms table updated", payload);
-      }
-    )
-    .subscribe();
 }
+
+async function onAlarmActiveActivated(alarm: AlarmRow) {
+  if (alarm.status !== AlarmStatus.ACTIVE) {
+    throw new Error("Alarm not activated");
+  }
+
+  const p1 = alarm.player1 as EvmAddress;
+  const p2 = alarm.player2 as EvmAddress;
+
+  // If the alarm status becomes active and either player has notifications subscriptions,
+  // start the schedule for that player1-alarmId pair
+  if (deviceSubscriptions[p1] && !scheduleTimers[p1][alarm.alarm_id]) {
+    if (!alarm.player1_timezone) {
+      throw new Error("Missing p1 timezone for active alarm");
+    }
+
+    return scheduleNext(p1, {
+      alarmTime: alarm.alarm_time,
+      alarmDays: parseAlarmDays(alarm.alarm_days),
+      timezoneOffset: alarm.player1_timezone,
+      submissionWindow: alarm.submission_window,
+    });
+  }
+
+  if (deviceSubscriptions[p2] && !scheduleTimers[p2][alarm.alarm_id]) {
+    if (!alarm.player2_timezone) {
+      throw new Error("Missing p1 timezone for active alarm");
+    }
+
+    return scheduleNext(p2, {
+      alarmTime: alarm.alarm_time,
+      alarmDays: parseAlarmDays(alarm.alarm_days),
+      timezoneOffset: alarm.player2_timezone,
+      submissionWindow: alarm.submission_window,
+    });
+  }
+}
+
+async function onAlarmDeactivated(alarm: AlarmRow) {
+  const p1 = alarm.player1 as EvmAddress;
+  const p2 = alarm.player2 as EvmAddress;
+  if (scheduleTimers[p1][alarm.alarm_id]) {
+    clearTimeout(scheduleTimers[p1][alarm.alarm_id]);
+    delete scheduleTimers[p1][alarm.alarm_id];
+  }
+  if (scheduleTimers[p2][alarm.alarm_id]) {
+    clearTimeout(scheduleTimers[p2][alarm.alarm_id]);
+    delete scheduleTimers[p2][alarm.alarm_id];
+  }
+}
+
+async function onAlarmStatusUpdated(alarm: AlarmRow) {}
 
 /**
  * When new notification subscriptions are added, check if the user already has
@@ -260,6 +252,32 @@ export async function runAlarmDeadlineNotificationSchedule(
       },
       (payload) => {
         onNotificationsRowDeleted(payload.old as AlarmNotificationRow);
+      }
+    )
+    .subscribe();
+
+  supabaseClient
+    .channel("alarm-state-updates")
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "partner_alarms",
+      },
+      (payload) => {
+        // -> On status changed to anything but active: stop the schedule for that alarm
+        // -> On status changed to active: start a schedule for that alarm
+        const newRow = payload.new as AlarmRow;
+        const oldRow = payload.old as AlarmRow;
+        if (newRow.status !== oldRow.status) {
+          onAlarmStatusChanged(
+            newRow.alarm_id,
+            newRow.player1,
+            newRow.player2,
+            newRow.status
+          );
+        }
       }
     )
     .subscribe();
