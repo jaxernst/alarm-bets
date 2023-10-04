@@ -172,6 +172,7 @@ async function onNotificationsRowAdded(row: AlarmNotificationRow) {
       (device) => device.deviceId === row.device_id
     )
   ) {
+    console.log("Adding device to subscription list");
     deviceSubscriptions[user] = [
       ...deviceSubscriptions[user],
       {
