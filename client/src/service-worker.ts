@@ -1,10 +1,16 @@
 /// <reference lib="webworker" />
 import { build, files } from '$service-worker';
+import { deviceHash } from './lib/util';
 
-declare const self: ServiceWorkerGlobalScope;
+declare const worker: ServiceWorkerGlobalScope;
+
+interface PushSubscriptionChangeEvent extends ExtendableEvent {
+	readonly newSubscription?: PushSubscription;
+	readonly oldSubscription?: PushSubscription;
+}
 
 const version = 6;
-const worker = self as unknown as ServiceWorkerGlobalScope;
+
 const STATIC_CACHE_NAME = `cache${version}`;
 const APP_CACHE_NAME = `offline${version}`;
 
@@ -21,7 +27,7 @@ const customAssets = [
 // `files` is an array of everything in the `static` directory
 // `version` is the current version of the app
 
-const addDomain = (assets: string[]) => assets.map((f) => self.location.origin + f);
+const addDomain = (assets: string[]) => assets.map((f) => worker.location.origin + f);
 
 // we filter the files because we don't want to cache logos for iOS
 // (they're big and largely unused)
@@ -97,7 +103,7 @@ worker.addEventListener('fetch', (event) => {
 	// don't try to handle e.g. data: URIs
 	const isHttp = url.protocol.startsWith('http');
 	const isDevServerRequest =
-		url.hostname === self.location.hostname && url.port !== self.location.port;
+		url.hostname === worker.location.hostname && url.port !== worker.location.port;
 	const isStaticAsset = staticAssets.has(url.href);
 	const skipBecauseUncached = event.request.cache === 'only-if-cached' && !isStaticAsset;
 
@@ -117,7 +123,7 @@ worker.addEventListener('fetch', (event) => {
 
 /** Push Notifications  **/
 
-self.addEventListener('push', (event) => {
+worker.addEventListener('push', (event) => {
 	console.log('Push event received');
 	const data = event.data?.json();
 
@@ -129,5 +135,20 @@ self.addEventListener('push', (event) => {
 		badge: data.badge
 	};
 
-	event.waitUntil(self.registration.showNotification(title, options));
+	event.waitUntil(worker.registration.showNotification(title, options));
+});
+
+const handlePushRenew = async () => {
+	const newSubscription = await worker.registration.pushManager.getSubscription();
+	await fetch(`api/_/notifications/${await deviceHash()}/update`, {
+		method: 'POST',
+		body: JSON.stringify(newSubscription),
+		headers: {
+			'content-type': 'application/json'
+		}
+	});
+};
+
+worker.addEventListener('pushsubscriptionchange' as any, (event: PushSubscriptionChangeEvent) => {
+	event.waitUntil(handlePushRenew());
 });

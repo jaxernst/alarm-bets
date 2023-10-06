@@ -1,8 +1,12 @@
 import { derived, get, writable, type Readable } from 'svelte/store';
 import { account } from './chainConfig';
 import { userAlarms } from './contractStores';
-import { AlarmStatus } from '@alarm-bets/contracts/lib/types';
-import { deviceHash, notificationPermissionGranted, subscribeToPushNotifications } from '$lib/util';
+import {
+	deviceHash,
+	notificationPermissionGranted,
+	subscribeToPushNotifications,
+	updatePushSubscription
+} from '$lib/util';
 import type { EvmAddress } from '$lib/types';
 
 export type Tab = 'alarms' | 'new' | 'join';
@@ -25,12 +29,19 @@ export const notifications = (() => {
 	});
 
 	const loading = writable(false);
+	let subscriptionRefreshed = false;
 
 	// Auto fetch notification status once an account is available
 	account.subscribe(async ($account) => {
 		if (!$account?.address) return;
-		const res = await fetchNotificationState($account.address);
-		enabledBackend.set(res);
+		const enabled = await fetchNotificationState($account.address);
+		enabledBackend.set(enabled);
+
+		// Push subscriptions need to be resubscribed to to keep them active, do this once
+		if (enabled && !subscriptionRefreshed) {
+			subscriptionRefreshed = true;
+			updatePushSubscription();
+		}
 	});
 
 	const enableReady = derived([account, userAlarms], ([$account, $userAlarms]) => {

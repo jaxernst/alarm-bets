@@ -5,6 +5,7 @@ import { Database } from "../../../alarm-bets-db";
 import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
 import { EvmAddress } from "../types";
 import { getActiveAlarms, parseAlarmDays } from "../util/util";
+import { dbListener } from "../db-listener";
 
 type AlarmId = number;
 
@@ -40,6 +41,11 @@ async function sendPushNotification(user: EvmAddress) {
 
     if (res.statusCode === 201) {
       console.log("Notification sent successfully");
+    } else if (res.statusCode === 410) {
+      deviceSubscriptions[user] = deviceSubscriptions[user].filter(
+        (d) => d.deviceId !== device.deviceId
+      );
+      console.log("Subscription expired, removing from list");
     } else {
       console.error("Failed to send notification", res);
     }
@@ -154,7 +160,7 @@ async function onAlarmDeactivated(alarm: AlarmRow) {
   }
 }
 
-async function onNotificationsRowAdded(row: AlarmNotificationRow) {
+async function onNotificationRowAdded(row: AlarmNotificationRow) {
   console.log("\n Notification subscription row added");
 
   const user = row.user_address as EvmAddress;
@@ -183,7 +189,7 @@ async function onNotificationsRowAdded(row: AlarmNotificationRow) {
   }
 }
 
-async function onNotificationsRowDeleted(row: AlarmNotificationRow) {
+async function onNotificationRowDeleted(row: AlarmNotificationRow) {
   console.log("\n Notification row deleted");
 
   const user = row.user_address as EvmAddress;
@@ -200,6 +206,32 @@ async function onNotificationsRowDeleted(row: AlarmNotificationRow) {
     delete deviceSubscriptions[user];
     Object.values(scheduleTimers[user]).forEach(clearTimeout);
   }
+}
+
+async function onNotificationRowUpdated(row: AlarmNotificationRow) {
+  console.log("\n Notification row updated");
+
+  const user = row.user_address as EvmAddress;
+  const userDevices = deviceSubscriptions[user];
+
+  // If no devices active add the first one and start the active alarm schedules
+  if (!userDevices) {
+    throw new Error("No devices found for updated notification row");
+  }
+
+  // Update the device in the list
+  const newDevices = userDevices.map((device) => {
+    if (device.deviceId === row.device_id) {
+      return {
+        subscription: row.subscription as unknown as PushSubscription,
+        deviceId: row.device_id,
+      };
+    }
+
+    return device;
+  });
+
+  deviceSubscriptions[user] = newDevices;
 }
 
 async function startActiveAlarmSchedules(user: EvmAddress) {
@@ -225,9 +257,7 @@ async function startActiveAlarmSchedules(user: EvmAddress) {
   }
 }
 
-export async function runAlarmDeadlineNotificationScheduler(
-  supabaseClient: SupabaseClient<Database>
-) {
+export async function run(supabaseClient: SupabaseClient<Database>) {
   // Fetch initial notification subscription data
   const { data, error } = await supabaseClient
     .from("alarm_notifications")
@@ -241,73 +271,14 @@ export async function runAlarmDeadlineNotificationScheduler(
 
   // Populate schedules set with initial notification subscriptions
   for (let row of data) {
-    onNotificationsRowAdded(row);
+    onNotificationRowAdded(row);
   }
 
-  // Listen for changes to user notification subscriptions
-  supabaseClient
-    .channel("notification-state-update")
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "alarm_notifications",
-      },
-      (payload) => {
-        onNotificationsRowAdded(payload.new as AlarmNotificationRow);
-      }
-    )
-    .on(
-      "postgres_changes",
-      {
-        event: "DELETE",
-        schema: "public",
-        table: "alarm_notifications",
-      },
-      (payload) => {
-        onNotificationsRowDeleted(payload.old as AlarmNotificationRow);
-      }
-    )
-    .subscribe();
-
-  // Listen for changes to user alarm state
-  supabaseClient
-    .channel("alarm-state-updates")
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "partner_alarms",
-      },
-      (payload) => {
-        const newRow = payload.new as AlarmRow;
-        const oldRow = payload.old as AlarmRow;
-
-        if (newRow.status === oldRow.status) return; // Only care about changes to status
-
-        if (newRow.status === AlarmStatus.ACTIVE) {
-          onAlarmActivated(newRow);
-        } else if (oldRow.status === AlarmStatus.ACTIVE) {
-          onAlarmDeactivated(newRow);
-        }
-      }
-    )
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "partner_alarms",
-      },
-      (payload) => {
-        const newRow = payload.new as AlarmRow;
-        if (newRow.status === AlarmStatus.ACTIVE) {
-          console.log("Active alarm row created");
-          onAlarmActivated(newRow);
-        }
-      }
-    )
-    .subscribe();
+  dbListener(supabaseClient, {
+    onNotificationRowAdded,
+    onNotificationRowDeleted,
+    onNotificationRowUpdated,
+    onAlarmActivated,
+    onAlarmDeactivated,
+  });
 }

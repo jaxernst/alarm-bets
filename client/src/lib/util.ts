@@ -1,5 +1,4 @@
 import { PUBLIC_VAPID_KEY } from '$env/static/public';
-import type { EvmAddress } from './types';
 
 export const isIosSafari = () => {
 	const ua = window.navigator.userAgent;
@@ -167,3 +166,26 @@ export async function subscribeToPushNotifications() {
 		window.alert("Uh Oh! This browser doesn't support push notifications.");
 	}
 }
+
+export const updatePushSubscription = async () => {
+	if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+		// If serviceWorker or PushManager are not supported, throw an error or exit the function.
+		console.error("Browser doesn't support service workers or push notifications.");
+		return;
+	}
+
+	try {
+		const registration = await navigator.serviceWorker.ready;
+		const subscription = await registration.pushManager.getSubscription();
+		console.log(subscription);
+		await fetch(`api/_/notifications/${await deviceHash()}/update`, {
+			method: 'POST',
+			body: JSON.stringify(subscription),
+			headers: {
+				'content-type': 'application/json'
+			}
+		});
+	} catch (e) {
+		console.log(e);
+	}
+};
