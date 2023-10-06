@@ -1,5 +1,9 @@
 import { getTimeUntilNextAlarm } from "../util/time";
-import { sendNotification, type PushSubscription } from "web-push";
+import {
+  sendNotification,
+  type PushSubscription,
+  WebPushError,
+} from "web-push";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../alarm-bets-db";
 import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
@@ -31,21 +35,26 @@ async function sendPushNotification(user: EvmAddress) {
   }
 
   for (const device of devices) {
-    const res = await sendNotification(
-      device.subscription,
-      JSON.stringify({
-        title: "Upcoming Alarm",
-        body: "Your alarm submission window is open. Wake up and submit your alarm!",
-      })
-    );
+    let res: any;
+    try {
+      res = await sendNotification(
+        device.subscription,
+        JSON.stringify({
+          title: "Upcoming Alarm",
+          body: "Your alarm submission window is open. Wake up and submit your alarm!",
+        })
+      );
+    } catch (e) {
+      if (e instanceof WebPushError && e.statusCode === 410) {
+        deviceSubscriptions[user] = deviceSubscriptions[user].filter(
+          (d) => d.deviceId !== device.deviceId
+        );
+        console.log("Subscription expired, removing from list");
+      }
+    }
 
     if (res.statusCode === 201) {
       console.log("Notification sent successfully");
-    } else if (res.statusCode === 410) {
-      deviceSubscriptions[user] = deviceSubscriptions[user].filter(
-        (d) => d.deviceId !== device.deviceId
-      );
-      console.log("Subscription expired, removing from list");
     } else {
       console.error("Failed to send notification", res);
     }
