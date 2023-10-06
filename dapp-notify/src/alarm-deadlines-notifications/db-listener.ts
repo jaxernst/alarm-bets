@@ -10,7 +10,7 @@ type AlarmRow = Database["public"]["Tables"]["partner_alarms"]["Row"];
 interface ListenerEvents {
   onNotificationRowAdded?: (row: NotificationRow) => void;
   onNotificationRowDeleted?: (row: NotificationRow) => void;
-  onNotificationRowUdated?: (row: NotificationRow) => void;
+  onNotificationRowUpdated?: (row: NotificationRow) => void;
   onAlarmActivated?: (row: AlarmRow) => void;
   onAlarmDeactivated?: (row: AlarmRow) => void;
 }

@@ -1,7 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
 import type { Database } from "../../alarm-bets-db";
-import { runAlarmDeadlineNotificationScheduler } from "./alarm-deadlines-notifications/scheduler";
+import { NotificationSubscriptionManager } from "./NotificationSubscriptionManager";
+import { ActiveAlarmStateManager } from "./alarm-deadlines-notifications/AlarmStateManager";
+import { AlarmNotificationManager } from "./alarm-deadlines-notifications/AlarmNotificationManager";
 
 require("dotenv").config({ path: "../.env" });
 
@@ -24,4 +26,17 @@ webpush.setVapidDetails(
   process.env.PRIVATE_VAPID_KEY
 );
 
-runAlarmDeadlineNotificationScheduler(supabaseClient);
+const notificationManager = new NotificationSubscriptionManager(supabaseClient);
+const alarmStateManager = new ActiveAlarmStateManager(
+  supabaseClient,
+  notificationManager
+);
+
+const alarmPushNotifier = new AlarmNotificationManager(
+  alarmStateManager,
+  notificationManager
+);
+
+alarmPushNotifier.run();
+
+setTimeout(() => {}, 1 << 30);
