@@ -5,10 +5,13 @@ import { Database } from "../../../alarm-bets-db";
 import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
 import { EvmAddress } from "../types";
 import { getActiveAlarms, parseAlarmDays } from "../util/util";
+import { supabaseClient } from "..";
+import { dbListener } from "./db-listener";
+import { clear } from "console";
 
 type AlarmId = number;
 
-type AlarmNotificationRow =
+type NotificationRow =
   Database["public"]["Tables"]["alarm_notifications"]["Row"];
 
 type AlarmRow = Database["public"]["Tables"]["partner_alarms"]["Row"];
@@ -17,10 +20,6 @@ type DeviceSubscription = {
   deviceId: string;
   subscription: PushSubscription;
 };
-
-// Global state to manage notification scehdules
-const deviceSubscriptions: Record<EvmAddress, DeviceSubscription[]> = {};
-const scheduleTimers: Record<EvmAddress, Record<AlarmId, NodeJS.Timeout>> = {};
 
 async function sendPushNotification(user: EvmAddress) {
   const devices = deviceSubscriptions[user];
@@ -183,7 +182,7 @@ async function onNotificationsRowAdded(row: AlarmNotificationRow) {
   }
 }
 
-async function onNotificationsRowDeleted(row: AlarmNotificationRow) {
+async function removeDe(row: AlarmNotificationRow) {
   console.log("\n Notification row deleted");
 
   const user = row.user_address as EvmAddress;
@@ -244,70 +243,88 @@ export async function runAlarmDeadlineNotificationScheduler(
     onNotificationsRowAdded(row);
   }
 
+  const deviceSubscriptions: Record<EvmAddress, DeviceSubscription[]> = {};
+  const scheduleTimers: Record<
+    EvmAddress,
+    Record<AlarmId, NodeJS.Timeout>
+  > = {};
+
   // Listen for changes to user notification subscriptions
-  supabaseClient
-    .channel("notification-state-update")
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "alarm_notifications",
-      },
-      (payload) => {
-        onNotificationsRowAdded(payload.new as AlarmNotificationRow);
-      }
-    )
-    .on(
-      "postgres_changes",
-      {
-        event: "DELETE",
-        schema: "public",
-        table: "alarm_notifications",
-      },
-      (payload) => {
-        onNotificationsRowDeleted(payload.old as AlarmNotificationRow);
-      }
-    )
-    .subscribe();
+}
 
-  // Listen for changes to user alarm state
-  supabaseClient
-    .channel("alarm-state-updates")
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "partner_alarms",
-      },
-      (payload) => {
-        const newRow = payload.new as AlarmRow;
-        const oldRow = payload.old as AlarmRow;
+function makeActiveAlarmGetter() {
+  return () => {};
+}
 
-        if (newRow.status === oldRow.status) return; // Only care about changes to status
+function makeDeviceSubscriptionGetter() {
+  return () => {};
+}
 
-        if (newRow.status === AlarmStatus.ACTIVE) {
-          onAlarmActivated(newRow);
-        } else if (oldRow.status === AlarmStatus.ACTIVE) {
-          onAlarmDeactivated(newRow);
-        }
-      }
-    )
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "partner_alarms",
-      },
-      (payload) => {
-        const newRow = payload.new as AlarmRow;
-        if (newRow.status === AlarmStatus.ACTIVE) {
-          console.log("Active alarm row created");
-          onAlarmActivated(newRow);
-        }
-      }
-    )
-    .subscribe();
+function clearTimers(timers: Record<any, NodeJS.Timeout>) {
+  Object.values(timers).forEach((t) => clearTimeout(t));
+}
+
+// Any time there's a change to subscriptions rows or alarm state, tear down the schedules
+// and revuild them instead of trying to update them. This is less efficient but more
+// resistant to errors
+
+// On any change to any db
+// 1. Get active alarms (can be cached locally)
+// 2. Get devices
+// 3. Build push sender
+// 4. Run schedules for alarms
+
+function main(supabaseClient: SupabaseClient<Database>) {
+  const notificationTimers: Record<
+    EvmAddress,
+    Record<AlarmId, NodeJS.Timeout>
+  > = {};
+
+  const updateTimerStateEffect = (
+    user: EvmAddress,
+    alarmId: AlarmId,
+    timer: NodeJS.Timeout
+  ) => {
+    if (!notificationTimers[user]) {
+      notificationTimers[user] = {};
+    }
+    notificationTimers[user][alarmId] = timer;
+  };
+
+  const getActiveAlarms = makeActiveAlarmGetter(supabaseClient);
+  const getDevices = makeDeviceSubscriptionGetter(supabaseClient);
+
+  const notificationResetSequence = async (user: EvmAddress) => {
+    if (notificationTimers[user]) {
+      clearTimers(notificationTimers[user]);
+      delete notificationTimers[user];
+    }
+
+    const alarms = await getActiveAlarms(user);
+    const notificationDestinations = await getDevices(user);
+
+    scheduleNotificationsForAlarms({
+      alarms,
+      notificationDestinations,
+      onTimerSet: updateTimerStateEffect,
+    });
+  };
+
+  dbListener(supabaseClient, {
+    onNotificationRowAdded: ({ user_address }) =>
+      notificationResetSequence(user_address as EvmAddress),
+
+    onNotificationRowDeleted: ({ user_address }) =>
+      notificationResetSequence(user_address as EvmAddress),
+
+    onAlarmActivated: ({ player1, player2 }) => {
+      notificationResetSequence(player1 as EvmAddress);
+      notificationResetSequence(player2 as EvmAddress);
+    },
+
+    onAlarmDeactivated: ({ player1, player2 }) => {
+      notificationResetSequence(player1 as EvmAddress);
+      notificationResetSequence(player2 as EvmAddress);
+    },
+  });
 }
