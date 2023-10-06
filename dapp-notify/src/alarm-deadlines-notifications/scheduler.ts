@@ -224,32 +224,6 @@ async function startActiveAlarmSchedules(user: EvmAddress) {
   }
 }
 
-export async function runAlarmDeadlineNotificationScheduler(
-  supabaseClient: SupabaseClient<Database>
-) {
-  // Fetch initial notification subscription data
-  const { data, error } = await supabaseClient
-    .from("alarm_notifications")
-    .select("*");
-
-  if (error) {
-    throw new Error(
-      "Error fetching alarm notifications from Supabase: " + error
-    );
-  }
-
-  // Populate schedules set with initial notification subscriptions
-  for (let row of data) {
-    onNotificationsRowAdded(row);
-  }
-
-  const deviceSubscriptions: Record<EvmAddress, DeviceSubscription[]> = {};
-  const scheduleTimers: Record<
-    EvmAddress,
-    Record<AlarmId, NodeJS.Timeout>
-  > = {};
-}
-
 function makeActiveAlarmGetter() {
   return () => {};
 }
