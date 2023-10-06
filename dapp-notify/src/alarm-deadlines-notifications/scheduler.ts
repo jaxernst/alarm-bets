@@ -282,6 +282,8 @@ function main(supabaseClient: SupabaseClient<Database>) {
     });
   };
 
+  // Need logic to initialize scheudels for users with prexisting alarms and notifications
+
   dbListener(supabaseClient, {
     onNotificationRowAdded: ({ user_address }) =>
       notificationResetSequence(user_address as EvmAddress),
