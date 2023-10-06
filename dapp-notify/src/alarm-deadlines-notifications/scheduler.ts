@@ -248,8 +248,6 @@ export async function runAlarmDeadlineNotificationScheduler(
     EvmAddress,
     Record<AlarmId, NodeJS.Timeout>
   > = {};
-
-  // Listen for changes to user notification subscriptions
 }
 
 function makeActiveAlarmGetter() {
