@@ -25,16 +25,41 @@ type DeviceSubscription = {
 
 // Global state to manage notification scehdules
 const deviceSubscriptions: Record<EvmAddress, DeviceSubscription[]> = {};
-const scheduleTimers: Record<EvmAddress, Record<AlarmId, NodeJS.Timeout>> = {};
+const scheduleTimers: Record<
+  EvmAddress,
+  Record<AlarmId, { due: Date; timer: NodeJS.Timeout }>
+> = {};
+
+const logTimerState = () => {
+  if (Object.keys(scheduleTimers).length === 0) return;
+  // Log time until each timeout
+  console.log("\n");
+  console.log("Current timer state");
+  console.log("-------------------");
+  Object.entries(scheduleTimers).forEach(([user, timers]) => {
+    console.log("User", user);
+    Object.entries(timers).forEach(([alarmId, timer]) => {
+      // Log out time until due
+      console.log(
+        "Alarm",
+        alarmId,
+        "due in",
+        Math.floor((timer.due.getTime() - Date.now()) / (1000 * 60)),
+        "minutes"
+      );
+    });
+  });
+};
 
 async function sendPushNotification(user: EvmAddress) {
   const devices = deviceSubscriptions[user];
   if (!devices) {
-    console.error("No ddevices found to notify", user);
+    console.error("No devices found to notify", user);
     return new Error("No devices found");
   }
 
   for (const device of devices) {
+    console.log("Sending notification to device", device.deviceId, "for", user);
     let res: any;
     try {
       res = await sendNotification(
@@ -45,11 +70,14 @@ async function sendPushNotification(user: EvmAddress) {
         })
       );
     } catch (e) {
+      console.error("Caught error", e);
       if (e instanceof WebPushError && e.statusCode === 410) {
         deviceSubscriptions[user] = deviceSubscriptions[user].filter(
           (d) => d.deviceId !== device.deviceId
         );
         console.log("Subscription expired, removing from list");
+      } else {
+        throw e;
       }
     }
 
@@ -94,17 +122,20 @@ async function scheduleNext(
     scheduleTimers[user] = {};
   }
 
-  scheduleTimers[user][alarm.id] = setTimeout(async () => {
-    sendPushNotification(user);
+  scheduleTimers[user][alarm.id] = {
+    timer: setTimeout(async () => {
+      sendPushNotification(user);
 
-    // After sending the notification, wait for the submission window to close
-    // (when alarm is due) and then schedule the next notification
-    // - Add a buffer to correct for any chain clock latency
-    setTimeout(
-      () => scheduleNext(user, alarm),
-      (alarm.submissionWindow + 10) * 1000
-    );
-  }, notifyTimeout * 1000);
+      // After sending the notification, wait for the submission window to close
+      // (when alarm is due) and then schedule the next notification
+      // - Add a buffer to correct for any chain clock latency
+      setTimeout(
+        () => scheduleNext(user, alarm),
+        (alarm.submissionWindow + 10) * 1000
+      );
+    }, notifyTimeout * 1000),
+    due: new Date(Date.now() + notifyTimeout * 1000),
+  };
 }
 
 async function onAlarmActivated(alarm: AlarmRow) {
@@ -125,7 +156,7 @@ async function onAlarmActivated(alarm: AlarmRow) {
     }
 
     console.log("Scheduling this alarm notification for player 1");
-    return scheduleNext(p1, {
+    scheduleNext(p1, {
       id: alarm.alarm_time,
       time: alarm.alarm_time,
       days: parseAlarmDays(alarm.alarm_days),
@@ -140,7 +171,7 @@ async function onAlarmActivated(alarm: AlarmRow) {
     }
 
     console.log("Scheduling this alarm notification for player 2");
-    return scheduleNext(p2, {
+    scheduleNext(p2, {
       id: alarm.alarm_id,
       time: alarm.alarm_time,
       days: parseAlarmDays(alarm.alarm_days),
@@ -148,6 +179,7 @@ async function onAlarmActivated(alarm: AlarmRow) {
       submissionWindow: alarm.submission_window,
     });
   }
+  logTimerState();
 }
 
 async function onAlarmDeactivated(alarm: AlarmRow) {
@@ -158,15 +190,16 @@ async function onAlarmDeactivated(alarm: AlarmRow) {
 
   if (scheduleTimers[p1]?.[alarm.alarm_id]) {
     console.log("Clearing timer for player 1");
-    clearTimeout(scheduleTimers[p1][alarm.alarm_id]);
+    clearTimeout(scheduleTimers[p1][alarm.alarm_id].timer);
     delete scheduleTimers[p1][alarm.alarm_id];
   }
 
   if (scheduleTimers[p2]?.[alarm.alarm_id]) {
     console.log("Clearing timer for player 2");
-    clearTimeout(scheduleTimers[p2][alarm.alarm_id]);
+    clearTimeout(scheduleTimers[p2][alarm.alarm_id].timer);
     delete scheduleTimers[p2][alarm.alarm_id];
   }
+  logTimerState();
 }
 
 async function onNotificationRowAdded(row: AlarmNotificationRow) {
@@ -196,6 +229,8 @@ async function onNotificationRowAdded(row: AlarmNotificationRow) {
       },
     ];
   }
+
+  logTimerState();
 }
 
 async function onNotificationRowDeleted(row: AlarmNotificationRow) {
@@ -213,8 +248,10 @@ async function onNotificationRowDeleted(row: AlarmNotificationRow) {
   if (newDevices.length === 0) {
     console.log("No subscriptions left, canceling timers");
     delete deviceSubscriptions[user];
-    Object.values(scheduleTimers[user]).forEach(clearTimeout);
+    Object.values(scheduleTimers[user]).forEach((t) => clearTimeout(t.timer));
   }
+
+  logTimerState();
 }
 
 async function onNotificationRowUpdated(row: AlarmNotificationRow) {
@@ -241,6 +278,8 @@ async function onNotificationRowUpdated(row: AlarmNotificationRow) {
   });
 
   deviceSubscriptions[user] = newDevices;
+
+  logTimerState();
 }
 
 async function startActiveAlarmSchedules(user: EvmAddress) {
