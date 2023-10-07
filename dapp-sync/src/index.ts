@@ -2,18 +2,32 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../../alarm-bets-db";
 import { createPublicClient, getAbiItem, http, webSocket } from "viem";
 import { optimism, optimismGoerli } from "viem/chains";
-import { EvmAddress, alarmTypeVals, queryAlarmCreationEvents } from "./helpers";
+import {
+  EvmAddress,
+  alarmConstantsMulticallArgs,
+  alarmTypeVals,
+  formatAlarmConstants,
+  queryAlarmCreationEvents,
+} from "./helpers";
 import { hubDeployments } from "@alarm-bets/contracts/lib/deployments";
 import PartnerAlarmClock from "@alarm-bets/contracts/lib/abi/PartnerAlarmClock";
 import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
 import AlarmBetsHub from "@alarm-bets/contracts/lib/abi/AlarmBetsHub";
+import { createLogger, transports } from "winston";
+
+const logger = createLogger({
+  transports: [
+    new transports.Console(),
+    new transports.File({ filename: "dapp-sync.log" }),
+    new transports.File({ filename: "dapp-sync-error.log", level: "error" }),
+  ],
+});
 
 require("dotenv").config({ path: "../.env" });
 
 type RowSchema = Database["public"]["Tables"]["partner_alarms"]["Row"];
 
-// Every 50 seconds received, update dapp-sync status in db
-const BLOCK_SYNC_INTERVAL = 60;
+const BLOCK_SYNC_INTERVAL = 100; // seconds
 
 const chainName: "optimismGoerli" | "optimism" = "optimismGoerli";
 
@@ -76,44 +90,8 @@ export const viemClient = createPublicClient({
  * dapp-sync is down. We need to updates statuses by querying events from the last saved block
  */
 
-const alarmConstantsMulticallArgs = (alarmAddr: EvmAddress) => {
-  const _multicallArgs = { address: alarmAddr, abi: PartnerAlarmClock };
-  return {
-    contracts: [
-      { ..._multicallArgs, functionName: "alarmTime" },
-      { ..._multicallArgs, functionName: "alarmDays" },
-      { ..._multicallArgs, functionName: "status" },
-      { ..._multicallArgs, functionName: "player1" },
-      { ..._multicallArgs, functionName: "player2" },
-      { ..._multicallArgs, functionName: "submissionWindow" },
-    ],
-  } as const;
-};
-
-function formatAlarmConstants(
-  alarmId: number,
-  alarmAddr: EvmAddress,
-  alarmTime: bigint,
-  alarmDays: readonly number[],
-  status: number,
-  player1: EvmAddress,
-  player2: EvmAddress,
-  submissionWindow: bigint
-) {
-  return {
-    alarm_id: alarmId,
-    alarm_address: alarmAddr,
-    status,
-    player1,
-    player2,
-    alarm_time: Number(alarmTime),
-    alarm_days: alarmDays.toString(),
-    submission_window: Number(submissionWindow),
-  };
-}
-
 async function recordLastQueriedBlock(block: number) {
-  console.log("Recording last captured block", block);
+  logger.log("info", "Recording last captured block", block);
   const { error: error2 } = await supabaseClient
     .from("dapp_sync_status")
     .update({
@@ -405,7 +383,7 @@ async function startPartnerAlarmSync() {
 
   setInterval(async () => {
     const blockNumber = await viemClient.getBlockNumber();
-    console.log("Sync at block number", blockNumber);
+    logger.log("info", `Syncing from block ${blockNumber}`);
     const { error } = await supabaseClient
       .from("dapp_sync_status")
       .update({
@@ -414,7 +392,7 @@ async function startPartnerAlarmSync() {
       .eq("alarm_type", "PartnerAlarmClock");
 
     if (error) {
-      throw new Error("Failed to update sync status");
+      logger.log("error", `Error updating sync status: ${error}`);
     }
   }, BLOCK_SYNC_INTERVAL * 1000);
 }
