@@ -90,9 +90,8 @@ async function sendPushNotification(user: EvmAddress) {
           (d) => d.deviceId !== device.deviceId
         );
         console.log("Subscription expired, removing from list");
-      } else {
-        throw e;
       }
+      throw e;
     }
 
     if (res && res.statusCode === 201) {
@@ -138,7 +137,11 @@ async function scheduleNext(
 
   scheduleTimers[user][alarm.id] = {
     timer: setTimeout(async () => {
-      sendPushNotification(user);
+      try {
+        await sendPushNotification(user);
+      } catch (e) {
+        return;
+      }
 
       // After sending the notification, wait for the submission window to close
       // (when alarm is due) and then schedule the next notification
