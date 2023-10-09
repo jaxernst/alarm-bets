@@ -7,8 +7,11 @@ export type AlarmSubscriptionBody = PushSubscription;
 
 export async function POST({ request, params }: RequestEvent) {
 	const { deviceId } = params;
-	console.log('deviceId', deviceId);
 	const subscription: AlarmSubscriptionBody = await request.json();
+	console.log('deviceId', deviceId, 'subscription', subscription);
+	if (!subscription) {
+		return new Response('No subscription received', { status: 400 });
+	}
 
 	// Save subscription to "alarm_notifications" table
 	try {

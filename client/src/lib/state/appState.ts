@@ -38,7 +38,7 @@ export const notifications = (() => {
 		enabledBackend.set(enabled);
 
 		// Push subscriptions need to be resubscribed to to keep them active, do this once
-		if (enabled && !subscriptionRefreshed) {
+		if (enabled && !subscriptionRefreshed && notificationPermissionGranted()) {
 			subscriptionRefreshed = true;
 			updatePushSubscription();
 		}

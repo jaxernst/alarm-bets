@@ -177,7 +177,7 @@ export const updatePushSubscription = async () => {
 	try {
 		const registration = await navigator.serviceWorker.ready;
 		const subscription = await registration.pushManager.getSubscription();
-		console.log(subscription);
+		console.log('Updating subscription...');
 		await fetch(`api/_/notifications/${await deviceHash()}/update`, {
 			method: 'POST',
 			body: JSON.stringify(subscription),
