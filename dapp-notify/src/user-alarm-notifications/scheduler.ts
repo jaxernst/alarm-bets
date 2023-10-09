@@ -82,7 +82,10 @@ async function sendPushNotification(user: EvmAddress) {
       logger.log("info", "Notification sent");
     } catch (e) {
       if (e instanceof WebPushError && e.statusCode === 410) {
-        logger.log("error", `Subscription expired for ${user} with device ${device.deviceId} (${e.statusCode} - ${e.message})`);`)`);
+        logger.log(
+          "error",
+          `Subscription expired for ${user} with device ${device.deviceId} `
+        );
         deviceSubscriptions[user] = deviceSubscriptions[user].filter(
           (d) => d.deviceId !== device.deviceId
         );
