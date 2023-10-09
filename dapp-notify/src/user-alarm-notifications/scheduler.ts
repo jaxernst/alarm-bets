@@ -3,6 +3,7 @@ import {
   sendNotification,
   type PushSubscription,
   WebPushError,
+  SendResult,
 } from "web-push";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../alarm-bets-db";
@@ -60,7 +61,7 @@ async function sendPushNotification(user: EvmAddress) {
 
   for (const device of devices) {
     console.log("Sending notification to device", device.deviceId, "for", user);
-    let res: any;
+    let res: SendResult | undefined;
     try {
       res = await sendNotification(
         device.subscription,
@@ -81,7 +82,7 @@ async function sendPushNotification(user: EvmAddress) {
       }
     }
 
-    if (res.statusCode === 201) {
+    if (res && res.statusCode === 201) {
       console.log("Notification sent successfully");
     } else {
       console.error("Failed to send notification", res);
