@@ -11,6 +11,15 @@ import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
 import { EvmAddress } from "../types";
 import { getActiveAlarms, parseAlarmDays } from "../util/util";
 import { dbListener } from "../db-listener";
+import { createLogger, transports } from "winston";
+
+const logger = createLogger({
+  transports: [
+    new transports.Console(),
+    new transports.File({ filename: "dapp-sync.log" }),
+    new transports.File({ filename: "dapp-sync-error.log", level: "error" }),
+  ],
+});
 
 type AlarmId = number;
 
@@ -70,9 +79,10 @@ async function sendPushNotification(user: EvmAddress) {
           body: "Your alarm submission window is open. Wake up and submit your alarm!",
         })
       );
+      logger.log("info", "Notification sent");
     } catch (e) {
-      console.error("Caught error", e);
       if (e instanceof WebPushError && e.statusCode === 410) {
+        logger.log("error", `Subscription expired for ${user} with device ${device.deviceId} (${e.statusCode} - ${e.message})`);`)`);
         deviceSubscriptions[user] = deviceSubscriptions[user].filter(
           (d) => d.deviceId !== device.deviceId
         );
