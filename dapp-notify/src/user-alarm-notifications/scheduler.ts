@@ -16,8 +16,8 @@ import { createLogger, transports } from "winston";
 const logger = createLogger({
   transports: [
     new transports.Console(),
-    new transports.File({ filename: "dapp-sync.log" }),
-    new transports.File({ filename: "dapp-sync-error.log", level: "error" }),
+    new transports.File({ filename: "dapp-notify.log" }),
+    new transports.File({ filename: "dapp-notify-error.log", level: "error" }),
   ],
 });
 
