@@ -1,4 +1,8 @@
-import { PUBLIC_VAPID_KEY } from '$env/static/public';
+// For some reason, the build fails when this is imported here. Not sure why, so
+// hardcoding this public env variable for now.
+// import { PUBLIC_VAPID_KEY } from '$env/static/public';
+const PUBLIC_VAPID_KEY =
+	'BGr7m29RSsrfngXARx_1nKIAb0qbA4jMRjtOVj5s1N4PeqN--L1G9tOSlWabLV4u2qhDPtewve9RQ11xKb_z_CY';
 
 export const isIosSafari = () => {
 	const ua = window.navigator.userAgent;
