@@ -14,6 +14,7 @@ import PartnerAlarmClock from "@alarm-bets/contracts/lib/abi/PartnerAlarmClock";
 import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
 import AlarmBetsHub from "@alarm-bets/contracts/lib/abi/AlarmBetsHub";
 import { createLogger, transports } from "winston";
+import { log } from "console";
 
 const logger = createLogger({
   transports: [
@@ -110,7 +111,7 @@ async function onNewAlarmEvent(
   alarmId: number
 ) {
   console.log("New alarm creation event received for alarm", alarmId);
-  // Check supabase client to ensure alarmId isnt already saved
+  // Check supabase client to ensure alarmId isn't already saved
   const { data: existingAlarm } = await supabaseClient
     .from("partner_alarms")
     .select("alarm_id")
@@ -118,7 +119,8 @@ async function onNewAlarmEvent(
 
   console.log(existingAlarm);
   if (existingAlarm?.length) {
-    throw new Error("Alarm already exists in db");
+    logger.log("error", `Alarm ${alarmId} already exists in db`);
+    return;
   }
 
   // Query for alarm constants
@@ -128,9 +130,10 @@ async function onNewAlarmEvent(
   });
 
   // Save alarm constants to db
-  const { error } = await supabaseClient
-    .from("partner_alarms")
-    .insert(formatAlarmConstants(...[alarmId, alarmAddress, ...res]));
+  const { error } = await supabaseClient.from("partner_alarms").insert({
+    ...formatAlarmConstants(...[alarmId, alarmAddress, ...res]),
+    block_last_updated_at: blockNumber,
+  });
 
   if (error) {
     console.log(error);
@@ -309,7 +312,9 @@ async function backfillAlarmConstants(fromBlock: number, toBlock: number) {
     };
   });
 
-  const rowsToInsert = await addTimezoneOffsets(alarmConstants);
+  const rowsToInsert = await addTimezoneOffsets(
+    alarmConstants.map((r) => ({ ...r, block_last_updated_at: toBlock }))
+  );
 
   console.log("Inserting", rowsToInsert.length, "rows");
   const { error: error1 } = await supabaseClient
@@ -322,7 +327,56 @@ async function backfillAlarmConstants(fromBlock: number, toBlock: number) {
   }
 }
 
-async function backfillStatusUpdates(fromBlock: number, toBlock: number) {}
+async function backfillStatusUpdates(fromBlock: number, toBlock: number) {
+  const events = await viemClient.getLogs({
+    address: hubAddress,
+    event: getAbiItem({
+      abi: AlarmBetsHub,
+      name: "StatusChanged",
+    }),
+    args: {
+      alarmType: alarmTypeVals["PartnerAlarmClock"],
+    },
+    fromBlock: BigInt(fromBlock),
+    toBlock: BigInt(toBlock),
+  });
+
+  // If multiple status updates are received for a single alarm, those will be
+  // overwritten by the last one
+  const currentStatuses: Record<number, number> = {};
+  events.forEach((event) => {
+    if (!event.args.alarmId || !event.args.to) {
+      logger.log("error", "Missing event args", event);
+      return;
+    }
+    currentStatuses[Number(event.args.alarmId)] = event.args.to;
+  });
+
+  const { data: currentRows } = await supabaseClient
+    .from("partner_alarms")
+    .select("*")
+    .in("alarm_id", Object.keys(currentStatuses));
+
+  const rowsToUpdate = (currentRows ?? []).map((r) => {
+    const newStatus = currentStatuses[r.alarm_id];
+    return {
+      ...r,
+      status: newStatus,
+      block_last_updated_at: toBlock,
+    };
+  });
+
+  const { error } = await supabaseClient
+    .from("partner_alarms")
+    .upsert(await addTimezoneOffsets(rowsToUpdate));
+
+  if (error) {
+    logger.log("error", "Failed to update alarm statuses", error);
+    return;
+  }
+
+  logger.log("info", `Updated ${rowsToUpdate.length} alarm statuses`);
+}
 
 async function startPartnerAlarmSync() {
   const { data } = await supabaseClient

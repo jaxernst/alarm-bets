@@ -48,6 +48,7 @@ export interface Database {
           alarm_days: string
           alarm_id: number
           alarm_time: number
+          block_last_updated_at: number | null
           player1: string
           player1_timezone: number | null
           player2: string
@@ -60,6 +61,7 @@ export interface Database {
           alarm_days: string
           alarm_id: number
           alarm_time: number
+          block_last_updated_at?: number | null
           player1: string
           player1_timezone?: number | null
           player2: string
@@ -72,6 +74,7 @@ export interface Database {
           alarm_days?: string
           alarm_id?: number
           alarm_time?: number
+          block_last_updated_at?: number | null
           player1?: string
           player1_timezone?: number | null
           player2?: string
