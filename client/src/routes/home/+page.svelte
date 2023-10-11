@@ -17,6 +17,7 @@
 	import { account } from '$lib/state/chainConfig';
 	import { onMount } from 'svelte';
 	import { getPWADisplayMode, mobileCheck } from '$lib/util';
+	import Footer from '$lib/components/Footer.svelte';
 
 	$: activeTabStyles = (t: Tab) =>
 		t === $activeTab ? ' underline underline-offset-4 text-bold font-bold ' : ' ';
@@ -107,7 +108,9 @@
 		</div>
 	</div>
 
-	<div class="text-s flex min-h-[25px] w-full justify-start px-2" />
+	<div class="text-s flex min-h-[25px] w-full justify-start px-2">
+		<Footer />
+	</div>
 </div>
 
 <style>
