@@ -2,7 +2,6 @@
 	import InfoIcon from '../icon-components/info-icon.svelte';
 	import NotificationIcon from '../icon-components/notification-icon.svelte';
 	import ClockDisplay from './ClockDisplay.svelte';
-	import { showWelcome } from '../state/appState';
 	import { notifications } from '../state/appState';
 </script>
 
@@ -31,14 +30,9 @@
 					</div>
 				</button>
 			{/if}
-			<button
-				class="h-5 w-5"
-				on:click={() => {
-					$showWelcome = true;
-				}}
-			>
+			<a class="h-5 w-5" href="/">
 				<InfoIcon />
-			</button>
+			</a>
 		</div>
 	</div>
 </div>

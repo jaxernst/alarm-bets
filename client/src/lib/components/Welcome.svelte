@@ -8,7 +8,7 @@
 	import Typewriter from './Typewriter.svelte';
 	import { crossfade, fade, slide } from 'svelte/transition';
 	import { cubicIn, cubicInOut } from 'svelte/easing';
-	import { showWelcome, welcomeHasBeenViewed } from '../state/appState';
+	import { welcomeHasBeenViewed } from '../state/appState';
 	import {
 		hubDeployments,
 		partnerAlarmClockContractTemplates
@@ -16,6 +16,7 @@
 	import { onMount } from 'svelte';
 	import Deadline from '../icon-components/deadline.svelte';
 	import { isIosSafari } from '../util';
+	import { goto } from '$app/navigation';
 
 	let pwaRequired = false;
 	let typewriterComplete = false;
@@ -25,17 +26,6 @@
 	let iOSSafari = false;
 	onMount(() => {
 		isIosSafari();
-	});
-
-	// Show the about section by default after showing the welcome for the first time
-	showWelcome.subscribe((show) => {
-		if (show && $welcomeHasBeenViewed) {
-			showAbout = true;
-			typewriterComplete = true;
-		}
-	});
-
-	onMount(() => {
 		$welcomeHasBeenViewed = true;
 	});
 
@@ -92,8 +82,8 @@
 </Dialog>
 
 <Dialog
-	open={pwaRequired || $showWelcome}
-	on:close={() => (pwaRequired ? null : ($showWelcome = false))}
+	open={true}
+	on:close={() => (pwaRequired ? null : goto('./home'))}
 	class="fixed left-0 top-0 flex h-screen w-full items-center justify-center"
 >
 	<DialogOverlay
@@ -126,7 +116,7 @@
 					</div>
 					<div in:fade={{ delay: 2600, duration: 800 }} class="flex justify-center">
 						<button
-							on:click={() => (pwaRequired ? (showAppInstall = true) : ($showWelcome = false))}
+							on:click={() => (pwaRequired ? (showAppInstall = true) : goto('./home'))}
 							class="rounded-lg border border-cyan-500 px-4 py-1 font-bold text-zinc-300 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-cyan-500 hover:text-white hover:shadow-md active:bg-cyan-700 active:text-zinc-400"
 						>
 							{#if !pwaRequired}
