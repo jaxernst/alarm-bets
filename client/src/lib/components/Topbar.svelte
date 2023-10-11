@@ -11,14 +11,7 @@
 		<div class="font-digital justify-self-start font-bold">
 			{'['}testnet{']'}
 		</div>
-		<!-- Empty div for the first column -->
-		<div class="flex items-center justify-center">
-			<div class="top-clock-bg rounded-2xl">
-				<div class=" px-4 pb-1 pt-2" style="font-size: 2em; line-height: 1em">
-					<ClockDisplay />
-				</div>
-			</div>
-		</div>
+		<div class="flex items-center justify-center" />
 		<div class="flex justify-end gap-2">
 			{#if $notifications.enableReady}
 				<button class="h-5 w-5" on:click={$notifications.toggle}>
