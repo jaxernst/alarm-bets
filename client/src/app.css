@@ -36,7 +36,7 @@ html {
 
 html {
 	background-color: rgb(30, 30, 30);
-	background: url('./app-bg.png') center/cover no-repeat;
+	background: url('/app-bg.png') center/cover no-repeat;
 }
 body {
 	overflow: hidden;
