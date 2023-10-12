@@ -89,6 +89,9 @@ export function mobileCheck() {
 export function checkForServiceWorkerUpdate() {
 	let updated = false;
 	let activated = false;
+
+	if (!navigator?.serviceWorker) return;
+
 	let hadControllingServiceWorker = !!navigator.serviceWorker.controller;
 	function checkUpdate() {
 		if (activated && updated && hadControllingServiceWorker) {
@@ -129,7 +132,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export function notificationPermissionGranted() {
-	if (typeof window !== 'undefined') {
+	if (typeof window !== 'undefined' && 'Notification' in window) {
 		return Notification.permission === 'granted';
 	}
 	return false;
