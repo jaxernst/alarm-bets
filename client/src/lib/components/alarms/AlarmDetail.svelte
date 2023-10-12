@@ -91,16 +91,6 @@
 			showAddToBalance = false;
 		}
 	};
-
-	// Periodically call the alarm timeToNextDeadline sync function
-	let interval: NodeJS.Timeout;
-	$: if ($alarm.timeToNextDeadline && !interval) {
-		interval = setInterval(() => {
-			alarm.syncTimeToDeadline();
-		}, 2000 * 10);
-	}
-
-	onDestroy(() => interval && clearInterval(interval));
 </script>
 
 <EndAlarmModal {alarm} />

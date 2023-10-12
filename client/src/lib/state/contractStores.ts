@@ -343,6 +343,15 @@ async function UserAlarmStore(user: EvmAddress, hub: EvmAddress, alarm: AlarmBas
 		}
 	);
 
+	const syncTimeToDeadline = async () => {
+		const [p1, p2] = [get(constants).player1, get(constants).player2];
+		const timeToNextDeadline = await getTimeToNextDeadline(addr, p1 === user ? p1 : p2);
+		alarmState.update((s) => ({ ...s, timeToNextDeadline }));
+	};
+
+	// Periodically sync time to next deadline
+	setInterval(syncTimeToDeadline, 20 * 1000);
+
 	// Consolidate params into single store
 	const { subscribe } = derived([constants, alarmState], ([$constants, $state]) => {
 		return {
@@ -378,10 +387,6 @@ async function UserAlarmStore(user: EvmAddress, hub: EvmAddress, alarm: AlarmBas
 			const res = await transactions.addTransaction(endAlarm(addr));
 			return res;
 		},
-		syncTimeToDeadline: async () => {
-			const [p1, p2] = [get(constants).player1, get(constants).player2];
-			const timeToNextDeadline = await getTimeToNextDeadline(addr, p1 === user ? p1 : p2);
-			alarmState.update((s) => ({ ...s, timeToNextDeadline }));
-		}
+		syncTimeToDeadline
 	};
 }
