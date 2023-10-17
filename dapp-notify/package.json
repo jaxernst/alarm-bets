@@ -8,8 +8,8 @@
     "build": "tsc",
     "serve": "node dist/index.js"
   },
-  "keywords": [],
   "author": "",
+  "keywords": [],
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.0.3",
