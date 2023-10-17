@@ -9,8 +9,8 @@
     "serve": "node dist/index.js"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
+  "author": "",
   "dependencies": {
     "dotenv": "^16.0.3",
     "ts-node": "^10.9.1",
