@@ -2,14 +2,7 @@
 pragma solidity ^0.8.9;
 
 /**
- * Enumeration of the commitment types registered through the commitment hub
- */
-enum RegisteredAlarmType {
-    PARTNER_ALARM_CLOCK
-}
-
-/**
- * Status represents all the states that alarms can be in
+ * Status represents all the states that comittments can be in
  */
 enum CommitmentStatus {
     INACTIVE,
@@ -17,4 +10,10 @@ enum CommitmentStatus {
     PAUSED,
     COMPLETE,
     CANCELLED
+}
+/**
+ * Enumeration of the commitment types registered through the commitment hub
+ */
+enum RegisteredAlarmType {
+    PARTNER_ALARM_CLOCK
 }
