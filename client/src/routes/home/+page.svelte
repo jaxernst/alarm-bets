@@ -36,7 +36,6 @@
 	}
 
 	let pwaRequired = false;
-
 	onMount(() => {
 		if (mobileCheck() && getPWADisplayMode() === 'browser') {
 			pwaRequired = true;
