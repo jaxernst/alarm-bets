@@ -38,6 +38,7 @@ export async function mainLoop(
   console.log("\nCurrent state:", state);
 
   const { newState, effects } = handleSchedulerEvent(state, event);
+  console.log("Effects:", effects);
   const finalState = await processEffects(newState, effects);
 
   console.log("\nFinal state:", finalState);
