@@ -5,6 +5,7 @@ import { dbListener } from "./db-listener";
 import { mainLoop as alarmNotificationLoop } from "./user-alarm-notifications/main";
 import { SchedulerEvent } from "./user-alarm-notifications/events";
 import { supabaseClient } from "./supabaseClient";
+import { allUserNotifications } from "./util/util";
 
 require("dotenv").config({ path: "../.env" });
 
@@ -20,6 +21,13 @@ webpush.setVapidDetails(
 
 function AlarmNotificationEventSource(supabase: SupabaseClient<Database>) {
   const queue: SchedulerEvent[] = [];
+
+  (async function initQueue() {
+    const notifications = await allUserNotifications(supabase);
+    notifications.forEach((n) =>
+      queue.push({ name: "notificationAdded", data: n })
+    );
+  })();
 
   dbListener(supabase, {
     onNotificationRowAdded: (row) =>
