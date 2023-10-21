@@ -67,6 +67,10 @@ function scheduleTimers(
 
 async function fetchAndScheduleAlarms(state: State, user: EvmAddress) {
   const alarms = await getActiveAlarms(user);
+  console.log(
+    "Scheduling alarm IDS:",
+    alarms.map((a) => a.alarmId)
+  );
   return scheduleTimers(state, user, alarms);
 }
 
@@ -139,6 +143,7 @@ export async function processEffects(state: State, effects: Effect[]) {
   try {
     switch (name) {
       case "ScheduleActiveAlarms":
+        console.log("Scheduling alarm notifs for user", data.user);
         return processEffects(
           await fetchAndScheduleAlarms(state, data.user),
           effects.slice(1)
