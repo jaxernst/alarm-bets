@@ -14,4 +14,5 @@ export type Alarm = {
   alarmTime: number; // seconds after midnight in local timezone
   alarmDays: number[]; // 1-7 (Sunday-Saturday)
   timezoneOffset: number; // seconds from UTC
+  submissionWindow: number; // seconds
 };

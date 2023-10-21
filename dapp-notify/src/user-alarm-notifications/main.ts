@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Alarm, AlarmId, EvmAddress, NotificationRow } from "../types";
-import { processEffects } from "./effects";
+import { alarmRescheduleQueue, processEffects } from "./effects";
 import { SchedulerEvent, handleSchedulerEvent } from "./events";
 import { Database } from "../../../alarm-bets-db";
 
@@ -30,16 +30,28 @@ export async function mainLoop(
 ) {
   await new Promise((resolve) => setTimeout(resolve, 1000));
   console.log("Main loop", new Date().toUTCString());
-  const event = getNextEvent();
 
-  if (!event) return mainLoop(getNextEvent, state);
+  const event = getNextEvent();
+  const alarmRescheduleEffect = alarmRescheduleQueue.next() ?? [];
+
+  if (!event && !alarmRescheduleEffect.length) {
+    return mainLoop(getNextEvent, state);
+  }
 
   console.log("\nNew event:", event);
   console.log("\nCurrent state:", state);
 
-  const { newState, effects } = handleSchedulerEvent(state, event);
+  const { newState, effects } = event
+    ? handleSchedulerEvent(state, event)
+    : { newState: state, effects: [] };
+
   console.log("Effects:", effects);
-  const finalState = await processEffects(newState, effects);
+
+  const combinedEffects = [...effects, alarmRescheduleEffect];
+
+  const finalState = combinedEffects.length
+    ? await processEffects(newState, effects)
+    : newState;
 
   console.log("\nFinal state:", finalState);
   mainLoop(getNextEvent, finalState);

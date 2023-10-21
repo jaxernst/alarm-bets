@@ -28,6 +28,11 @@ export function activeAlarmsFetcher(supabase: SupabaseClient<Database>) {
   };
 }
 
+export async function allUserNotifications(supabase: SupabaseClient<Database>) {
+  const { data } = await supabaseClient.from("alarm_notifications").select("*");
+  return data ?? [];
+}
+
 export const compactAlarmFormat = (user: EvmAddress, a: AlarmRow): Alarm => {
   const timezoneOffset =
     user === a.player1 ? a.player1_timezone : a.player2_timezone;
@@ -39,6 +44,7 @@ export const compactAlarmFormat = (user: EvmAddress, a: AlarmRow): Alarm => {
     alarmTime: a.alarm_time,
     alarmDays: parseAlarmDays(a.alarm_days),
     timezoneOffset,
+    submissionWindow: a.submission_window,
   };
 };
 
@@ -56,27 +62,29 @@ export const sendPushNotification = async (
   subscription: PushSubscription,
   alarm: Alarm
 ) => {
-  await sendNotification(
-    subscription,
-    JSON.stringify({
-      title: "Upcoming Alarm",
-      body: "Your alarm submission window is open. Wake up and submit your alarm!",
-    })
-  );
+  try {
+    await sendNotification(
+      subscription,
+      JSON.stringify({
+        title: "Upcoming Alarm",
+        body: "Your alarm submission window is open. Wake up and submit your alarm!",
+      })
+    );
+  } catch (e) {
+    console.error("Error sending push notification", e);
+  }
 };
 
-export const pushNotificationDelivery = (
+export const sendNotifications = async (
   devices: NotificationRow[],
   alarm: Alarm
 ) => {
-  return () => {
-    for (const device of devices) {
-      sendPushNotification(
-        device.subscription as unknown as PushSubscription,
-        alarm
-      ).catch(console.error);
-    }
-  };
+  for (const device of devices) {
+    await sendPushNotification(
+      device.subscription as unknown as PushSubscription,
+      alarm
+    );
+  }
 };
 
 export const timeToNextAlarm = ({

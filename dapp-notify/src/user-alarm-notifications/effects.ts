@@ -1,16 +1,20 @@
+import { sendNotification } from "web-push";
 import { Alarm, AlarmId, EvmAddress } from "../types";
 import {
   getActiveAlarms,
-  pushNotificationDelivery,
+  sendNotifications,
   timeToNextAlarm,
 } from "../util/util";
 import { State } from "./main";
 
 type ScheduleActiveEffect = ["ScheduleActiveAlarms", { user: EvmAddress }];
+
 type RebuildAlarmTimersEffect = ["RebuildAlarmTimers", { user: EvmAddress }];
 
 type CancelAlarmTimersEffect = ["CancelAllAlarmTimers", { user: EvmAddress }];
-type AddAlarmTimerEffect = ["StartTimer", { user: EvmAddress; alarm: Alarm }];
+
+type StartAlarmTimerEffect = ["StartTimer", { user: EvmAddress; alarm: Alarm }];
+
 type CancelAlarmTimerEffect = [
   "CancelTimer",
   { user: EvmAddress; alarmId: AlarmId }
@@ -20,11 +24,21 @@ export type Effect =
   | ScheduleActiveEffect
   | RebuildAlarmTimersEffect
   | CancelAlarmTimersEffect
-  | AddAlarmTimerEffect
+  | StartAlarmTimerEffect
   | CancelAlarmTimerEffect;
 
+export const alarmRescheduleQueue = (() => {
+  const queue: StartAlarmTimerEffect[] = [];
+  return {
+    push: (user: EvmAddress, alarm: Alarm) => {
+      queue.push(["StartTimer", { user, alarm }]);
+    },
+    next: () => queue.shift(),
+  };
+})();
+
 function scheduleTimer(state: State, user: EvmAddress, alarm: Alarm) {
-  const timeoutSeconds = timeToNextAlarm(alarm);
+  const timeoutSeconds = timeToNextAlarm(alarm) - alarm.submissionWindow;
   const userDevices = state[user]?.notifications;
   if (!userDevices) throw new Error("scheduleAlarm: No devices found for user");
 
@@ -35,6 +49,12 @@ function scheduleTimer(state: State, user: EvmAddress, alarm: Alarm) {
     timeoutSeconds / 60,
     "min"
   );
+
+  const onDue = async () => {
+    await sendNotifications(userDevices, alarm);
+    alarmRescheduleQueue.push(user, alarm);
+  };
+
   return {
     ...state,
     [user]: {
@@ -43,10 +63,7 @@ function scheduleTimer(state: State, user: EvmAddress, alarm: Alarm) {
         ...state[user]?.alarmTimers,
         [alarm.alarmId]: {
           ...state[user]?.alarmTimers?.[alarm.alarmId],
-          timer: setTimeout(
-            pushNotificationDelivery(userDevices, alarm),
-            timeoutSeconds * 1000
-          ),
+          timer: setTimeout(onDue, timeoutSeconds * 1000),
           alarm,
         },
       },
@@ -84,6 +101,7 @@ function cancelTimer(state: State, user: EvmAddress, alarmId: AlarmId) {
   return {
     ...state,
     [user]: {
+      ...state[user],
       alarmTimers: {
         ...userTimers,
         [alarmId]: undefined,
@@ -107,6 +125,7 @@ function cancelTimers(state: State, user: EvmAddress) {
     return {
       ...newState,
       [user]: {
+        ...newState[user],
         alarmTimers: {
           ...newState[user]?.alarmTimers,
           [alarmId[0]]: undefined,
