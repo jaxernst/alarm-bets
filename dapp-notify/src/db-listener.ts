@@ -1,11 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../alarm-bets-db";
 import { AlarmStatus } from "@alarm-bets/contracts/lib/types";
-
-type NotificationRow =
-  Database["public"]["Tables"]["alarm_notifications"]["Row"];
-
-type AlarmRow = Database["public"]["Tables"]["partner_alarms"]["Row"];
+import { AlarmRow, NotificationRow } from "./types";
 
 interface ListenerEvents {
   onNotificationRowAdded?: (row: NotificationRow) => void;
@@ -15,7 +11,6 @@ interface ListenerEvents {
   onAlarmDeactivated?: (row: AlarmRow) => void;
 }
 
-// Make params for this funciton
 export function dbListener(
   supabaseClient: SupabaseClient<Database>,
   actions: ListenerEvents
