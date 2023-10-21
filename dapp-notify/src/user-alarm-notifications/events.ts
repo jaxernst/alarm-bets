@@ -1,3 +1,4 @@
+import { add } from "winston";
 import { Alarm, AlarmRow, EvmAddress, NotificationRow } from "../types";
 import { compactAlarmFormat } from "../util/util";
 import { Effect } from "./effects";
@@ -101,12 +102,43 @@ const removeNotificationDevice: ScheduleEventHandler<NotificationRow> = (
   };
 };
 
-const addNotifiedUserAlarm: ScheduleEventHandler<{
+const updateNotificationDevice: ScheduleEventHandler<NotificationRow> = (
+  state: State,
+  notification: NotificationRow
+) => {
+  const user = notification.user_address as EvmAddress;
+  const notificationState = state[user] ?? {};
+
+  if (!notificationState.notifications) {
+    return addNotificationDevice(state, notification);
+  }
+
+  const newNotifications = notificationState.notifications?.map((n) =>
+    n.device_id === notification.device_id ? notification : n
+  );
+
+  const newState = {
+    ...state,
+    [user]: {
+      ...notificationState,
+      notifications: newNotifications,
+    },
+  };
+
+  return {
+    newState,
+    effects: [["RebuildAlarmTimers", { user }]],
+  };
+};
+
+// Add alarm to state if the user is notified
+const maybeAddAlarm: ScheduleEventHandler<{
   user: EvmAddress;
   alarm: Alarm;
-}> = (state: State, { user, alarm }) => {
+}> = (state, { user, alarm }) => {
   const alarmState = state[user] ?? {};
   const notificationsOn = alarmState.notifications?.length;
+  if (!notificationsOn) return { newState: state, effects: [] };
 
   const newState = {
     ...state,
@@ -124,7 +156,25 @@ const addNotifiedUserAlarm: ScheduleEventHandler<{
 
   return {
     newState,
-    effects: notificationsOn ? [["RebuildAlarmTimers", { user, alarm }]] : [],
+    effects: [["StartTimer", { user, alarm }]],
+  };
+};
+
+const maybeRemoveAlarm: ScheduleEventHandler<{
+  user: EvmAddress;
+  alarmId: number;
+}> = (state, { user, alarmId }) => {
+  const alarmState = state[user] ?? {};
+  const alarmTimers = alarmState.alarmTimers;
+  const notificationsOn = alarmState.notifications?.length;
+
+  if (!notificationsOn || !alarmTimers?.[alarmId]) {
+    return { newState: state, effects: [] };
+  }
+
+  return {
+    newState: state,
+    effects: [["CancelTimer", { user, alarmId, timer: alarmTimers[alarmId] }]],
   };
 };
 
@@ -138,26 +188,39 @@ export const handleSchedulerEvent: ScheduleEventHandler<SchedulerEvent> = (
     case "notificationDeleted":
       return removeNotificationDevice(state, event.data);
     case "notificationUpdated":
-      throw new Error("Not implemented");
+      return updateNotificationDevice(state, event.data);
     //return updateNotificationDevice(event.data, state);
-    case "alarmActivated":
-      const player1Added = addNotifiedUserAlarm(state, {
+    case "alarmActivated": {
+      const s1 = maybeAddAlarm(state, {
         user: event.data.player1 as EvmAddress,
         alarm: compactAlarmFormat(event.data.player1 as EvmAddress, event.data),
       });
 
-      const player2Added = addNotifiedUserAlarm(player1Added.newState, {
+      const s2 = maybeAddAlarm(s1.newState, {
         user: event.data.player2 as EvmAddress,
         alarm: compactAlarmFormat(event.data.player1 as EvmAddress, event.data),
       });
 
       return {
-        newState: player2Added.newState,
-        effects: player1Added.effects.concat(player2Added.effects),
+        newState: s2.newState,
+        effects: s1.effects.concat(s2.effects),
       };
+    }
 
     case "alarmDeactivated":
-      throw new Error("Not implemented");
-    //return cancelAlarm(event.data, state);
+      const s1 = maybeRemoveAlarm(state, {
+        user: event.data.player1 as EvmAddress,
+        alarmId: event.data.alarm_id,
+      });
+
+      const s2 = maybeRemoveAlarm(s1.newState, {
+        user: event.data.player2 as EvmAddress,
+        alarmId: event.data.alarm_id,
+      });
+
+      return {
+        newState: s2.newState,
+        effects: s1.effects.concat(s2.effects),
+      };
   }
 };
