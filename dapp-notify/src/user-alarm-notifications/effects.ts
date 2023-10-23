@@ -42,13 +42,11 @@ function scheduleTimer(state: State, user: EvmAddress, alarm: Alarm) {
   const userDevices = state[user]?.notifications;
   if (!userDevices) throw new Error("scheduleAlarm: No devices found for user");
 
-  console.log(
-    "Scheduling alarm",
-    alarm.alarmId,
-    "in",
-    timeoutSeconds / 60,
-    "min"
-  );
+  console.log("Scheduling alarm", {
+    dueIn: timeoutSeconds / 60,
+    alarmId: alarm.alarmId,
+    devices: userDevices,
+  });
 
   const onDue = async () => {
     await sendNotifications(userDevices, alarm);
