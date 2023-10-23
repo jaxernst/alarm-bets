@@ -28,7 +28,7 @@ export async function mainLoop(
   getNextEvent: () => SchedulerEvent | undefined,
   state: State
 ) {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 5000));
   console.log("Main loop", new Date().toUTCString());
 
   const event = getNextEvent();
@@ -38,16 +38,15 @@ export async function mainLoop(
     return mainLoop(getNextEvent, state);
   }
 
-  console.log("\nNew event:", event);
+  event ? console.log("\nNew event:", event) : null;
   console.log("\nCurrent state:", state);
 
   const { newState, effects } = event
     ? handleSchedulerEvent(state, event)
     : { newState: state, effects: [] };
 
-  console.log("Effects:", effects);
-
   const combinedEffects = [...effects, alarmRescheduleEffect];
+  console.log("Effects:", combinedEffects);
 
   const finalState = combinedEffects.length
     ? await processEffects(newState, effects)
