@@ -1,8 +1,6 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { Alarm, AlarmId, EvmAddress, NotificationRow } from "../types";
 import { alarmRescheduleQueue, processEffects } from "./effects";
 import { SchedulerEvent, handleSchedulerEvent } from "./events";
-import { Database } from "../../../alarm-bets-db";
 
 export type State = Record<
   EvmAddress,
