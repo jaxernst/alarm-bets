@@ -72,6 +72,7 @@ export const sendPushNotification = async (
     );
   } catch (e) {
     console.error("Error sending push notification", e);
+    throw e;
   }
 };
 
@@ -80,10 +81,25 @@ export const sendNotifications = async (
   alarm: Alarm
 ) => {
   for (const device of devices) {
-    await sendPushNotification(
-      device.subscription as unknown as PushSubscription,
-      alarm
-    );
+    try {
+      await sendPushNotification(
+        device.subscription as unknown as PushSubscription,
+        alarm
+      );
+      console.log(
+        "Sent notification to",
+        device.user_address,
+        "on device",
+        device.device_id
+      );
+    } catch (e) {
+      console.log(
+        "Failed to send notification to",
+        device.user_address,
+        "on device",
+        device.device_id
+      );
+    }
   }
 };
 
