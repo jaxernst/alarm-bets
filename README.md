@@ -1,6 +1,6 @@
 # Alarm Bets
 
-A smart contract betting game for waking up early. Put down money, choose your target sleep schedule, solve puzzles every morning to prove you've woken up...
+A smart contract game protocol for waking up early. Put down money, choose your target sleep schedule, solve puzzles every morning to prove you've woken up...
 
 Currently in open-development. See the live demo here:
 
